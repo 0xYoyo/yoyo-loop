@@ -68,6 +68,7 @@ const requiredContracts = [
   [build.includes("max_fix_rounds"), "builder must read the fix-round cap from config, not hardcode it"],
   [build.includes("`loop-stuck`"), "builder must have a convergence escape hatch"],
   [build.includes("sensitive_paths"), "builder must escalate sensitive-path diffs"],
+  [/[Nn]ever force-reset/.test(build), "builder must refuse to force-reset a diverged worktree"],
   [spec.includes("repo:SLUG"), "spec must label filed issues with the repository slug"],
   [/[Nn]ever apply the `agent-ready` label/.test(spec), "spec must never self-approve"],
   [review.includes("Yoyo-loop review of COMMIT_SHA"), "reviewer must record the reviewed SHA"],
