@@ -85,6 +85,11 @@ Rules for the draft:
 - Size the issue to one day of agent work or less. Bigger work becomes a
   chain of small issues, ordered so each is buildable using only merged
   code from the ones before it.
+- When an issue creates or modifies CI configuration, its acceptance
+  criteria must state that the workflow triggers on `pull_request`. A
+  workflow that only runs on pushes to the default branch leaves every pull
+  request with no checks, which makes the reviewer escalate all of them to a
+  human. Do not leave the trigger implicit.
 
 ## 4. Confirm and file
 
