@@ -148,6 +148,12 @@ cannot do damage. Deny at minimum:
 Allow the ordinary read, edit, test, commit, push, and PR-creation commands
 this project needs.
 
+Scope file access with `Read(path)` and `Edit(path)` rules only. Do not write
+`Write(path)` rules: the file permission checker never matches them, so they
+are dead entries that Claude Code flags as a warning on startup. `Edit(path)`
+already covers every file-editing tool, Write and NotebookEdit included, so
+one `Edit` rule per path is both necessary and sufficient.
+
 ## 9. Smoke test and hand off
 
 Read back and report:
