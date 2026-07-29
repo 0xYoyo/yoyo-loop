@@ -10,10 +10,6 @@ one issue end to end. Under `/loop`, each iteration runs this skill once.
 
 ## 0. Preflight
 
-Read `.claude/yoyo.md` for `repo_slug`, `linear_team`, `max_fix_rounds`,
-`sensitive_paths`, and the project's check commands. If that file is missing,
-this repository has not been initialised — say so and end the pass.
-
 Before changing Linear, GitHub, branches, or files:
 
 - Confirm this is the intended GitHub repository and `origin` is reachable.
@@ -23,6 +19,20 @@ Before changing Linear, GitHub, branches, or files:
 - Require a clean working tree (`git status --porcelain` must be empty). If it
   is dirty, report the paths and end the pass. Never stash, reset, overwrite,
   or commit unrelated work.
+- With the tree clean, `git fetch origin` and compare the checkout against the
+  default branch on `origin`. If it is behind, sync to it before reading
+  anything else: fast-forward when already on the default branch, and when a
+  previous pass left you on some other branch, check the default branch out
+  first. Nothing is lost — the tree is clean and every branch this loop creates
+  is pushed. If the checkout has diverged rather than merely fallen behind,
+  report the local commits and end the pass; never force-reset to catch up.
+
+Then read `.claude/yoyo.md` for `repo_slug`, `linear_team`, `max_fix_rounds`,
+`sensitive_paths`, and the project's check commands. Treat that file as missing
+only when it is still absent after the sync above — a stale worktree is not an
+uninitialised repository, and a checkout predating `yoyo-init` will otherwise
+report a setup failure that syncing fixes. If it is genuinely absent, this
+repository has not been initialised — say so and end the pass.
 
 ## 1. Review feedback first
 
