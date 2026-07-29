@@ -1,0 +1,108 @@
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+
+const root = new URL("../", import.meta.url);
+
+function read(relativePath) {
+  return readFileSync(new URL(relativePath, root), "utf8");
+}
+
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
+const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec"];
+const skillDirectory = new URL("skills/", root);
+const actualSkillNames = readdirSync(skillDirectory, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
+
+assert(
+  JSON.stringify(actualSkillNames) === JSON.stringify(skillNames),
+  `Expected only ${skillNames.join(", ")}; found ${actualSkillNames.join(", ")}`,
+);
+
+for (const skillName of skillNames) {
+  const relativePath = `skills/${skillName}/SKILL.md`;
+  const text = read(relativePath);
+  const frontmatter = text.match(/^---\n([\s\S]*?)\n---\n/);
+
+  assert(frontmatter, `${relativePath} is missing YAML frontmatter`);
+
+  const fields = frontmatter[1]
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  const name = fields.find((line) => line.startsWith("name: "))?.slice(6);
+  const description = fields
+    .find((line) => line.startsWith("description: "))
+    ?.slice(13);
+
+  assert(fields.length === 2, `${relativePath} must contain only name and description frontmatter`);
+  assert(name === skillName, `${relativePath} name must be ${skillName}`);
+  assert(description, `${relativePath} needs a description`);
+  assert(!/\bTEAM\b/.test(text), `${relativePath} left an upstream TEAM placeholder`);
+}
+
+const readme = read("README.md");
+for (const match of readme.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
+  const target = match[1];
+  if (!target.startsWith("http") && !target.startsWith("#")) {
+    assert(existsSync(new URL(target, root)), `README link does not exist: ${target}`);
+  }
+}
+
+const build = read("skills/yoyo-build/SKILL.md");
+const review = read("skills/yoyo-review/SKILL.md");
+const init = read("skills/yoyo-init/SKILL.md");
+const spec = read("skills/yoyo-spec/SKILL.md");
+
+const requiredContracts = [
+  [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
+  [build.includes("remove `loop-changes-requested`"), "builder escalation must leave the repair queue"],
+  [build.includes("defaultBranchRef"), "builder must detect the default branch"],
+  [build.includes("git status --porcelain"), "builder must protect dirty worktrees"],
+  [build.includes("repo:SLUG"), "builder must scope its pick query to this repository"],
+  [build.includes("max_fix_rounds"), "builder must read the fix-round cap from config, not hardcode it"],
+  [build.includes("`loop-stuck`"), "builder must have a convergence escape hatch"],
+  [build.includes("sensitive_paths"), "builder must escalate sensitive-path diffs"],
+  [spec.includes("repo:SLUG"), "spec must label filed issues with the repository slug"],
+  [/[Nn]ever apply the `agent-ready` label/.test(spec), "spec must never self-approve"],
+  [review.includes("Yoyo-loop review of COMMIT_SHA"), "reviewer must record the reviewed SHA"],
+  [review.includes("No checks at all"), "reviewer must escalate when no checks exist"],
+  [review.includes("sensitive_paths"), "reviewer must escalate sensitive-path diffs"],
+  [/[Nn]ever merge or enable auto-merge/.test(review), "reviewer must never merge"],
+  [init.includes("git worktree add"), "init must create the builder worktree"],
+  [init.includes("gh pr merge"), "init must deny merge in the permissions allowlist"],
+  [readme.includes("install.sh"), "README must explain how to install the skills"],
+  [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
+];
+
+for (const [condition, message] of requiredContracts) {
+  assert(condition, message);
+}
+
+// Regressions caught in review: a hardcoded team key silently breaks every
+// project whose Linear team is not the one it was written against.
+for (const [file, text] of [
+  ["skills/yoyo-build/SKILL.md", build],
+  ["skills/yoyo-review/SKILL.md", review],
+]) {
+  assert(
+    !/\b[A-Z]{2,5}-NNN\b/.test(text.replace(/TEAMKEY-NNN/g, "")),
+    `${file} hardcodes a Linear team key; read linear_team from config instead`,
+  );
+}
+
+assert(!build.includes("origin/main"), "builder hardcodes origin/main");
+assert(!build.includes("default_branch"), "builder must detect the default branch live, not read a stale copy");
+assert(
+  review.includes("none are required"),
+  "reviewer must treat unrequired checks as a valid gate; branch protection is unavailable on free private repos",
+);
+
+console.log(
+  `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
+);
