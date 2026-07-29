@@ -108,11 +108,22 @@ on an unresolved blocker, go to step 8. Never guess.
 
 ## 6. Verify
 
-Run the project's relevant lint, typecheck, build, and narrowest useful tests,
-using the commands recorded in `.claude/yoyo.md`. All checks attributable to
-this change must pass before opening a PR. If a broad check has a pre-existing
-unrelated failure, run the relevant targeted check, preserve the evidence, and
-disclose both results in the PR.
+Run the project's relevant lint, typecheck, build, and narrowest useful tests.
+Take each command from `.claude/yoyo.md`. Where `test_command`, `lint_command`,
+or `typecheck_command` is blank or absent, detect it from the repository
+instead — `package.json` scripts, `Makefile` targets, `pyproject.toml`,
+`Cargo.toml`, a CI workflow, whatever this repo actually uses — and run what
+you find. A value recorded in config always wins over detection.
+
+Detection only reads what already exists. Never invent a command, never install
+a test runner, and never create test infrastructure as a side effect of
+verifying; that is a change to the repository, not a check of it. If a kind of
+check is neither configured nor detectable, run nothing for it and say so
+explicitly in the PR, naming which check was unavailable.
+
+All checks attributable to this change must pass before opening a PR. If a
+broad check has a pre-existing unrelated failure, run the relevant targeted
+check, preserve the evidence, and disclose both results in the PR.
 
 Review `git diff` and `git status` before shipping. Stop if the diff contains
 unrelated work or generated secrets.
