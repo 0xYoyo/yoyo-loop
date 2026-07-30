@@ -136,17 +136,23 @@ list to the user and ask what to add.
 
 ## 8. Permissions
 
-Write or merge `.claude/settings.json` so loops do not stall on prompts but
-cannot do damage. Deny at minimum:
+Command safety is enforced by the user-level guard hook, not by permission
+lists in project settings. Before writing any settings, verify the hook is
+installed: an executable must exist at `~/.claude/hooks/guard.sh`. If it does
+not, STOP and tell the user to run `install.sh` from the yoyo-loop repository
+(then `/reload-skills`), and do not continue until it is there — project
+settings written without the hook would leave Bash unguarded.
 
-- `gh pr merge`
-- `gh * -R *` and `gh * --repo *`, so a session can only address its own repo
-- `git push --force`
-- `git reset --hard`
-- `rm -rf`
+Then write or merge `.claude/settings.json` with only:
 
-Allow the ordinary read, edit, test, commit, push, and PR-creation commands
-this project needs.
+- `Read(path)` and `Edit(path)` allows for this project and its `../SLUG.build`
+  worktree sibling
+- a broad Bash allow (`Bash(*)`), so loops never stall on command prompts
+
+Do not emit a Bash deny list or a command whitelist. Every Bash command still
+passes through the guard hook, which denies review-bypassing and destructive
+commands and asks for anything notable — a settings deny list would only
+drift out of sync with it.
 
 Scope file access with `Read(path)` and `Edit(path)` rules only. Do not write
 `Write(path)` rules: the file permission checker never matches them, so they

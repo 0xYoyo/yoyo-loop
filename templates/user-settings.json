@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(//Users/yoyopc/.ssh/**)",
+      "Read(//Users/yoyopc/.aws/**)",
+      "Read(//Users/yoyopc/.gnupg/**)",
+      "Read(//Users/yoyopc/Library/Keychains/**)",
+      "Read(//Users/yoyopc/.claude/.credentials.json)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Edit(//Users/yoyopc/.ssh/**)",
+      "Edit(//Users/yoyopc/.aws/**)",
+      "Edit(//Users/yoyopc/.gnupg/**)",
+      "Edit(//Users/yoyopc/Library/Keychains/**)",
+      "Edit(//Users/yoyopc/.claude/.credentials.json)"
+    ],
+    "additionalDirectories": [
+      "/Users/yoyopc/repos/"
+    ],
+    "defaultMode": "acceptEdits"
+  },
+  "model": "claude-fable-5[1m]",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Write|Edit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/yoyopc/.claude/hooks/guard.sh",
+            "timeout": 10,
+            "statusMessage": "Checking policy..."
+          }
+        ]
+      }
+    ]
+  },
+  "tui": "fullscreen",
+  "effortLevel": "medium"
+}

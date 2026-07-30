@@ -88,7 +88,18 @@ const requiredContracts = [
   [review.includes("sensitive_paths"), "reviewer must escalate sensitive-path diffs"],
   [/[Nn]ever merge or enable auto-merge/.test(review), "reviewer must never merge"],
   [init.includes("git worktree add"), "init must create the builder worktree"],
-  [init.includes("gh pr merge"), "init must deny merge in the permissions allowlist"],
+  [
+    init.includes("~/.claude/hooks/guard.sh"),
+    "init must verify the guard hook is installed before writing settings",
+  ],
+  [
+    /STOP and tell the user to run `install\.sh`/.test(init.replace(/\s+/g, " ")),
+    "init must stop with install.sh instructions when the guard hook is missing",
+  ],
+  [
+    !/[Dd]eny at minimum/.test(init),
+    "init must not emit a Bash deny list; the guard hook is the sole judge of Bash",
+  ],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
   [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
 ];
