@@ -62,6 +62,14 @@ gh pr checks NUMBER --json bucket,name,state,link
 gh pr checks NUMBER --required --json bucket,name,state,link
 ```
 
+The `--required` command exits 1 with `no required checks reported on the ...`
+when the head commit has no required checks. That exit code is the answer to
+the question, not a failure: it means "none are required", which is the normal
+case on a free private repository, so record it and carry on. Distinguish it
+from real errors by reading the message — authentication failures, network
+failures, and a missing or unknown PR also exit non-zero, and those you must
+report instead of treating as an empty required set.
+
 Work out the gate from what exists right now, on every pass. Never read it
 from config: a repository with no tests last week may have them today, and the
 loop must notice that by itself.
