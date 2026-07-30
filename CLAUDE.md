@@ -3,6 +3,8 @@
 Source of the yoyo-loop skills: four `SKILL.md` files under `skills/`, a
 validator in `scripts/validate.mjs`, and the CI workflow that runs it.
 
+Update `ROADMAP.md` when a phase lands.
+
 ## This working tree is live
 
 `~/.claude/skills/yoyo-*` are symlinks pointing straight into
