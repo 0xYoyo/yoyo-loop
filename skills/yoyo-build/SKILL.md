@@ -19,22 +19,33 @@ Before changing Linear, GitHub, branches, or files:
 - Require a clean working tree (`git status --porcelain` must be empty). If it
   is dirty, report the paths and end the pass. Never stash, reset, overwrite,
   or commit unrelated work.
-- With the tree clean, sync before reading anything else. Never check out the
-  local default branch: git refuses to have one branch checked out in two
-  worktrees at once, and the primary clone already holds the default branch, so
-  this worktree stays detached for its whole life.
+- With the tree clean, fetch and then check for unpushed work — before moving
+  `HEAD`, because moving it is what would lose that work:
 
   ```bash
   git fetch origin
+  git log --oneline HEAD --not --remotes
+  ```
+
+  If that prints any commits, a previous pass left work that exists on no
+  `origin` ref: report those commits and end the pass. This check must run
+  first. Once `HEAD` has moved, the commits are no longer reachable from it and
+  the check reports nothing, so running it afterwards proves only that the
+  detach already happened. Never force-reset to catch up.
+
+- Only with that check clean, detach onto the default branch you just fetched.
+  Never check out the local default branch: git refuses to have one branch
+  checked out in two worktrees at once, and the primary clone already holds the
+  default branch, so this worktree stays detached for its whole life.
+
+  ```bash
   git switch --detach origin/DEFAULT_BRANCH
   ```
 
   Create every issue branch from `origin/DEFAULT_BRANCH` too, never from a
-  local default branch. Nothing is lost by detaching — the tree is clean and
-  every branch this loop creates is pushed. If `HEAD` carries commits that
-  exist on no `origin` ref, a previous pass left unpushed work: report those
-  commits and end the pass rather than detaching away from them. Never
-  force-reset to catch up.
+  local default branch. Nothing is lost by detaching — the tree is clean, every
+  branch this loop creates is pushed, and the check above already cleared any
+  local-only commits.
 
 Then read `.claude/yoyo.md` for `repo_slug`, `linear_team`, `max_fix_rounds`,
 `sensitive_paths`, and the project's check commands. Treat that file as missing

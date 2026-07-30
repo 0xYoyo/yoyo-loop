@@ -109,6 +109,19 @@ for (const [file, text] of [
   );
 }
 
+// Order matters, not just presence: detaching is the step that would orphan
+// unpushed commits, so a check placed after it can only ever report success.
+const localOnlyCheck = buildFlat.indexOf("git log --oneline HEAD --not --remotes");
+const detachStep = buildFlat.indexOf("git switch --detach origin/DEFAULT_BRANCH");
+assert(
+  localOnlyCheck !== -1,
+  "builder must look for commits that exist on no origin ref before syncing",
+);
+assert(
+  localOnlyCheck < detachStep,
+  "builder must check for local-only commits BEFORE detaching; after the detach the check can only pass",
+);
+
 assert(!build.includes("origin/main"), "builder hardcodes origin/main");
 assert(!build.includes("default_branch"), "builder must detect the default branch live, not read a stale copy");
 assert(
