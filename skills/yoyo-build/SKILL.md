@@ -19,13 +19,22 @@ Before changing Linear, GitHub, branches, or files:
 - Require a clean working tree (`git status --porcelain` must be empty). If it
   is dirty, report the paths and end the pass. Never stash, reset, overwrite,
   or commit unrelated work.
-- With the tree clean, `git fetch origin` and compare the checkout against the
-  default branch on `origin`. If it is behind, sync to it before reading
-  anything else: fast-forward when already on the default branch, and when a
-  previous pass left you on some other branch, check the default branch out
-  first. Nothing is lost — the tree is clean and every branch this loop creates
-  is pushed. If the checkout has diverged rather than merely fallen behind,
-  report the local commits and end the pass; never force-reset to catch up.
+- With the tree clean, sync before reading anything else. Never check out the
+  local default branch: git refuses to have one branch checked out in two
+  worktrees at once, and the primary clone already holds the default branch, so
+  this worktree stays detached for its whole life.
+
+  ```bash
+  git fetch origin
+  git switch --detach origin/DEFAULT_BRANCH
+  ```
+
+  Create every issue branch from `origin/DEFAULT_BRANCH` too, never from a
+  local default branch. Nothing is lost by detaching — the tree is clean and
+  every branch this loop creates is pushed. If `HEAD` carries commits that
+  exist on no `origin` ref, a previous pass left unpushed work: report those
+  commits and end the pass rather than detaching away from them. Never
+  force-reset to catch up.
 
 Then read `.claude/yoyo.md` for `repo_slug`, `linear_team`, `max_fix_rounds`,
 `sensitive_paths`, and the project's check commands. Treat that file as missing
@@ -53,10 +62,15 @@ pass.
 
 Before fixing, count the fix rounds already spent on this PR: the number of
 comments beginning `Yoyo-loop review of` that contain at least one entry under
-"Must fix before merge". If that count has reached `max_fix_rounds` from
-`.claude/yoyo.md`, do not attempt another fix. Apply `loop-stuck`, remove
-`loop-changes-requested`, comment listing the findings that keep recurring,
-and end the pass. An agent should not argue with a reviewer forever.
+"Must fix before merge". That count includes the verdict you are about to act
+on, so compare it with `>`, not `>=`: only when it exceeds `max_fix_rounds`
+from `.claude/yoyo.md` do you stop. With `max_fix_rounds: 2` the second repair
+still happens and the third changes-requested verdict is the one that gives up.
+
+When the count does exceed the cap, do not attempt another fix. Apply
+`loop-stuck`, remove `loop-changes-requested`, comment listing the findings
+that keep recurring, and end the pass. An agent should not argue with a
+reviewer forever.
 
 If a proposed fix would cross an issue non-goal, touch a path listed in
 `sensitive_paths`, or requires a product decision, do not implement it.
@@ -77,8 +91,7 @@ condition:
 
 The `repo:SLUG` filter is not optional. One Linear team serves several
 repositories; without it you will claim work belonging to a different codebase
-that you cannot see. If an otherwise-eligible issue has no repo label at all,
-do not claim it — comment asking which repository it belongs to and move on.
+that you cannot see.
 
 Sort by priority, then oldest first. If the queue is empty, say so and end the
 pass. Do not invent work and do not pick a blocked issue.
@@ -107,9 +120,10 @@ on an unresolved blocker, go to step 8. Never guess.
 ## 5. Build
 
 - Fetch the latest default branch from `origin` and create or resume a branch
-  named `TEAMKEY-NNN-short-slug`, where `TEAMKEY-NNN` is the issue's real
-  identifier exactly as Linear returned it. Never hardcode a team key; it
-  comes from `linear_team` in `.claude/yoyo.md`.
+  named `TEAMKEY-NNN-short-slug` off `origin/DEFAULT_BRANCH` — never off a
+  local default branch — where `TEAMKEY-NNN` is the issue's real identifier
+  exactly as Linear returned it. Never hardcode a team key; it comes from
+  `linear_team` in `.claude/yoyo.md`.
 - Implement the acceptance criteria using the repository's existing style,
   architecture, and naming.
 - Add or update tests when the change affects logic, data flow, permissions,

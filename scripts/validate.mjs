@@ -59,6 +59,10 @@ const review = read("skills/yoyo-review/SKILL.md");
 const init = read("skills/yoyo-init/SKILL.md");
 const spec = read("skills/yoyo-spec/SKILL.md");
 
+// Line wrapping in the skills is prose, not contract: match against a
+// whitespace-normalised copy so a reflowed paragraph cannot break a check.
+const buildFlat = build.replace(/\s+/g, " ");
+
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
   [build.includes("remove `loop-changes-requested`"), "builder escalation must leave the repair queue"],
@@ -68,7 +72,15 @@ const requiredContracts = [
   [build.includes("max_fix_rounds"), "builder must read the fix-round cap from config, not hardcode it"],
   [build.includes("`loop-stuck`"), "builder must have a convergence escape hatch"],
   [build.includes("sensitive_paths"), "builder must escalate sensitive-path diffs"],
-  [/[Nn]ever force-reset/.test(build), "builder must refuse to force-reset a diverged worktree"],
+  [/never force-reset/i.test(buildFlat), "builder must refuse to force-reset a diverged worktree"],
+  [
+    build.includes("git switch --detach origin/DEFAULT_BRANCH"),
+    "builder worktree must sync by detaching onto origin's default branch; git forbids checking out the same branch in two worktrees",
+  ],
+  [
+    /never check out the local default branch/i.test(buildFlat),
+    "builder must state it never checks out the local default branch",
+  ],
   [spec.includes("repo:SLUG"), "spec must label filed issues with the repository slug"],
   [/[Nn]ever apply the `agent-ready` label/.test(spec), "spec must never self-approve"],
   [review.includes("Yoyo-loop review of COMMIT_SHA"), "reviewer must record the reviewed SHA"],
