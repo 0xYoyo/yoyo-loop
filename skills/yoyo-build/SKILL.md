@@ -47,6 +47,15 @@ Before changing Linear, GitHub, branches, or files:
   branch this loop creates is pushed, and the check above already cleared any
   local-only commits.
 
+- Only after the unpushed-work check has passed, tidy merged issue branches in
+  this worktree: for each local issue branch, check its PR with
+  `gh pr view BRANCH --json state`. Only when the state is exactly `MERGED`,
+  delete the local branch — `git branch -d BRANCH`, escalating to `-D` only
+  when git refuses because the merge was a squash or rebase — then run
+  `git remote prune origin`. Never delete a branch whose PR is open or
+  closed-without-merging, a branch with no PR at all, or the default branch.
+  When `gh pr view` fails or the state is ambiguous, leave the branch alone.
+
 Then read `.claude/yoyo.md` for `repo_slug`, `linear_team`, `max_fix_rounds`,
 `sensitive_paths`, and the project's check commands. Treat that file as missing
 only when it is still absent after the sync above — a stale worktree is not an

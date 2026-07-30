@@ -62,6 +62,7 @@ const spec = read("skills/yoyo-spec/SKILL.md");
 // Line wrapping in the skills is prose, not contract: match against a
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
 const buildFlat = build.replace(/\s+/g, " ");
+const reviewFlat = review.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
@@ -87,6 +88,12 @@ const requiredContracts = [
   [review.includes("No checks at all"), "reviewer must escalate when no checks exist"],
   [review.includes("sensitive_paths"), "reviewer must escalate sensitive-path diffs"],
   [/[Nn]ever merge or enable auto-merge/.test(review), "reviewer must never merge"],
+  [spec.includes("git pull --ff-only"), "spec must fast-forward the primary clone at the start of a pass"],
+  [review.includes("git pull --ff-only"), "reviewer must fast-forward the primary clone at the start of a pass"],
+  [
+    reviewFlat.includes("Never delete a branch whose PR is open"),
+    "reviewer tidy must forbid deleting branches whose PR is open or closed-unmerged",
+  ],
   [init.includes("git worktree add"), "init must create the builder worktree"],
   [init.includes("gh pr merge"), "init must deny merge in the permissions allowlist"],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
@@ -120,6 +127,15 @@ assert(
 assert(
   localOnlyCheck < detachStep,
   "builder must check for local-only commits BEFORE detaching; after the detach the check can only pass",
+);
+
+// Same order discipline for the tidy step: deleting branches before the
+// unpushed-work check could delete the only ref pointing at unpushed commits.
+const builderTidy = buildFlat.indexOf("git remote prune origin");
+assert(builderTidy !== -1, "builder must prune merged issue branches in the worktree");
+assert(
+  localOnlyCheck < builderTidy,
+  "builder must tidy merged branches only AFTER the unpushed-work check passes",
 );
 
 assert(!build.includes("origin/main"), "builder hardcodes origin/main");
