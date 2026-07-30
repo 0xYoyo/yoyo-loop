@@ -15,6 +15,13 @@ Read `.claude/yoyo.md` first for this repository's `repo_slug` and
 `linear_team`. If that file is missing, this repository has not been
 initialised — tell the user to run `/yoyo-init` and stop.
 
+Then sync the clone so research never runs against stale code — the user must
+never need to pull manually. If the working tree is clean
+(`git status --porcelain` empty) and the checked-out branch is the default
+branch, run `git pull --ff-only`. Never rebase and never merge. If the
+fast-forward fails, report that and continue read-only on what is checked out.
+If the tree is dirty or on another branch, skip the pull and continue.
+
 ## 1. Research before asking
 
 Read the relevant code first. Find which files are involved, what patterns
