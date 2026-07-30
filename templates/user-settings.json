@@ -1,5 +1,8 @@
 {
   "permissions": {
+    "allow": [
+      "mcp__linear-server"
+    ],
     "deny": [
       "Read(//Users/yoyopc/.ssh/**)",
       "Read(//Users/yoyopc/.aws/**)",
