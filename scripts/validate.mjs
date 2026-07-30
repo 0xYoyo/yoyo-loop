@@ -129,6 +129,31 @@ assert(
   "reviewer must treat unrequired checks as a valid gate; branch protection is unavailable on free private repos",
 );
 
+// The guard hook ships with the repo, installs alongside the skills, and its
+// test file must keep exercising every deny case the loop's safety rests on.
+assert(existsSync(new URL("hooks/guard.sh", root)), "hooks/guard.sh must exist");
+assert(existsSync(new URL("hooks/guard.test.sh", root)), "hooks/guard.test.sh must exist");
+assert(
+  read("install.sh").includes("hooks/guard.sh"),
+  "install.sh must symlink the guard hook into ~/.claude/hooks",
+);
+assert(
+  read(".github/workflows/validate.yml").includes("hooks/guard.test.sh"),
+  "CI must run the guard hook tests",
+);
+
+const guardTest = read("hooks/guard.test.sh");
+const guardDenyCases = [
+  ['check deny  "$MAIN_REPO"    "git push"', "bare push on main in the primary clone"],
+  ['check deny  "$MAIN_REPO" "git -c user.name=x push"', "config injection must not bypass the push guard"],
+  ['check deny  "$MAIN_REPO" "git push origin main"', "explicit push to main"],
+  ['"gh pr merge', "merging a PR"],
+  ['| sh"', "curl piped into a shell"],
+];
+for (const [needle, why] of guardDenyCases) {
+  assert(guardTest.includes(needle), `guard.test.sh must keep a deny test for: ${why}`);
+}
+
 console.log(
   `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
 );

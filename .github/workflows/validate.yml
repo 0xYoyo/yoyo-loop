@@ -22,3 +22,5 @@ jobs:
           node-version: 22
       - name: Validate skills and safety contracts
         run: node scripts/validate.mjs
+      - name: Test the guard hook
+        run: bash hooks/guard.test.sh

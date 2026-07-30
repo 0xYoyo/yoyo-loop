@@ -14,6 +14,11 @@ for skill in yoyo-spec yoyo-build yoyo-review yoyo-init; do
   echo "linked ${DEST}/${skill} -> ${src}"
 done
 
+HOOKS_DEST="${HOME}/.claude/hooks"
+mkdir -p "$HOOKS_DEST"
+ln -sfn "${REPO}/hooks/guard.sh" "${HOOKS_DEST}/guard.sh"
+echo "linked ${HOOKS_DEST}/guard.sh -> ${REPO}/hooks/guard.sh"
+
 echo
 echo "Done. Run /reload-skills in Claude Code (or restart it),"
 echo "then check /skills lists yoyo-spec, yoyo-build, yoyo-review, yoyo-init."
