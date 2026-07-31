@@ -12,7 +12,7 @@ One approval label, one rule: **humans merge**.
 
 | Skill | What it does |
 | --- | --- |
-| `/yoyo-init` | Bootstraps one repo: GitHub repo, labels, CI gate, builder worktree, config. Run once per project. |
+| `/yoyo-init` | Bootstraps one repo: GitHub repo, labels, CI gate, builder worktree, config; adopts a PRD file into `docs/PRD.md` when one is present. Run once per project. |
 | `/yoyo-spec` | Interviews you until the behavior is unambiguous, then files a Linear issue with `AC-N` criteria and `NG-N` non-goals; reads `docs/PRD.md` first when present, milestone-by-milestone rolling wave. |
 | `/yoyo-build` | Claims the next safe `agent-ready` issue, implements only its contract, opens a PR. Runs under `/loop`. |
 | `/yoyo-review` | Reviews open PRs against their issue and CI, posts a three-group verdict. Runs under `/loop`. |
