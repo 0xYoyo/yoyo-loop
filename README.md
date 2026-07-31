@@ -16,7 +16,7 @@ One approval label, one rule: **humans merge**.
 | `/yoyo-spec` | Interviews you until the behavior is unambiguous, then files a Linear issue with `AC-N` criteria and `NG-N` non-goals. |
 | `/yoyo-build` | Claims the next safe `agent-ready` issue, implements only its contract, opens a PR. Runs under `/loop`. |
 | `/yoyo-review` | Reviews open PRs against their issue and CI, posts a three-group verdict. Runs under `/loop`. |
-| `/yoyo-status` | Read-only list of everything waiting on you: PRs to merge, escalations to read, blocked questions to answer, specs awaiting `agent-ready`. Never writes anything. |
+| `/yoyo-status` | Read-only list of everything waiting on you: PRs to merge, escalations to read, blocked questions to answer, specs awaiting `agent-ready`. Cross-project by default, single project by slug argument. Never writes anything. |
 
 ## Changes from Finn-loop
 

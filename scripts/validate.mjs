@@ -130,6 +130,22 @@ const requiredContracts = [
     "status must state it never mutates — no writes to Linear or GitHub",
   ],
   [status.includes(".claude/yoyo.md"), "status must read the loop config"],
+  [
+    statusFlat.includes("keep every directory that contains `.claude/yoyo.md`"),
+    "status must discover projects by scanning for .claude/yoyo.md",
+  ],
+  [
+    statusFlat.includes("Exclude `*.build` worktrees"),
+    "status discovery must exclude .build builder worktrees",
+  ],
+  [
+    statusFlat.includes("Every line carries a leading `[slug]` tag"),
+    "status lines must carry the [slug] project tag",
+  ],
+  [
+    statusFlat.includes("not labeled `agent-ready` and not labeled `blocked`"),
+    "status backlog category must exclude blocked issues so nothing is listed twice",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
