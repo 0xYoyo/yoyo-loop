@@ -63,6 +63,7 @@ const spec = read("skills/yoyo-spec/SKILL.md");
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
 const buildFlat = build.replace(/\s+/g, " ");
 const reviewFlat = review.replace(/\s+/g, " ");
+const specFlat = spec.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
@@ -84,6 +85,18 @@ const requiredContracts = [
   ],
   [spec.includes("repo:SLUG"), "spec must label filed issues with the repository slug"],
   [/[Nn]ever apply the `agent-ready` label/.test(spec), "spec must never self-approve"],
+  [
+    specFlat.includes("never apply it to any issue in the chain"),
+    "spec must extend the agent-ready ban to every issue in a chain",
+  ],
+  [
+    specFlat.includes("blocked-by relation on its immediate predecessor"),
+    "spec must chain split issues with Linear blocked-by relations",
+  ],
+  [
+    specFlat.includes("Only after the user approves the set"),
+    "spec must require user approval of the split before drafting or filing",
+  ],
   [review.includes("Yoyo-loop review of COMMIT_SHA"), "reviewer must record the reviewed SHA"],
   [review.includes("No checks at all"), "reviewer must escalate when no checks exist"],
   [review.includes("sensitive_paths"), "reviewer must escalate sensitive-path diffs"],
