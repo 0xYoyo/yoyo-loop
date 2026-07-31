@@ -12,7 +12,7 @@ function assert(condition, message) {
   }
 }
 
-const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec"];
+const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status"];
 const skillDirectory = new URL("skills/", root);
 const actualSkillNames = readdirSync(skillDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -58,12 +58,14 @@ const build = read("skills/yoyo-build/SKILL.md");
 const review = read("skills/yoyo-review/SKILL.md");
 const init = read("skills/yoyo-init/SKILL.md");
 const spec = read("skills/yoyo-spec/SKILL.md");
+const status = read("skills/yoyo-status/SKILL.md");
 
 // Line wrapping in the skills is prose, not contract: match against a
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
 const buildFlat = build.replace(/\s+/g, " ");
 const reviewFlat = review.replace(/\s+/g, " ");
 const specFlat = spec.replace(/\s+/g, " ");
+const statusFlat = status.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
@@ -122,6 +124,12 @@ const requiredContracts = [
   ],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
   [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
+  [/read-only/i.test(status), "status must declare itself read-only"],
+  [
+    statusFlat.includes("never mutates anything: no writes to Linear, no writes to GitHub"),
+    "status must state it never mutates — no writes to Linear or GitHub",
+  ],
+  [status.includes(".claude/yoyo.md"), "status must read the loop config"],
 ];
 
 for (const [condition, message] of requiredContracts) {

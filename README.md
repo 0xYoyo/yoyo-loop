@@ -1,6 +1,6 @@
 # yoyo-loop
 
-Four Claude Code skills that turn Linear + GitHub into a small, human-gated
+Five Claude Code skills that turn Linear + GitHub into a small, human-gated
 software factory. Adapted from [Finn-loop](https://github.com/finna/Finn-loop)
 by Alex Finn (MIT), with per-repo scoping and a bootstrap command added.
 
@@ -16,6 +16,7 @@ One approval label, one rule: **humans merge**.
 | `/yoyo-spec` | Interviews you until the behavior is unambiguous, then files a Linear issue with `AC-N` criteria and `NG-N` non-goals. |
 | `/yoyo-build` | Claims the next safe `agent-ready` issue, implements only its contract, opens a PR. Runs under `/loop`. |
 | `/yoyo-review` | Reviews open PRs against their issue and CI, posts a three-group verdict. Runs under `/loop`. |
+| `/yoyo-status` | Read-only list of everything waiting on you: PRs to merge, escalations to read, blocked questions to answer, specs awaiting `agent-ready`. Never writes anything. |
 
 ## Changes from Finn-loop
 
@@ -42,9 +43,9 @@ git clone <this repo> ~/repos/yoyo-loop
 cd ~/repos/yoyo-loop && ./install.sh
 ```
 
-This symlinks each skill into `~/.claude/skills/`, so all four commands exist
+This symlinks each skill into `~/.claude/skills/`, so all five commands exist
 in every project you open, and editing a skill here takes effect immediately
-everywhere. Then run `/reload-skills` and confirm `/skills` lists all four.
+everywhere. Then run `/reload-skills` and confirm `/skills` lists all five.
 
 ## Set up a project (once per project)
 
@@ -92,6 +93,9 @@ window 2 — cd ~/repos/myproject.build  → /loop 15m /yoyo-build
    reason first.
 4. Answer questions on `blocked` issues, then remove the `blocked` label so a
    future pass can resume them.
+5. Run `/yoyo-status` any time to see everything waiting on you — merges,
+   escalations, blocked questions, specs awaiting `agent-ready` — in one
+   read-only list.
 
 Run only one builder loop per repository. The Linear assignee is a cooperative
 lock between people; two sessions authenticated as the same user cannot
