@@ -43,6 +43,15 @@ Ask the user, offering detected defaults:
   README and an initial commit so the repository has a default branch, note
   that this is a bootstrap install, and continue. Do not scaffold the user's
   project yourself; the first spec does that.
+- **PRD adoption.** After the repository has a default branch, look for a
+  PRD: if `docs/PRD.md` already exists, nothing to do. Otherwise, if exactly
+  one markdown file whose name contains "prd" (case-insensitive) exists in
+  the repo root or `docs/`, move it to `docs/PRD.md` (creating `docs/` if
+  needed), commit with message "Add PRD", and push. If several candidates
+  exist, list them and ask the user which one is the PRD instead of guessing.
+  If none exists, continue normally — a PRD is recommended for product repos
+  but not required. The PRD is authored outside the factory; init normalises
+  its location only and never edits its content.
 - Create the GitHub repo with `gh repo create` if `origin` is missing, then
   push.
 - Detect the real default branch via
@@ -168,6 +177,8 @@ Read back and report:
 - the default branch and whether a check is genuinely required
 - open PRs and their loop labels
 - that `/yoyo-spec`, `/yoyo-build`, `/yoyo-review` appear in `/skills`
+- whether `docs/PRD.md` is present; when it is, tell the user their first
+  session should be: `/yoyo-spec` — "spec milestone 1 from the PRD"
 
 Recommend connecting Linear's GitHub integration
 (https://linear.app/docs/github-integration) so a merged PR moves its issue to

@@ -65,6 +65,7 @@ const status = read("skills/yoyo-status/SKILL.md");
 const buildFlat = build.replace(/\s+/g, " ");
 const reviewFlat = review.replace(/\s+/g, " ");
 const specFlat = spec.replace(/\s+/g, " ");
+const initFlat = init.replace(/\s+/g, " ");
 const statusFlat = status.replace(/\s+/g, " ");
 
 const requiredContracts = [
@@ -138,6 +139,18 @@ const requiredContracts = [
   [
     !/[Dd]eny at minimum/.test(init),
     "init must not emit a Bash deny list; the guard hook is the sole judge of Bash",
+  ],
+  [
+    initFlat.includes("move it to `docs/PRD.md`"),
+    "init must normalise a found PRD to docs/PRD.md",
+  ],
+  [
+    initFlat.includes("never edits its content"),
+    "init must never edit PRD content",
+  ],
+  [
+    initFlat.includes("ask the user which one is the PRD instead of guessing"),
+    "init must ask rather than guess between several PRD candidates",
   ],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
   [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
