@@ -49,7 +49,36 @@ fix might need two questions; a big feature legitimately needs 10-20+. Never
 stop early because it feels like a lot of questions. Once the test passes,
 stop — no filler questions.
 
-## 3. Draft the issue
+## 3. Size the work — split only when it does not fit
+
+Size what the interview revealed against the rule: one day of agent work or
+less per issue.
+
+If the work fits in one day, file one issue and skip the rest of this
+section. Never split work that fits — each extra issue costs the user a
+review, an approval, and a merge, so fragmenting a one-day task wastes more
+than it saves.
+
+If the work exceeds one day, you MUST propose a split into a chain of
+one-day issues, ordered so each is independently buildable using only merged
+code from the issues before it.
+
+Show the proposal as a numbered list — a title plus a one-line scope for
+each draft issue — BEFORE drafting any full body. The user can re-cut the
+boundaries: move scope between issues, merge two, add one, reorder. Fold
+their changes in and show the revised list. Only after the user approves the
+set do you draft each full issue body in the standard shape below.
+
+Chain rules:
+
+- No two issues in a chain share an acceptance criterion. Each AC belongs to
+  exactly one issue.
+- Cross-issue dependencies are expressed only through the Linear blocked-by
+  relation created at filing time — never as prose like "after the previous
+  issue" inside an issue body. Each body must read as a complete contract on
+  its own.
+
+## 4. Draft the issue
 
 Use exactly this shape:
 
@@ -89,31 +118,39 @@ Rules for the draft:
   build and review skills enforce.
 - No acceptance criterion may require a non-goal. If one does, resolve it
   with the user before filing.
-- Size the issue to one day of agent work or less. Bigger work becomes a
-  chain of small issues, ordered so each is buildable using only merged
-  code from the ones before it.
+- Size the issue to one day of agent work or less; bigger work goes through
+  the split in section 3 first. An issue in a chain must stand alone: its
+  acceptance criteria cover only its own scope, and its body never refers to
+  sibling issues.
 - When an issue creates or modifies CI configuration, its acceptance
   criteria must state that the workflow triggers on `pull_request`. A
   workflow that only runs on pushes to the default branch leaves every pull
   request with no checks, which makes the reviewer escalate all of them to a
   human. Do not leave the trigger implicit.
 
-## 4. Confirm and file
+## 5. Confirm and file
 
-Show the full draft in chat and get the user's go-ahead. Then create the
-issue on the `linear_team` Linear team (via the Linear connector) with the
-draft as the body.
+Show the full draft in chat — every draft, when there is a chain — and get
+the user's go-ahead. Then create each issue on the `linear_team` Linear team
+(via the Linear connector) with its draft as the body.
 
 Apply the `repo:SLUG` label using the `repo_slug` from `.claude/yoyo.md`.
 This label is what keeps one Linear team serving several repositories
 without their queues mixing. An issue filed without it will never be picked
-up by any builder.
+up by any builder. In a chain, every issue gets the label.
 
-Report the exact issue identifier and URL returned by Linear; later skills
-use that identifier rather than guessing it.
+For a chain, file the issues in chain order. The first issue gets no
+relation; every subsequent issue gets a Linear blocked-by relation on its
+immediate predecessor, so the builder's pick query — which skips issues
+with an unresolved blocker relation — opens the chain one link at a time as
+predecessors are done.
+
+Report the exact issue identifier and URL returned by Linear — for a chain,
+every identifier and URL, in order; later skills use those identifiers
+rather than guessing them.
 
 ## Hard rule
 
-Never apply the `agent-ready` label. The user applies it in Linear after a
-final read — that label is the approval gate between "idea" and "an agent
-builds it".
+Never apply the `agent-ready` label — and in a chain, never apply it to any
+issue in the chain. The user applies it in Linear after a final read — that
+label is the approval gate between "idea" and "an agent builds it".
