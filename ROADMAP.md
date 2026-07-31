@@ -8,8 +8,8 @@ into a fully unattended pipeline).
 | Phase | What | Status |
 | --- | --- | --- |
 | 1 | Unattended-safe freedom: guard hook v2 (versioned + tested), permission inversion, auto-sync / auto-prune | **DONE** — PRs #5–#7 |
-| 2 | Multi-issue spec splitting via Linear blocked-by chains | Planned |
-| 3 | `/yoyo-status` read-only queue view | Planned |
+| 2 | Multi-issue spec splitting via Linear blocked-by chains | **DONE** — PR #9 |
+| 3 | `/yoyo-status` read-only queue view | **DONE** — PR #10 |
 | 4 | Fresh-reviewer convergence completing the loop-stuck cap | Planned |
 | 5 | Notification lane (Slack/Telegram) with live re-verification | Planned |
 | 6 | Off the open session (Cloud Routines / persistent workers) | Planned |
