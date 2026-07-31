@@ -152,6 +152,10 @@ const requiredContracts = [
     initFlat.includes("ask the user which one is the PRD instead of guessing"),
     "init must ask rather than guess between several PRD candidates",
   ],
+  [
+    initFlat.includes('- ".claude/**"'),
+    "init config template must list .claude/** as a sensitive path; the config must protect the config",
+  ],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
   [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
   [/read-only/i.test(status), "status must declare itself read-only"],

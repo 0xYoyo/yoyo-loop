@@ -127,6 +127,7 @@ sensitive_paths:
   - "**/*.env*"
   - package.json
   - Makefile
+  - ".claude/**"
 
 max_fix_rounds: 2
 ```
@@ -137,7 +138,10 @@ config can never go stale.
 The last two sensitive paths are there because a PR can neuter its own check
 gate without touching `.github/workflows/` — by rewriting the test script or
 deleting the tests it runs. Add whichever files play that role in this project
-(`pyproject.toml`, `Cargo.toml`, a test config, and so on).
+(`pyproject.toml`, `Cargo.toml`, a test config, and so on). The factory's own
+config is sensitive because a PR that edits `.claude/` can weaken the
+fix-round cap, the sensitive list itself, or permissions — the config must
+protect the config.
 
 Add project-specific sensitive paths — auth, billing, permissions, schema,
 deployment config — based on what is actually in this repository. Show the
