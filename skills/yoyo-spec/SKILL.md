@@ -15,6 +15,34 @@ Read `.claude/yoyo.md` first for this repository's `repo_slug` and
 `linear_team`. If that file is missing, this repository has not been
 initialised — tell the user to run `/yoyo-init` and stop.
 
+## PRD intake
+
+After reading `.claude/yoyo.md`, check for `docs/PRD.md`. If present, read it
+fully before researching the codebase. It is the product source of truth,
+authored and maintained OUTSIDE the factory; the spec skill never edits it.
+
+When a PRD exists, do not re-ask product questions the PRD already answers.
+Interview only on implementation-level forks, gaps, and anything the codebase
+or PRD leaves genuinely ambiguous.
+
+Milestone sessions: when the user asks to "spec milestone N from the PRD",
+read that milestone's sketch plus the CURRENT codebase and convert exactly
+one milestone into the existing multi-issue blocked-by chain flow — chain
+proposal first, user re-cuts and approves, file in order with relations.
+Never file issues for more than one milestone in a session — the next
+milestone is specced only after the previous one's code is merged (rolling
+wave).
+
+If the user's answers during the interview contradict the PRD, the user
+wins. Note the contradiction in chat and record in the filed issue(s) that
+`docs/PRD.md` needs a version bump for X.
+
+Before filing, check the PRD's "Human checklist" for items that block the
+milestone being specced and surface them to the user in chat during the
+session.
+
+## Sync the clone
+
 Then sync the clone so research never runs against stale code — the user must
 never need to pull manually. If the working tree is clean
 (`git status --porcelain` empty) and the checked-out branch is the default

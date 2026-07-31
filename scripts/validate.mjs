@@ -99,6 +99,23 @@ const requiredContracts = [
     specFlat.includes("Only after the user approves the set"),
     "spec must require user approval of the split before drafting or filing",
   ],
+  [
+    specFlat.includes("check for `docs/PRD.md`. If present, read it fully"),
+    "spec must read docs/PRD.md when present",
+  ],
+  [
+    specFlat.includes("convert exactly one milestone") &&
+      specFlat.includes("Never file issues for more than one milestone in a session"),
+    "spec must convert exactly one PRD milestone per session",
+  ],
+  [
+    specFlat.includes("contradict the PRD, the user wins"),
+    "spec must let the user win over the PRD on contradiction",
+  ],
+  [
+    specFlat.includes("the spec skill never edits it"),
+    "spec must never edit the PRD",
+  ],
   [review.includes("Yoyo-loop review of COMMIT_SHA"), "reviewer must record the reviewed SHA"],
   [review.includes("No checks at all"), "reviewer must escalate when no checks exist"],
   [review.includes("sensitive_paths"), "reviewer must escalate sensitive-path diffs"],
