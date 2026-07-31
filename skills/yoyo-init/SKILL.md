@@ -47,7 +47,9 @@ Ask the user, offering detected defaults:
   PRD: if `docs/PRD.md` already exists, nothing to do. Otherwise, if exactly
   one markdown file whose name contains "prd" (case-insensitive) exists in
   the repo root or `docs/`, move it to `docs/PRD.md` (creating `docs/` if
-  needed), commit with message "Add PRD", and push. If several candidates
+  needed), commit with message "Add PRD", and push — on a brand-new directory
+  `origin` may not exist yet; in that case push as soon as a later step
+  creates it. If several candidates
   exist, list them and ask the user which one is the PRD instead of guessing.
   If none exists, continue normally — a PRD is recommended for product repos
   but not required. The PRD is authored outside the factory; init normalises
@@ -127,6 +129,7 @@ sensitive_paths:
   - "**/*.env*"
   - package.json
   - Makefile
+  - ".claude/**"
 
 max_fix_rounds: 2
 ```
@@ -134,10 +137,13 @@ max_fix_rounds: 2
 Do not record the default branch here; the builder detects it live so the
 config can never go stale.
 
-The last two sensitive paths are there because a PR can neuter its own check
+`package.json` and `Makefile` are there because a PR can neuter its own check
 gate without touching `.github/workflows/` — by rewriting the test script or
 deleting the tests it runs. Add whichever files play that role in this project
-(`pyproject.toml`, `Cargo.toml`, a test config, and so on).
+(`pyproject.toml`, `Cargo.toml`, a test config, and so on). The factory's own
+config is sensitive because a PR that edits `.claude/` can weaken the
+fix-round cap, the sensitive list itself, or permissions — the config must
+protect the config.
 
 Add project-specific sensitive paths — auth, billing, permissions, schema,
 deployment config — based on what is actually in this repository. Show the
