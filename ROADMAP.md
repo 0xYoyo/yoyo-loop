@@ -1,19 +1,67 @@
 # Roadmap
 
+Last updated: 31 July 2026 — post multi-project planning session.
+
 Status board for the yoyo-loop build phases. The ordering follows Alex Finn's
 Finn-loop README ("From the starter loop to a full software factory" — not in
 this repo; it describes growing a minimal builder/reviewer loop step by step
 into a fully unattended pipeline).
 
-| Phase | What | Status |
-| --- | --- | --- |
-| 1 | Unattended-safe freedom: guard hook v2 (versioned + tested), permission inversion, auto-sync / auto-prune | **DONE** — PRs #5–#7 |
-| 2 | Multi-issue spec splitting via Linear blocked-by chains | **DONE** — PR #9 |
-| 3 | `/yoyo-status` read-only queue view | **DONE** — PR #10 |
-| 4 | Fresh-reviewer convergence completing the loop-stuck cap | Planned |
-| 5 | Notification lane (Slack/Telegram) with live re-verification | Planned |
-| 6 | Off the open session (Cloud Routines / persistent workers) | Planned |
-| 7 | Later: `/yoyo-vision` project interview, preview gates, risk-tiered merging, morning director, watchdog, post-merge learning loop | Later |
+## Phases
+
+**Phase 1 — Unattended-safe freedom — ✅ DONE (yoyo-loop PRs #5–#7, briza PR #3)**
+Guard hook v2, permission inversion, auto-sync/prune. (Unchanged; see git
+history of this file for detail.)
+
+**Phase 2 — Multi-issue spec splitting — ✅ DONE (PR #9)**
+Spec proposes blocked-by chains of one-day issues; user approves the set
+once; builder blocker-exclusion serializes the parts.
+
+**Phase 3 — /yoyo-status — ✅ DONE (PR #10, cross-project in PR #11)**
+One ordered action list, cross-project by default (scans sibling
+repos for .claude/yoyo.md), single project by slug argument.
+
+**Phase 4 — PRD intake — next, gated on the first real PRD**
+Product ideation lives OUTSIDE the factory in the "Product Studio" Claude
+project, which produces docs/PRD.md per product. Factory change is small:
+/yoyo-spec reads docs/PRD.md first when present; each /yoyo-spec session
+converts ONE milestone into a Phase-2 chain against the then-real codebase
+(rolling wave). The PR is written only once the first PRD exists so the
+change is designed against a real document. A /yoyo-plan skill that picks
+and re-plans milestones autonomously is a later luxury.
+
+**Phase 5 — Notification lane, outbound-only first**
+5a: outbound Slack messages only — issue became blocked; PR became
+loop-approved / needs-human-review / loop-stuck. No inbound actions, so no
+approver allowlists or signature verification needed yet. 5b (later):
+interactive approvals from Slack with signature verification, approver
+allowlist, idempotency, and re-reading live Linear/GitHub state at action
+time. (Finn §2.)
+
+**Phase 6 — Fresh-reviewer convergence — deferred until a PR needs fix rounds**
+Builder PR → clean-context reviewer → fix rounds → existing loop-stuck cap.
+(Finn §1.) Build when the failure mode first appears.
+
+**Phase 7 — Off the open session**
+Cloud Routines on GitHub events first; leased persistent workers only if
+open sessions become the bottleneck. Cures the machine-wide scheduler-lock
+quirk. (Finn §8.) Trigger: loop latency actually hurting across projects.
+
+**Phase 8 — Later layers**
+Preview + documentation merge gates (Finn §5); risk-tiered merging
+(Finn §3); morning director + factory watchdog (Finn §6–7); post-merge
+learning loop (Finn §9); /yoyo-plan autonomous milestone planning.
+
+Note: hosting, deployments, and secrets are NOT a factory phase — they are
+milestone 1 of each product repo, specified in its PRD.
+
+## Standing decisions
+
+- Build each layer only when its failure mode first appears, not
+  speculatively. Every interruption or annoyance is classified: known
+  one-timer or a new permanent fix in a skill/hook.
+- Product ideation (Product Studio) lives outside the factory; the PRD
+  committed as docs/PRD.md is the interface between them.
 
 ## Notes
 
