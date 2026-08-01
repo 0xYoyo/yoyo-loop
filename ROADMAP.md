@@ -32,7 +32,7 @@ sensitive paths (the config protects the config). First consumer:
 0xYoyo/unfiltered. A /yoyo-plan skill that picks and re-plans milestones
 autonomously is a later luxury.
 
-**Phase 4.5 — bootstrap CI seed**
+**Phase 4.5 — bootstrap CI seed — ✅ DONE (this PR)**
 /yoyo-init commits a minimal real CI workflow (repo-hygiene job: secret
 scan + structure sanity) on pull_request at bootstrap, so pre-test-suite
 PRs carry genuine green checks and the reviewer's no-CI escalation stops
