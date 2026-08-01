@@ -32,6 +32,13 @@ sensitive paths (the config protects the config). First consumer:
 0xYoyo/unfiltered. A /yoyo-plan skill that picks and re-plans milestones
 autonomously is a later luxury.
 
+**Phase 4.5 — bootstrap CI seed — ✅ DONE (this PR)**
+/yoyo-init commits a minimal real CI workflow (repo-hygiene job: secret
+scan + structure sanity) on pull_request at bootstrap, so pre-test-suite
+PRs carry genuine green checks and the reviewer's no-CI escalation stops
+firing on every new project's first PRs. Spec-side: bootstrap chains put
+tooling+CI as issue 2. Trigger: before the next project's init.
+
 **Phase 5 — Notification lane, outbound-only first**
 5a: outbound Slack messages only — issue became blocked; PR became
 loop-approved / needs-human-review / loop-stuck. No inbound actions, so no

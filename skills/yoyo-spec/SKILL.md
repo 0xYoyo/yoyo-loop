@@ -106,6 +106,11 @@ Chain rules:
   relation created at filing time — never as prose like "after the previous
   issue" inside an issue body. Each body must read as a complete contract on
   its own.
+- Bootstrap chains (repository has no application code yet): the
+  tooling + CI issue comes immediately after the scaffold issue, and
+  its contract states that it extends or replaces the seed hygiene
+  workflow written by /yoyo-init with the project's real lint,
+  typecheck, and test jobs, keeping the pull_request trigger.
 
 ## 4. Draft the issue
 

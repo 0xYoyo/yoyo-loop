@@ -164,6 +164,18 @@ const requiredContracts = [
     initFlat.includes('- ".claude/**"'),
     "init config template must list .claude/** as a sensitive path; the config must protect the config",
   ],
+  [
+    initFlat.includes("seed hygiene workflow"),
+    "init must write a seed CI workflow for empty projects",
+  ],
+  [
+    /on:\s*pull_request/.test(init),
+    "init's seed workflow must trigger on pull_request",
+  ],
+  [
+    specFlat.includes("extends or replaces the seed hygiene workflow"),
+    "spec bootstrap chains must upgrade the seed workflow, not ignore it",
+  ],
   [readme.includes("install.sh"), "README must explain how to install the skills"],
   [readme.includes("/reload-skills"), "README must tell the user to reload skills"],
   [/read-only/i.test(status), "status must declare itself read-only"],

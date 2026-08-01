@@ -86,14 +86,43 @@ still fine and safe; there is simply never a checks-related reason to.
 - **If the project already has a test or lint command** and
   `.github/workflows/` is empty, add a workflow that runs it on
   `pull_request`. Commit and push.
-- **If the project has no code yet**, add nothing. Tell the user, without
-  jargon:
+- **If the project has no code yet**, write a seed hygiene workflow at
+  `.github/workflows/ci.yml` with exactly this content, commit and push it:
 
-  > There is nothing to test yet, so GitHub has nothing to check, so the
-  > reviewer will hand you every pull request instead of approving any. Make
-  > sure your first spec includes a test suite and a workflow that runs it on
-  > every pull request. From the moment that merges, the reviewer starts
-  > approving on its own — you never have to come back and reconfigure this.
+  ```yaml
+  name: CI
+
+  on:
+    pull_request:
+
+  permissions:
+    contents: read
+
+  jobs:
+    hygiene:
+      name: Repo hygiene
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - name: No committed secrets
+          run: |
+            ! git grep -InE "(shpss_|shpat_|sk-[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16}|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY)" -- . ":(exclude).github/workflows/ci.yml" \
+              || { echo "Potential secret committed"; exit 1; }
+        - name: Structure sanity
+          run: |
+            test -f README.md
+            test -f .claude/yoyo.md
+            ! git ls-files | grep -E "(^|/)\.env(\..*)?$" \
+              || { echo ".env file tracked"; exit 1; }
+  ```
+
+  Then tell the user, without jargon:
+
+  > Every pull request now carries a real hygiene check (no secrets,
+  > sane structure), so the reviewer has green evidence from the very
+  > first PR instead of handing you each one. Your first spec should
+  > still include a test suite and a workflow step running it on every
+  > pull request; that issue extends or replaces this seed workflow.
 
 Do not try to mark a check "required", and do not report it as a problem when
 you cannot. Branch protection and rulesets are unavailable on free private
