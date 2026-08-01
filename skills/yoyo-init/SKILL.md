@@ -106,7 +106,7 @@ still fine and safe; there is simply never a checks-related reason to.
         - uses: actions/checkout@v4
         - name: No committed secrets
           run: |
-            ! git grep -InE "(shpss_|shpat_|sk-[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16}|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY)" -- . \
+            ! git grep -InE "(shpss_|shpat_|sk-[A-Za-z0-9]{20,}|AKIA[A-Z0-9]{16}|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY)" -- . ":(exclude).github/workflows/ci.yml" \
               || { echo "Potential secret committed"; exit 1; }
         - name: Structure sanity
           run: |
