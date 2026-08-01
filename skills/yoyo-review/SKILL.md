@@ -7,16 +7,17 @@ description: Review open PRs against their linked Linear issues and required Git
 
 One pass = one PR reviewed. Under `/loop`, each iteration runs this skill once.
 
-Read `.claude/yoyo.md` first for `linear_team` and `sensitive_paths`. If that
-file is missing, this repository has not been initialised — say so and end the
-pass.
-
-Then sync the clone — the user must never need to pull manually. If the
+First sync the clone — the user must never need to pull manually. If the
 working tree is clean (`git status --porcelain` empty) and the checked-out
 branch is the default branch, run `git pull --ff-only`. Never rebase and never
 merge. If the fast-forward fails, report that and continue read-only on what
 is checked out. If the tree is dirty or on another branch, skip the pull and
 continue.
+
+Then read `.claude/yoyo.md` for `linear_team` and `sensitive_paths`. Treat
+that file as missing only when it is still absent after the sync above — a
+stale clone is not an uninitialised repository. If it is genuinely absent, say
+so and end the pass.
 
 ## 1. Find a PR needing review
 

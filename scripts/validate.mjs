@@ -124,6 +124,14 @@ const requiredContracts = [
   [spec.includes("git pull --ff-only"), "spec must fast-forward the primary clone at the start of a pass"],
   [review.includes("git pull --ff-only"), "reviewer must fast-forward the primary clone at the start of a pass"],
   [
+    /a stale clone is not an uninitialised repository/i.test(specFlat),
+    "spec must sync before declaring the repo uninitialised",
+  ],
+  [
+    /a stale clone is not an uninitialised repository/i.test(reviewFlat),
+    "review must sync before declaring the repo uninitialised",
+  ],
+  [
     reviewFlat.includes("Never delete a branch whose PR is open"),
     "reviewer tidy must forbid deleting branches whose PR is open or closed-unmerged",
   ],
@@ -218,6 +226,21 @@ assert(builderTidy !== -1, "builder must prune merged issue branches in the work
 assert(
   localOnlyCheck < builderTidy,
   "builder must tidy merged branches only AFTER the unpushed-work check passes",
+);
+
+// Same discipline for spec and review: a sync placed after the missing-config
+// abort never runs, so a stale clone reads as an uninitialised repository.
+const specSync = specFlat.indexOf("git pull --ff-only");
+const specConfigRead = specFlat.search(/read `\.claude\/yoyo\.md`/i);
+assert(
+  specSync !== -1 && specConfigRead !== -1 && specSync < specConfigRead,
+  "spec must sync the clone BEFORE reading config; a sync after the missing-config abort never runs",
+);
+const reviewSync = reviewFlat.indexOf("git pull --ff-only");
+const reviewConfigRead = reviewFlat.search(/read `\.claude\/yoyo\.md`/i);
+assert(
+  reviewSync !== -1 && reviewConfigRead !== -1 && reviewSync < reviewConfigRead,
+  "review must sync the clone BEFORE reading config; a sync after the missing-config abort never runs",
 );
 
 assert(!build.includes("origin/main"), "builder hardcodes origin/main");
