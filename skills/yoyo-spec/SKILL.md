@@ -11,9 +11,19 @@ interview the user in rounds until confident, draft, confirm, file. The user
 is the product brain; you are the codebase brain. Never guess product
 decisions.
 
+## Sync the clone
+
+First sync the clone so nothing downstream judges stale state — the user must
+never need to pull manually. If the working tree is clean
+(`git status --porcelain` empty) and the checked-out branch is the default
+branch, run `git pull --ff-only`. Never rebase and never merge. If the
+fast-forward fails, report that and continue read-only on what is checked out.
+If the tree is dirty or on another branch, skip the pull and continue.
+
 Read `.claude/yoyo.md` first for this repository's `repo_slug` and
-`linear_team`. If that file is missing, this repository has not been
-initialised — tell the user to run `/yoyo-init` and stop.
+`linear_team`. Treat that file as missing only when it is still absent after
+the sync above — a stale clone is not an uninitialised repository. If it is
+genuinely absent, tell the user to run `/yoyo-init` and stop.
 
 ## PRD intake
 
@@ -40,15 +50,6 @@ wins. Note the contradiction in chat and record in the filed issue(s) that
 Before filing, check the PRD's "Human checklist" for items that block the
 milestone being specced and surface them to the user in chat during the
 session.
-
-## Sync the clone
-
-Then sync the clone so research never runs against stale code — the user must
-never need to pull manually. If the working tree is clean
-(`git status --porcelain` empty) and the checked-out branch is the default
-branch, run `git pull --ff-only`. Never rebase and never merge. If the
-fast-forward fails, report that and continue read-only on what is checked out.
-If the tree is dirty or on another branch, skip the pull and continue.
 
 ## 1. Research before asking
 
