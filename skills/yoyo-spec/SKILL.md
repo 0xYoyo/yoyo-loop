@@ -20,7 +20,7 @@ branch, run `git pull --ff-only`. Never rebase and never merge. If the
 fast-forward fails, report that and continue read-only on what is checked out.
 If the tree is dirty or on another branch, skip the pull and continue.
 
-Read `.claude/yoyo.md` first for this repository's `repo_slug` and
+Then read `.claude/yoyo.md` for this repository's `repo_slug` and
 `linear_team`. Treat that file as missing only when it is still absent after
 the sync above — a stale clone is not an uninitialised repository. If it is
 genuinely absent, tell the user to run `/yoyo-init` and stop.

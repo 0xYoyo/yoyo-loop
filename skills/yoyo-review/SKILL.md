@@ -14,7 +14,7 @@ merge. If the fast-forward fails, report that and continue read-only on what
 is checked out. If the tree is dirty or on another branch, skip the pull and
 continue.
 
-Read `.claude/yoyo.md` first for `linear_team` and `sensitive_paths`. Treat
+Then read `.claude/yoyo.md` for `linear_team` and `sensitive_paths`. Treat
 that file as missing only when it is still absent after the sync above — a
 stale clone is not an uninitialised repository. If it is genuinely absent, say
 so and end the pass.

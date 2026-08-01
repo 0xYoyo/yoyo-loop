@@ -231,15 +231,15 @@ assert(
 // Same discipline for spec and review: a sync placed after the missing-config
 // abort never runs, so a stale clone reads as an uninitialised repository.
 const specSync = specFlat.indexOf("git pull --ff-only");
-const specConfigRead = specFlat.indexOf("Read `.claude/yoyo.md`");
+const specConfigRead = specFlat.search(/read `\.claude\/yoyo\.md`/i);
 assert(
-  specSync !== -1 && specSync < specConfigRead,
+  specSync !== -1 && specConfigRead !== -1 && specSync < specConfigRead,
   "spec must sync the clone BEFORE reading config; a sync after the missing-config abort never runs",
 );
 const reviewSync = reviewFlat.indexOf("git pull --ff-only");
-const reviewConfigRead = reviewFlat.indexOf("Read `.claude/yoyo.md`");
+const reviewConfigRead = reviewFlat.search(/read `\.claude\/yoyo\.md`/i);
 assert(
-  reviewSync !== -1 && reviewSync < reviewConfigRead,
+  reviewSync !== -1 && reviewConfigRead !== -1 && reviewSync < reviewConfigRead,
   "review must sync the clone BEFORE reading config; a sync after the missing-config abort never runs",
 );
 
