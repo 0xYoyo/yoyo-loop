@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 31 July 2026 — post multi-project planning session.
+Last updated: 1 August 2026 — Phase 4 landed; Unfiltered onboarded.
 
 Status board for the yoyo-loop build phases. The ordering follows Alex Finn's
 Finn-loop README ("From the starter loop to a full software factory" — not in
@@ -21,14 +21,16 @@ once; builder blocker-exclusion serializes the parts.
 One ordered action list, cross-project by default (scans sibling
 repos for .claude/yoyo.md), single project by slug argument.
 
-**Phase 4 — PRD intake — next, gated on the first real PRD**
+**Phase 4 — PRD intake — ✅ DONE (PRs #13–#15)**
 Product ideation lives OUTSIDE the factory in the "Product Studio" Claude
-project, which produces docs/PRD.md per product. Factory change is small:
-/yoyo-spec reads docs/PRD.md first when present; each /yoyo-spec session
-converts ONE milestone into a Phase-2 chain against the then-real codebase
-(rolling wave). The PR is written only once the first PRD exists so the
-change is designed against a real document. A /yoyo-plan skill that picks
-and re-plans milestones autonomously is a later luxury.
+project, which produces docs/PRD.md per product. /yoyo-spec reads
+docs/PRD.md first when present and converts exactly ONE milestone per
+session into a Phase-2 chain against the then-real codebase (rolling
+wave); the user wins over the PRD on contradiction. /yoyo-init adopts a
+found PRD file into docs/PRD.md and includes ".claude/**" in default
+sensitive paths (the config protects the config). First consumer:
+0xYoyo/unfiltered. A /yoyo-plan skill that picks and re-plans milestones
+autonomously is a later luxury.
 
 **Phase 5 — Notification lane, outbound-only first**
 5a: outbound Slack messages only — issue became blocked; PR became
