@@ -348,6 +348,21 @@ assert(
   "builder must escalate, not retry, when the guard denies a command with the escalation message",
 );
 
+// Init cannot write .claude/settings.json itself — the guard denies agent
+// writes to Claude settings files — so it proposes and the human copies.
+assert(
+  init.includes("settings.proposed.json"),
+  "init must stage settings as .claude/settings.proposed.json instead of writing settings.json",
+);
+assert(
+  initFlat.includes("cp PROJECT_PATH/.claude/settings.proposed.json PROJECT_PATH/.claude/settings.json"),
+  "init must instruct the user to run the cp command that installs the proposed settings",
+);
+assert(
+  initFlat.includes("the human copying the file IS the approval gate"),
+  "init must state that the human copying the file is the approval gate",
+);
+
 console.log(
   `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
 );
