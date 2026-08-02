@@ -200,6 +200,42 @@ const requiredContracts = [
     statusFlat.includes("not labeled `agent-ready` and not labeled `blocked`"),
     "status backlog category must exclude blocked issues so nothing is listed twice",
   ],
+  [
+    build.includes("yoyo-slack.webhook"),
+    "builder must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
+  ],
+  [
+    buildFlat.includes("After applying `blocked`, send a Slack notification"),
+    "builder must notify Slack when an issue becomes blocked",
+  ],
+  [
+    buildFlat.includes("After applying `loop-stuck`, send a Slack notification"),
+    "builder must notify Slack when a PR becomes loop-stuck",
+  ],
+  [
+    buildFlat.includes("After applying `needs-human-review`, send a Slack notification"),
+    "builder must notify Slack when a PR becomes needs-human-review",
+  ],
+  [
+    review.includes("yoyo-slack.webhook"),
+    "reviewer must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
+  ],
+  [
+    reviewFlat.includes("After adding `loop-approved` or `needs-human-review`, send a Slack notification"),
+    "reviewer must notify Slack on loop-approved and needs-human-review verdicts",
+  ],
+  [
+    buildFlat.includes("skip notification silently"),
+    "builder must skip notification silently when the webhook file is missing",
+  ],
+  [
+    reviewFlat.includes("skip notification silently"),
+    "reviewer must skip notification silently when the webhook file is missing",
+  ],
+  [
+    readme.includes("yoyo-slack.webhook"),
+    "README must document the yoyo-slack.webhook setup",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

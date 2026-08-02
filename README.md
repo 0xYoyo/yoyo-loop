@@ -101,6 +101,27 @@ Run only one builder loop per repository. The Linear assignee is a cooperative
 lock between people; two sessions authenticated as the same user cannot
 reliably lock each other.
 
+## Slack notifications
+
+Optional and outbound-only: the loop posts a message when something needs a
+human, and nothing in Slack can act back on the loop. Four events notify:
+
+- an issue became `blocked` (builder has a question)
+- a PR became `loop-stuck` (fix rounds exhausted)
+- a PR became `needs-human-review` (escalation, from builder or reviewer)
+- a PR became `loop-approved` (ready for your merge decision)
+
+Setup (about 3 minutes): create a Slack app at https://api.slack.com/apps →
+enable **Incoming Webhooks** → activate → add it to a channel → copy the
+webhook URL. Then store it:
+
+```bash
+printf '%s\n' 'URL' > ~/.claude/yoyo-slack.webhook && chmod 600 ~/.claude/yoyo-slack.webhook
+```
+
+If the file is missing, notifications are silently off — nothing breaks. The
+URL is a credential and lives only in that file, never in a repo.
+
 ## Validation
 
 `scripts/validate.mjs` asserts the safety contracts mechanically — that the
