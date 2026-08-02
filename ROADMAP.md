@@ -74,6 +74,9 @@ milestone 1 of each product repo, specified in its PRD.
   one-timer or a new permanent fix in a skill/hook.
 - Product ideation (Product Studio) lives outside the factory; the PRD
   committed as docs/PRD.md is the interface between them.
+- The guard has two verdicts, deny and allow. Former ASK-tier commands deny
+  with escalation guidance; each denied-but-safe pattern gets triaged with
+  the user and promoted to a permanent allow.
 
 ## Notes
 

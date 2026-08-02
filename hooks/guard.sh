@@ -2,11 +2,13 @@
 # hooks/guard.sh — installed as ~/.claude/hooks/guard.sh (see install.sh).
 # PreToolUse guard for unattended agentic loops.
 #
-# Three tiers:
-#   DENY  - refused outright, no prompt. Bypasses review, or rewrites history
-#           with no recovery path, or exfiltrates credentials.
-#   ASK   - prompts for authorization. Reversible or recoverable, but notable.
-#           NOTE: an ASK pauses an unattended loop until a human answers.
+# Two tiers:
+#   DENY  - refused outright. Hard denials (bypasses review, irreversible,
+#           credential exfiltration) keep their specific messages. Command
+#           classes that formerly asked for authorization also deny now, with
+#           escalation guidance: an ASK prompt stalls an unattended loop
+#           forever, so a pass must fail fast and escalate to a human instead
+#           of hanging.
 #   allow - everything else, silently.
 #
 # Reads the hook payload on stdin. Emits a decision as JSON, or exits 0 to allow.
@@ -27,7 +29,13 @@ decide() { # decide <allow|deny|ask> <reason>
   exit 0
 }
 deny() { decide deny "$1"; }
-ask()  { decide ask  "$1"; }
+
+# Former ASK tier: deny with escalation guidance so an agent pass ends and
+# escalates instead of waiting on a prompt nobody will answer. Each
+# denied-but-safe pattern gets triaged with the user and promoted to a
+# permanent allow.
+ESCALATE_MSG='yoyo-loop guard: this command class requires a human and is denied in agent sessions. Do not retry it. Escalate instead: builders comment the exact command and why it is needed, apply `blocked` (issue) or `needs-human-review` (PR), and end the pass.'
+escalate() { decide deny "$ESCALATE_MSG Context: $1"; }
 
 project_root() {
   local r="${CLAUDE_PROJECT_DIR:-$PWD}"
@@ -85,16 +93,16 @@ case "$tool" in
         deny "Blocked: writes to credential material (~/.ssh, ~/.aws, ~/.gnupg, keychain, Claude credentials) are never permitted." ;;
     esac
 
-    # Claude settings are authorizable, not forbidden - so a permissions change
-    # can be proposed and approved rather than requiring a manual edit.
+    # Claude settings changes need a human: denied with escalation guidance
+    # so the loop fails fast instead of waiting on a prompt.
     case "$path" in
       */.claude/settings.json|*/.claude/settings.local.json|\
       "$HOME"/.claude/settings.json|"$HOME"/.claude/settings.local.json)
-        ask "Authorize? This rewrites Claude permission settings ($path) - review the diff before approving." ;;
+        escalate "This rewrites Claude permission settings ($path) - review the diff before approving." ;;
     esac
 
     in_workspace "$path" && exit 0
-    ask "Authorize? Write outside the project. Target: $path (project is $ROOT)"
+    escalate "Write outside the project. Target: $path (project is $ROOT)"
     ;;
   Bash) ;;
   *) exit 0 ;;
@@ -263,7 +271,7 @@ while IFS= read -r seg; do
         fi
         # Unknown repo or unknown branch: refuse to guess - fail closed.
         [ -z "$br" ] && \
-          ask "Authorize? Cannot determine which repository/branch this push targets (${seg_git_dir:-unknown directory}): $seg"
+          escalate "Cannot determine which repository/branch this push targets (${seg_git_dir:-unknown directory}): $seg"
         { [ "$br" = "main" ] || [ "$br" = "master" ]; } && targets_default=true
         # A detached HEAD ("br" = HEAD) pushes nothing implicit - not judged
         # against any other checkout's branch.
@@ -274,7 +282,7 @@ while IFS= read -r seg; do
       deny "Blocked: push to the default branch. Open a PR instead."
     fi
     if [ "$is_force" = true ]; then
-      ask "Authorize? Force push to a non-default branch. Normal after a rebase, but it overwrites the remote branch: $seg"
+      escalate "Force push to a non-default branch. Normal after a rebase, but it overwrites the remote branch: $seg"
     fi
   fi
 
@@ -292,61 +300,61 @@ while IFS= read -r seg; do
           -*) continue ;;
           /|'~'|'~/'|'$HOME'|'$HOME/'|'${HOME}'|"$HOME"|"$HOME"/)
             deny "Blocked: recursive delete of the filesystem root or your home directory." ;;
-          *..*) verdict="ask" ;;
-          /*) in_workspace "$tok" || verdict="ask" ;;
-          *)  in_workspace "${EFFDIR:-$ROOT}/$tok" || verdict="ask" ;;
+          *..*) verdict="escalate" ;;
+          /*) in_workspace "$tok" || verdict="escalate" ;;
+          *)  in_workspace "${EFFDIR:-$ROOT}/$tok" || verdict="escalate" ;;
         esac
       done
-      [ "$verdict" = "ask" ] && \
-        ask "Authorize? Recursive forced delete reaching outside the project: $seg"
+      [ "$verdict" = "escalate" ] && \
+        escalate "Recursive forced delete reaching outside the project: $seg"
     fi
   fi
 
-  # ========================================================== TIER 2 - ASK ==
+  # ================================= TIER 2 - ESCALATE (deny with guidance) ==
 
   # -- destructive git, recoverable --------------------------------------
   [[ "$seg" =~ ^git[[:space:]]+reset([[:space:]].*)?--hard ]] && \
-    ask "Authorize? 'git reset --hard' discards uncommitted work: $seg"
+    escalate "'git reset --hard' discards uncommitted work: $seg"
   [[ "$seg" =~ ^git[[:space:]]+clean([[:space:]].*)?-[a-zA-Z]*[fF] ]] && \
-    ask "Authorize? 'git clean -f' permanently deletes untracked files: $seg"
+    escalate "'git clean -f' permanently deletes untracked files: $seg"
   [[ "$seg" =~ ^git[[:space:]]+branch([[:space:]].*)?[[:space:]]-D([[:space:]]|$) ]] && \
-    ask "Authorize? 'git branch -D' force-deletes a possibly unmerged branch: $seg"
+    escalate "'git branch -D' force-deletes a possibly unmerged branch: $seg"
   [[ "$seg" =~ ^git[[:space:]]+worktree[[:space:]]+remove ]] && \
-    ask "Authorize? Removing a worktree can discard uncommitted work: $seg"
+    escalate "Removing a worktree can discard uncommitted work: $seg"
   [[ "$seg" =~ ^git[[:space:]]+config([[:space:]].*)?--global ]] && \
-    ask "Authorize? 'git config --global' changes git behaviour for every repo: $seg"
+    escalate "'git config --global' changes git behaviour for every repo: $seg"
 
   # -- file ownership and system services --------------------------------
   [[ "$seg" =~ ^chmod([[:space:]].*)?777 ]] && \
-    ask "Authorize? 'chmod 777' makes a file world-writable: $seg"
+    escalate "'chmod 777' makes a file world-writable: $seg"
   [[ "$seg" =~ ^chown([[:space:]]|$) ]] && \
-    ask "Authorize? 'chown' changes file ownership: $seg"
+    escalate "'chown' changes file ownership: $seg"
   [[ "$seg" =~ ^killall([[:space:]]|$) ]] && \
-    ask "Authorize? 'killall' terminates every process matching the name: $seg"
+    escalate "'killall' terminates every process matching the name: $seg"
   [[ "$seg" =~ ^(launchctl|systemctl)([[:space:]]|$) ]] && \
-    ask "Authorize? System service management: $seg"
+    escalate "System service management: $seg"
 
   # -- package and system installs ---------------------------------------
   [[ "$seg" =~ ^pip3?[[:space:]]+install([[:space:]]|$) ]] && \
-    ask "Authorize? 'pip install': $seg"
+    escalate "'pip install': $seg"
   [[ "$seg" =~ ^npm[[:space:]]+(i|install|add)([[:space:]].*)?([[:space:]]-g([[:space:]]|$)|--global) ]] && \
-    ask "Authorize? Global npm install changes machine-wide state: $seg"
+    escalate "Global npm install changes machine-wide state: $seg"
   [[ "$seg" =~ ^brew[[:space:]]+(install|uninstall|upgrade)([[:space:]]|$) ]] && \
-    ask "Authorize? 'brew' changes machine-wide state: $seg"
+    escalate "'brew' changes machine-wide state: $seg"
 
   # -- publishing, spending, infrastructure ------------------------------
   [[ "$seg" =~ ^(npx[[:space:]]+)?npm[[:space:]]+(publish|unpublish|deprecate)([[:space:]]|$) ]] && \
-    ask "Authorize? Publishing to npm is public and hard to undo: $seg"
+    escalate "Publishing to npm is public and hard to undo: $seg"
   [[ "$seg" =~ ^gh[[:space:]]+repo[[:space:]]+archive([[:space:]]|$) ]] && \
-    ask "Authorize? Archiving a repository: $seg"
+    escalate "Archiving a repository: $seg"
   [[ "$seg" =~ ^gh[[:space:]]+secret[[:space:]]+set([[:space:]]|$) ]] && \
-    ask "Authorize? Writing a repository secret: $seg"
+    escalate "Writing a repository secret: $seg"
   [[ "$seg" =~ ^gh[[:space:]]+release[[:space:]]+(create|delete)([[:space:]]|$) ]] && \
-    ask "Authorize? Creating or deleting a public release: $seg"
+    escalate "Creating or deleting a public release: $seg"
   [[ "$seg" =~ ^(npx[[:space:]]+)?(netlify|vercel)([[:space:]].*)?deploy ]] && \
-    ask "Authorize? Deploying: $seg"
+    escalate "Deploying: $seg"
   [[ "$seg" =~ ^(npx[[:space:]]+)?wrangler[[:space:]]+(publish|deploy)([[:space:]]|$) ]] && \
-    ask "Authorize? Deploying via wrangler: $seg"
+    escalate "Deploying via wrangler: $seg"
 
 done <<< "$segments"
 

@@ -323,6 +323,31 @@ for (const [needle, why] of guardDenyCases) {
   assert(guardTest.includes(needle), `guard.test.sh must keep a deny test for: ${why}`);
 }
 
+// The guard has exactly two verdicts, deny and allow. An ASK prompt stalls an
+// unattended loop forever, so former ASK-tier commands deny with escalation
+// guidance instead of prompting.
+const guard = read("hooks/guard.sh");
+assert(
+  !guard.includes("decide ask"),
+  "guard must never emit an ask verdict; an ASK prompt stalls an unattended loop",
+);
+assert(
+  !/^ask\(\)/m.test(guard),
+  "guard must not define an ask() helper; former ASK-tier commands deny with escalation guidance",
+);
+assert(
+  guard.includes("Escalate instead"),
+  "guard's former ASK tier must deny with escalation guidance",
+);
+assert(
+  guardTest.includes('check_escalate "$MAIN_REPO" "vercel deploy'),
+  "guard.test.sh must prove a deploy-class command denies with the escalation message",
+);
+assert(
+  buildFlat.includes("do not retry it and do not work around it"),
+  "builder must escalate, not retry, when the guard denies a command with the escalation message",
+);
+
 console.log(
   `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
 );
