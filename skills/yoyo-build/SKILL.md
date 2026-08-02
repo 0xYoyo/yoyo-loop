@@ -63,6 +63,12 @@ uninitialised repository, and a checkout predating `yoyo-init` will otherwise
 report a setup failure that syncing fixes. If it is genuinely absent, this
 repository has not been initialised — say so and end the pass.
 
+If at any point the guard hook denies a command with its escalation message,
+do not retry it and do not work around it. Comment the exact command and why
+it is needed on the Linear issue or the PR, apply `blocked` (issue) or
+`needs-human-review` (PR) as appropriate — sending the matching Slack
+notification described in steps 1 and 8 — and end the pass.
+
 ## 1. Review feedback first
 
 List open PRs labeled `loop-changes-requested`, including their labels:

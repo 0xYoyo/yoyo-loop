@@ -323,6 +323,46 @@ for (const [needle, why] of guardDenyCases) {
   assert(guardTest.includes(needle), `guard.test.sh must keep a deny test for: ${why}`);
 }
 
+// The guard has exactly two verdicts, deny and allow. An ASK prompt stalls an
+// unattended loop forever, so former ASK-tier commands deny with escalation
+// guidance instead of prompting.
+const guard = read("hooks/guard.sh");
+assert(
+  !guard.includes("decide ask"),
+  "guard must never emit an ask verdict; an ASK prompt stalls an unattended loop",
+);
+assert(
+  !/^ask\(\)/m.test(guard),
+  "guard must not define an ask() helper; former ASK-tier commands deny with escalation guidance",
+);
+assert(
+  guard.includes("Escalate instead"),
+  "guard's former ASK tier must deny with escalation guidance",
+);
+assert(
+  guardTest.includes('check_escalate "$MAIN_REPO" "vercel deploy'),
+  "guard.test.sh must prove a deploy-class command denies with the escalation message",
+);
+assert(
+  buildFlat.includes("do not retry it and do not work around it"),
+  "builder must escalate, not retry, when the guard denies a command with the escalation message",
+);
+
+// Init cannot write .claude/settings.json itself — the guard denies agent
+// writes to Claude settings files — so it proposes and the human copies.
+assert(
+  init.includes("settings.proposed.json"),
+  "init must stage settings as .claude/settings.proposed.json instead of writing settings.json",
+);
+assert(
+  initFlat.includes("cp PROJECT_PATH/.claude/settings.proposed.json PROJECT_PATH/.claude/settings.json"),
+  "init must instruct the user to run the cp command that installs the proposed settings",
+);
+assert(
+  initFlat.includes("the human copying the file IS the approval gate"),
+  "init must state that the human copying the file is the approval gate",
+);
+
 console.log(
   `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
 );

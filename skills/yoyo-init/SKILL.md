@@ -187,7 +187,27 @@ not, STOP and tell the user to run `install.sh` from the yoyo-loop repository
 (then `/reload-skills`), and do not continue until it is there — project
 settings written without the hook would leave Bash unguarded.
 
-Then write or merge `.claude/settings.json` with only:
+Never write `.claude/settings.json` directly: the guard denies agent writes
+to Claude settings files even in attended sessions, so the human copying the
+file IS the approval gate. Instead:
+
+1. Compose the full intended settings JSON — merging any existing
+   `.claude/settings.json` content — and write it to
+   `.claude/settings.proposed.json`, a normal in-workspace write.
+2. Show the user the proposed content in chat and explain in one line what it
+   grants and denies.
+3. Tell the user to run, in any terminal, this exact command, substituting
+   the real project path:
+
+   ```bash
+   cp PROJECT_PATH/.claude/settings.proposed.json PROJECT_PATH/.claude/settings.json
+   ```
+
+4. Wait for the user to confirm they ran it, verify `.claude/settings.json`
+   now exists and matches the proposal by reading it, then delete
+   `.claude/settings.proposed.json`.
+
+The proposed settings must contain only:
 
 - `Read(path)` and `Edit(path)` allows for this project and its `../SLUG.build`
   worktree sibling
