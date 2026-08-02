@@ -1,6 +1,6 @@
 # Roadmap
 
-Last updated: 1 August 2026 — Phase 4 landed; Unfiltered onboarded.
+Last updated: 2 August 2026 — Phase 5a landed.
 
 Status board for the yoyo-loop build phases. The ordering follows Alex Finn's
 Finn-loop README ("From the starter loop to a full software factory" — not in
@@ -32,7 +32,7 @@ sensitive paths (the config protects the config). First consumer:
 0xYoyo/unfiltered. A /yoyo-plan skill that picks and re-plans milestones
 autonomously is a later luxury.
 
-**Phase 4.5 — bootstrap CI seed — ✅ DONE (this PR)**
+**Phase 4.5 — bootstrap CI seed — ✅ DONE (PR #18)**
 /yoyo-init commits a minimal real CI workflow (repo-hygiene job: secret
 scan + structure sanity) on pull_request at bootstrap, so pre-test-suite
 PRs carry genuine green checks and the reviewer's no-CI escalation stops
@@ -40,12 +40,13 @@ firing on every new project's first PRs. Spec-side: bootstrap chains put
 tooling+CI as issue 2. Trigger: before the next project's init.
 
 **Phase 5 — Notification lane, outbound-only first**
-5a: outbound Slack messages only — issue became blocked; PR became
-loop-approved / needs-human-review / loop-stuck. No inbound actions, so no
-approver allowlists or signature verification needed yet. 5b (later):
-interactive approvals from Slack with signature verification, approver
-allowlist, idempotency, and re-reading live Linear/GitHub state at action
-time. (Finn §2.)
+5a — outbound Slack lane — ✅ DONE (2026-08-02): outbound Slack messages
+only — issue became blocked; PR became loop-approved / needs-human-review /
+loop-stuck. No inbound actions, so no approver allowlists or signature
+verification needed yet.
+5b (later): interactive approvals from Slack with signature verification,
+approver allowlist, idempotency, and re-reading live Linear/GitHub state at
+action time. (Finn §2.)
 
 **Phase 6 — Fresh-reviewer convergence — deferred until a PR needs fix rounds**
 Builder PR → clean-context reviewer → fix rounds → existing loop-stuck cap.
@@ -53,8 +54,10 @@ Builder PR → clean-context reviewer → fix rounds → existing loop-stuck cap
 
 **Phase 7 — Off the open session**
 Cloud Routines on GitHub events first; leased persistent workers only if
-open sessions become the bottleneck. Cures the machine-wide scheduler-lock
-quirk. (Finn §8.) Trigger: loop latency actually hurting across projects.
+open sessions become the bottleneck. The /loop scheduler is per-session and
+loops run concurrently (confirmed 2026-08-02); the remaining constraint
+Phase 7 removes is that sessions must stay open on an awake machine.
+(Finn §8.) Trigger: loop latency actually hurting across projects.
 
 **Phase 8 — Later layers**
 Preview + documentation merge gates (Finn §5); risk-tiered merging

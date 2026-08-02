@@ -229,6 +229,12 @@ window 2 — cd ~/repos/SLUG.build  → /loop 15m /yoyo-build
 
 Remind the user that only they apply `agent-ready`, and only they merge.
 
+Check whether `~/.claude/yoyo-slack.webhook` exists. If yes, say notifications
+are already connected. If no, tell the user notifications are optional and
+point them to the yoyo-loop README section "Slack notifications" for the
+3-minute setup. Do not create the file yourself and do not ask for the URL
+interactively.
+
 If the project had no code, close by telling them exactly what to do next:
 
 1. Run `/yoyo-spec` and describe the project. The first issue is the skeleton.

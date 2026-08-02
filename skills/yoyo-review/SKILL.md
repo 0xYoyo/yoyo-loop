@@ -144,6 +144,24 @@ them so an absent label does not fail the command:
   both `loop-approved` and `loop-changes-requested`; set "Safe to merge" to
   `No — human decision required.`
 
+After adding `loop-approved` or `needs-human-review`, send a Slack
+notification — those are the two verdicts that need a human. Read the webhook
+URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
+notification silently and continue — notifications are optional. Send:
+
+```bash
+curl -m 5 -s -X POST -H 'Content-type: application/json' \
+  --data '{"text":"✅ [SLUG] PR #N loop-approved — TITLE URL"}' \
+  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+```
+
+using text `"✅ [SLUG] PR #N loop-approved — TITLE URL"` for `loop-approved`
+and `"👀 [SLUG] PR #N needs-human-review — REASON URL"` for
+`needs-human-review`, substituting the `repo_slug`, the real PR number, the PR
+title or a one-line reason, and the PR URL. Do not notify on
+`loop-changes-requested` — that stays inside the automated repair loop. A
+notification failure must never fail the pass.
+
 The escalation path deliberately leaves the automated repair queue. A human
 must resolve the reason, change the issue or repository configuration as
 needed, and remove `needs-human-review` before the reviewer looks at that

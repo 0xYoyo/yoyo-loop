@@ -92,11 +92,38 @@ When the count does exceed the cap, do not attempt another fix. Apply
 that keep recurring, and end the pass. An agent should not argue with a
 reviewer forever.
 
+After applying `loop-stuck`, send a Slack notification. Read the webhook URL
+from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
+notification silently and continue — notifications are optional. Send:
+
+```bash
+curl -m 5 -s -X POST -H 'Content-type: application/json' \
+  --data '{"text":"🛑 [SLUG] PR #N loop-stuck — recurring findings URL"}' \
+  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+```
+
+substituting the `repo_slug`, the real PR number, a one-line summary of the
+recurring findings, and the PR URL. A notification failure must never fail the
+pass.
+
 If a proposed fix would cross an issue non-goal, touch a path listed in
 `sensitive_paths`, or requires a product decision, do not implement it.
 Comment the exact conflict, add `needs-human-review`, remove
 `loop-changes-requested`, and end the pass. This prevents the next loop
 iteration from retrying a decision only a human can make.
+
+After applying `needs-human-review`, send a Slack notification. Read the
+webhook URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist,
+skip notification silently and continue — notifications are optional. Send:
+
+```bash
+curl -m 5 -s -X POST -H 'Content-type: application/json' \
+  --data '{"text":"👀 [SLUG] PR #N needs-human-review — REASON URL"}' \
+  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+```
+
+substituting the `repo_slug`, the real PR number, a one-line reason, and the
+PR URL. A notification failure must never fail the pass.
 
 ## 2. Pick
 
@@ -200,6 +227,20 @@ Comment one specific question a human can answer asynchronously, apply the
 `blocked` label, and unassign yourself. Leave `agent-ready` in place: the pick
 query explicitly excludes `blocked`, so the issue safely reappears only after
 a human answers and removes that label.
+
+After applying `blocked`, send a Slack notification. Read the webhook URL from
+`~/.claude/yoyo-slack.webhook`; if that file does not exist, skip notification
+silently and continue — notifications are optional. Send:
+
+```bash
+curl -m 5 -s -X POST -H 'Content-type: application/json' \
+  --data '{"text":"🚧 [SLUG] TEAMKEY-NNN blocked — QUESTION URL"}' \
+  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+```
+
+substituting the `repo_slug`, the issue's real identifier, a one-line version
+of the question, and the issue URL. A notification failure must never fail the
+pass.
 
 Never use "this is unclear" as the question. State the exact decision, the
 available options, and which acceptance criterion it affects. End the pass so
