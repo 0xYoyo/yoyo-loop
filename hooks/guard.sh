@@ -214,8 +214,19 @@ while IFS= read -r seg; do
   # -- credentials and secrets -------------------------------------------
   [[ "$seg" =~ ^gh[[:space:]]+auth[[:space:]]+(logout|refresh|token)([[:space:]]|$) ]] && \
     deny "Blocked: mutating or printing the gh credential."
-  [[ "$seg" =~ ^(cat|bat|less|more|head|tail|echo|printf|xxd|od|strings|nl)([[:space:]].*)?\.env ]] && \
-    deny "Blocked: printing a .env file."
+  # .env.example is a committed placeholder with no secrets, reviewed in PRs
+  # like any other file. It is exempt only when every .env* token in the
+  # segment has that exact basename; any other .env* path still denies.
+  if [[ "$seg" =~ ^(cat|bat|less|more|head|tail|echo|printf|xxd|od|strings|nl)([[:space:]].*)?\.env ]]; then
+    env_only_example=true
+    for tok in $seg; do
+      tok="${tok%\'}"; tok="${tok#\'}"; tok="${tok%\"}"; tok="${tok#\"}"
+      case "$tok" in
+        *.env*) [ "${tok##*/}" = ".env.example" ] || env_only_example=false ;;
+      esac
+    done
+    [ "$env_only_example" = true ] || deny "Blocked: printing a .env file."
+  fi
   [[ "$seg" =~ ^git[[:space:]]+add([[:space:]].*)?(\.env|\.pem|\.key|id_rsa) ]] && \
     deny "Blocked: staging a secret file (.env*, *.pem, *.key, id_rsa*)."
   # Only when a file-consuming command actually operates on the path - a mere

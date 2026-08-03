@@ -236,6 +236,16 @@ const requiredContracts = [
     readme.includes("yoyo-slack.webhook"),
     "README must document the yoyo-slack.webhook setup",
   ],
+  [
+    buildFlat.includes(
+      "A candidate is claimable only after a per-issue relations check proves every blocker is Done or canceled.",
+    ),
+    "builder must verify blockers with a per-issue relations check before claiming",
+  ],
+  [
+    buildFlat.includes("never the builder's"),
+    "builder must state that overriding an unresolved blocker is never its call",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
@@ -322,6 +332,10 @@ const guardDenyCases = [
 for (const [needle, why] of guardDenyCases) {
   assert(guardTest.includes(needle), `guard.test.sh must keep a deny test for: ${why}`);
 }
+assert(
+  guardTest.includes(".env.example"),
+  "guard.test.sh must exercise the .env.example allowance",
+);
 
 // The guard has exactly two verdicts, deny and allow. An ASK prompt stalls an
 // unattended loop forever, so former ASK-tier commands deny with escalation

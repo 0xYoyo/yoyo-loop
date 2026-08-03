@@ -149,6 +149,21 @@ that you cannot see.
 Sort by priority, then oldest first. If the queue is empty, say so and end the
 pass. Do not invent work and do not pick a blocked issue.
 
+Then verify the selection instead of trusting it: before claiming, fetch the
+chosen candidate as a single issue with its relations included and inspect
+every blocked-by relation. A candidate is claimable only after a per-issue
+relations check proves every blocker is Done or canceled. "Done or canceled"
+means the blocking issue's workflow status type is `completed` or `canceled`;
+any other status — Backlog, Todo, In Progress, In Review — leaves the blocker
+unresolved.
+
+An unresolved blocker is a hard stop, never a judgment call. Do not override
+it because the dependency looks soft, unrelated, or already satisfied by open
+work in flight — deciding that a chain may run out of order is a human
+decision, never the builder's. When the check fails, skip the candidate and
+evaluate the next one in the sorted order; do not comment on or modify the
+skipped issue.
+
 ## 3. Claim (the cooperative lock)
 
 Assign yourself and move the issue to the team's started workflow state
