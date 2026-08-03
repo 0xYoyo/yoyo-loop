@@ -228,6 +228,10 @@ const requiredContracts = [
     "status backlog category must exclude blocked issues so nothing is listed twice",
   ],
   [
+    statusFlat.includes("Each PR appears in exactly one category, never two"),
+    "status must state each PR appears in exactly one category",
+  ],
+  [
     build.includes("yoyo-slack.webhook"),
     "builder must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
   ],
