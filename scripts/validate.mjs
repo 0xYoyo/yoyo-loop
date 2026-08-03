@@ -55,6 +55,7 @@ for (const match of readme.matchAll(/\[[^\]]+\]\(([^)]+)\)/g)) {
 }
 
 const build = read("skills/yoyo-build/SKILL.md");
+const roadmap = read("ROADMAP.md");
 const review = read("skills/yoyo-review/SKILL.md");
 const init = read("skills/yoyo-init/SKILL.md");
 const spec = read("skills/yoyo-spec/SKILL.md");
@@ -67,6 +68,7 @@ const reviewFlat = review.replace(/\s+/g, " ");
 const specFlat = spec.replace(/\s+/g, " ");
 const initFlat = init.replace(/\s+/g, " ");
 const statusFlat = status.replace(/\s+/g, " ");
+const roadmapFlat = roadmap.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
@@ -276,6 +278,28 @@ const requiredContracts = [
   [
     buildFlat.includes("never the builder's"),
     "builder must state that overriding an unresolved blocker is never its call",
+  ],
+  [
+    buildFlat.includes("A candidate is never carried over from a previous pass, from memory, or from narrative reasoning"),
+    "builder must re-run the pick query fresh every pass and never carry a candidate over",
+  ],
+  [
+    buildFlat.includes("re-fetch the issue and confirm the assignee actually cleared"),
+    "builder must verify the assignee cleared after unassigning; a stuck assignee strands the issue",
+  ],
+  [
+    buildFlat.includes("Repair pushes are append-only") &&
+      buildFlat.includes("never force-push, never rewrite already-reviewed commits"),
+    "builder repair pushes must be append-only; never force-push",
+  ],
+  [
+    reviewFlat.includes("re-fetch of the PR performed immediately before deciding"),
+    "reviewer skip decision must use a re-fetch immediately before deciding, not the pass-start listing",
+  ],
+  [
+    roadmap.includes("## North star") &&
+      roadmapFlat.includes("does this reduce Yoyo's required touches?"),
+    "ROADMAP must contain the North star section",
   ],
 ];
 

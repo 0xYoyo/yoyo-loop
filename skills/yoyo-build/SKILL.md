@@ -91,6 +91,11 @@ branch, fix only the "Must fix before merge" items, run the relevant checks,
 push, remove `loop-changes-requested`, and comment with what changed. End this
 pass.
 
+Repair pushes are append-only: fix commits go on top of the existing branch
+history — never force-push, never rewrite already-reviewed commits. The
+reviewer records verdicts against exact SHAs, and a history rewrite orphans
+that evidence; squash-merge flattens the history at merge anyway.
+
 Before fixing, count the fix rounds already spent on this PR: the number of
 comments beginning `Yoyo-loop review of` that contain at least one entry under
 "Must fix before merge". That count includes the verdict you are about to act
@@ -153,6 +158,12 @@ that you cannot see.
 
 Sort by priority, then oldest first. If the queue is empty, say so and end the
 pass. Do not invent work and do not pick a blocked issue.
+
+Re-run this full sorted query fresh at the start of every pass — every label,
+assignee, and blocker condition, priority then oldest first. A candidate is
+never carried over from a previous pass, from memory, or from narrative
+reasoning: "issue X just unblocked, so claim X" is not a pick — X competes in
+the fresh sorted query like every other candidate.
 
 Then verify the selection instead of trusting it: before claiming, fetch the
 chosen candidate as a single issue with its relations included and inspect
@@ -253,6 +264,13 @@ Comment one specific question a human can answer asynchronously, apply the
 `blocked` label, and unassign yourself. Leave `agent-ready` in place: the pick
 query explicitly excludes `blocked`, so the issue safely reappears only after
 a human answers and removes that label.
+
+After unassigning, re-fetch the issue and confirm the assignee actually
+cleared. If the connector refused or the assignee persists, state it
+explicitly in the pass output as a must-act failure — an assigned issue is
+invisible to the pick query and strands silently — and include the failed
+unassign in the blocked Slack notification below. Do not retry in a loop: one
+re-fetch, one report.
 
 After applying `blocked`, send a Slack notification. Read the webhook URL from
 `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip notification

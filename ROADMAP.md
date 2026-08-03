@@ -1,6 +1,25 @@
 # Roadmap
 
-Last updated: 2 August 2026 — Phase 5a landed.
+Last updated: 3 August 2026 — pass-hygiene hardening + north star.
+
+## North star
+
+The factory converges toward: Yoyo sends off tasks — today issues, then whole
+milestones, then whole projects — and nothing needs him in between. He is
+pinged where he already is (Slack) only for genuinely human things: merge
+decisions after work reviews clean, blocked product questions, guard denials
+that grow the allowlist via the deny→block→notify→triage cycle, and
+account/browser work no agent can perform. /yoyo-status shows everything
+waiting on him and nothing else. Every repetitive manual step or chat-side
+intervention is a bug: it gets baked into a skill, hook, or template before he
+has to ask twice, so his required touches strictly decrease as the factory
+matures. Loops eventually run without an open session on an awake machine
+(Phase 7). Agent output quality — code, design, tests, docs — converges to
+where the human merge is governance, not quality control. Operating
+constraints: free-tier-first until a real limit hits; every factory change
+lands via PR with validator contracts, never hand edits. Every phase and every
+fix is measured against one question: does this reduce Yoyo's required
+touches?
 
 Status board for the yoyo-loop build phases. The ordering follows Alex Finn's
 Finn-loop README ("From the starter loop to a full software factory" — not in
