@@ -35,6 +35,12 @@ review, including when `needs-human-review` sits alongside
 `loop-changes-requested`: new commits pushed during a fix round are re-reviewed
 like any others. If nothing needs review, say so and end the pass.
 
+Make the skip decision against a re-fetch of the PR performed immediately
+before deciding — never against the listing output from the start of the
+pass; a same-pass race between listing and deciding has already produced a
+stale skip once. This is the entry-side freshness check; the re-fetch before
+posting in step 3 is the separate exit-side one.
+
 ## 2. Read the contract and code
 
 - Parse the linked issue identifier from `Closes TEAMKEY-NNN` in the PR body,
