@@ -70,7 +70,34 @@ const statusFlat = status.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
-  [build.includes("remove `loop-changes-requested`"), "builder escalation must leave the repair queue"],
+  [
+    buildFlat.includes("add `needs-human-review`, remove `loop-changes-requested`"),
+    "builder unfixable escalation must leave the repair queue",
+  ],
+  [
+    buildFlat.includes("also remove `loop-changes-requested`, the same as the other unfixable escalations"),
+    "builder guard-denial escalation must leave the repair queue",
+  ],
+  [
+    buildFlat.includes("Skip every PR carrying `loop-stuck`"),
+    "builder step 1 must skip only loop-stuck PRs",
+  ],
+  [
+    !buildFlat.includes("Skip every PR carrying `needs-human-review`"),
+    "builder step 1 must not skip on needs-human-review; it gates the merge, not the repair",
+  ],
+  [
+    reviewFlat.includes("`needs-human-review` and `loop-changes-requested` may coexist"),
+    "reviewer must state that needs-human-review and loop-changes-requested may coexist",
+  ],
+  [
+    reviewFlat.includes("reserved for these findings a builder cannot fix"),
+    "reviewer must reserve loop-changes-requested removal for findings a builder cannot fix",
+  ],
+  [
+    reviewFlat.includes("Reroute (escape hatch)"),
+    "review skill must document the reroute escape hatch",
+  ],
   [build.includes("defaultBranchRef"), "builder must detect the default branch"],
   [build.includes("git status --porcelain"), "builder must protect dirty worktrees"],
   [build.includes("repo:SLUG"), "builder must scope its pick query to this repository"],
@@ -201,6 +228,10 @@ const requiredContracts = [
     "status backlog category must exclude blocked issues so nothing is listed twice",
   ],
   [
+    statusFlat.includes("Each PR appears in exactly one category, never two"),
+    "status must state each PR appears in exactly one category",
+  ],
+  [
     build.includes("yoyo-slack.webhook"),
     "builder must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
   ],
@@ -221,8 +252,8 @@ const requiredContracts = [
     "reviewer must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
   ],
   [
-    reviewFlat.includes("After adding `loop-approved` or `needs-human-review`, send a Slack notification"),
-    "reviewer must notify Slack on loop-approved and needs-human-review verdicts",
+    reviewFlat.includes("newly adds `loop-approved` or `needs-human-review`"),
+    "reviewer must notify Slack only when a verdict newly adds loop-approved or needs-human-review",
   ],
   [
     buildFlat.includes("skip notification silently"),
