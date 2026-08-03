@@ -67,7 +67,10 @@ If at any point the guard hook denies a command with its escalation message,
 do not retry it and do not work around it. Comment the exact command and why
 it is needed on the Linear issue or the PR, apply `blocked` (issue) or
 `needs-human-review` (PR) as appropriate — sending the matching Slack
-notification described in steps 1 and 8 — and end the pass.
+notification described in steps 1 and 8 — and end the pass. When the denial
+happens while repairing a PR, also remove `loop-changes-requested`, the same
+as the other unfixable escalations: the guard denial will recur identically on
+every retry, so the PR waits on a human.
 
 ## 1. Review feedback first
 
@@ -77,8 +80,10 @@ List open PRs labeled `loop-changes-requested`, including their labels:
 gh pr list --state open --label loop-changes-requested --json number,title,headRefName,headRefOid,labels,updatedAt,url
 ```
 
-Skip every PR carrying `needs-human-review` or `loop-stuck`; it has left the
-automated repair queue until a human resolves the escalation.
+Skip every PR carrying `loop-stuck`; it has left the automated repair queue
+until a human resolves the escalation. Do not skip on `needs-human-review`
+alone: that label gates the merge, not the repair, so a PR carrying both
+labels is still the builder's to fix.
 
 If any PR remains, choose the least recently updated one. Read its linked
 Linear issue and latest `Yoyo-loop review of COMMIT_SHA` verdict. Check out its

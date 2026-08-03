@@ -70,9 +70,12 @@ age (oldest first).
 1. **merge** — open PRs labeled `loop-approved` that are mergeable and whose
    latest verdict SHA equals the current head. The reviewer already found no
    must-fix issue at exactly this commit; only the human merge is left.
-2. **read & resolve** — open PRs labeled `needs-human-review` or
-   `loop-stuck`, with the escalation reason pulled from the latest verdict
-   comment.
+2. **read & resolve** — open PRs labeled `loop-stuck`, plus PRs labeled
+   `needs-human-review` without `loop-changes-requested` — those are awaiting
+   your decision, with the escalation reason pulled from the latest verdict
+   comment. A PR carrying both `needs-human-review` and
+   `loop-changes-requested` is still the agent's to fix — no action from you
+   yet — so it is not listed.
 3. **answer** — Linear issues labeled `blocked` (with `repo:SLUG`), quoting
    the blocking question from the issue's latest comment.
 4. **approve or discard** — issues with `repo:SLUG`, not labeled

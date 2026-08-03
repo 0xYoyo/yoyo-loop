@@ -89,8 +89,11 @@ window 2 — cd ~/repos/myproject.build  → /loop 15m /yoyo-build
    close it. Watch the first few passes and your `/usage` before leaving a new
    installation unattended.
 3. Merge only PRs that are `loop-approved`, conflict-free, and green. A
-   `needs-human-review` or `loop-stuck` PR needs you to read and resolve the
-   reason first.
+   `loop-stuck` PR, or a `needs-human-review` PR without
+   `loop-changes-requested`, needs you to read and resolve the reason first.
+   A PR carrying both `needs-human-review` and `loop-changes-requested` is
+   still being fixed by the agent — that label gates the merge, not the
+   repair.
 4. Answer questions on `blocked` issues, then remove the `blocked` label so a
    future pass can resume them.
 5. Run `/yoyo-status` any time to see everything waiting on you — merges,
@@ -142,7 +145,10 @@ node scripts/validate.mjs
 - One issue per PR, sized to a day of agent work or less.
 - Acceptance criteria are observable outcomes; non-goals are binding. A PR
   comment cannot expand scope — only editing the issue can.
-- Blocked issues and escalated PRs leave the automated queue until a human acts.
+- Blocked issues, `loop-stuck` PRs, and unfixable escalations leave the
+  automated queue until a human acts. `needs-human-review` alone gates the
+  merge, not the repair: a PR carrying it alongside `loop-changes-requested`
+  stays in the repair queue.
 - **Spec quality is the bottleneck.** Vague acceptance criteria produce
   confident wrong PRs. Let `/yoyo-spec` ask as many questions as it needs.
 - Agents never merge, never enable auto-merge, and never apply `agent-ready`.

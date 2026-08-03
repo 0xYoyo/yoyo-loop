@@ -29,9 +29,11 @@ Skip drafts. For each PR, find the latest comment whose first line is
 `Yoyo-loop review of COMMIT_SHA`.
 
 Skip a PR when that recorded SHA equals its current `headRefOid` and it already
-has `loop-approved`, `loop-changes-requested`, `needs-human-review`, or
-`loop-stuck`. Review it again when new commits landed after the recorded SHA.
-If nothing needs review, say so and end the pass.
+has any verdict label — `loop-approved`, `loop-changes-requested`,
+`needs-human-review`, or `loop-stuck`. A changed SHA always gets a fresh
+review, including when `needs-human-review` sits alongside
+`loop-changes-requested`: new commits pushed during a fix round are re-reviewed
+like any others. If nothing needs review, say so and end the pass.
 
 ## 2. Read the contract and code
 
@@ -134,18 +136,31 @@ Yes — automated review evidence is complete. A human still makes the merge dec
 ```
 
 Then set labels based on the verdict, checking existing labels before removing
-them so an absent label does not fail the command:
+them so an absent label does not fail the command. `needs-human-review` and
+`loop-changes-requested` may coexist: `needs-human-review` gates the merge,
+not the repair.
 
 - No must-fix and no new escalation: add `loop-approved`; remove
   `loop-changes-requested`. Preserve a pre-existing `needs-human-review` label
   because it may represent a separate high-risk human gate.
 - Must-fix present: add `loop-changes-requested`; remove `loop-approved`.
-- Scope conflict, sensitive path, or no CI: add `needs-human-review`; remove
-  both `loop-approved` and `loop-changes-requested`; set "Safe to merge" to
-  `No — human decision required.`
+- Sensitive-path diff: add `needs-human-review`; remove `loop-approved`; set
+  "Safe to merge" to `No — human decision required.` If there are also
+  must-fix findings, add `loop-changes-requested` too and do not remove it:
+  the PR stays in the automated repair queue while still requiring a human
+  merge.
+- Scope conflict, no checks at all, or a product decision: add
+  `needs-human-review`; remove both `loop-approved` and
+  `loop-changes-requested`; set "Safe to merge" to
+  `No — human decision required.` Removing `loop-changes-requested` on
+  escalation is reserved for these findings a builder cannot fix: those PRs
+  wait entirely on a human.
 
-After adding `loop-approved` or `needs-human-review`, send a Slack
-notification — those are the two verdicts that need a human. Read the webhook
+When this verdict newly adds `loop-approved` or `needs-human-review` — the
+label was absent before this pass — send a Slack notification; those are the
+two verdicts that need a human. Do not re-notify when the label was already
+present: a sensitive-path PR keeps `needs-human-review` across fix rounds, and
+only the transition pings. Read the webhook
 URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
 notification silently and continue — notifications are optional. Send:
 
@@ -162,10 +177,21 @@ title or a one-line reason, and the PR URL. Do not notify on
 `loop-changes-requested` — that stays inside the automated repair loop. A
 notification failure must never fail the pass.
 
-The escalation path deliberately leaves the automated repair queue. A human
+Only the unfixable escalations — scope conflict, no checks at all, a product
+decision — deliberately leave the automated repair queue. For those, a human
 must resolve the reason, change the issue or repository configuration as
 needed, and remove `needs-human-review` before the reviewer looks at that
-unchanged commit again.
+unchanged commit again. A sensitive-path escalation with must-fix findings
+stays in the queue: the builder keeps fixing while the merge waits on a human.
+
+### Reroute (escape hatch)
+
+A human or a trusted operator can re-enter a PR into the automated repair
+queue by posting a fresh `Yoyo-loop review of COMMIT_SHA` verdict comment and
+swapping the labels to match it — for example adding `loop-changes-requested`
+and removing `loop-stuck` once the underlying blocker is resolved. This is the
+manual override for stranded states; the label rules above should make it
+rare.
 
 ## 5. Tidy merged branches
 
