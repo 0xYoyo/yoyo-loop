@@ -111,6 +111,23 @@ Chain rules:
   its contract states that it extends or replaces the seed hygiene
   workflow written by /yoyo-init with the project's real lint,
   typecheck, and test jobs, keeping the pull_request trigger.
+- Milestone chains end with a hardening tail: one extra issue titled
+  `MN hardening: deferred findings` (N is the milestone number), filed by
+  this spec session as the chain's final issue, blocked-by the last real
+  issue of the milestone. Its body carries an empty Acceptance Criteria
+  section and ends with this standing footer:
+
+  ```md
+  ---
+
+  *This issue is the MN hardening tail. Reviewers append deferred findings
+  here as new ACs during the milestone. It becomes* `agent-ready` *only by
+  the user, after the milestone chain completes and the user reads the
+  accumulated set.*
+  ```
+
+  The spec never marks it `agent-ready` — the same hard rule as every other
+  issue.
 
 ## 4. Draft the issue
 

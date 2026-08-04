@@ -60,6 +60,35 @@ Every must-fix code finding starts with one of:
 - `[SECURITY]` — a severe security issue blocks shipping
 - `[CI]` — a required GitHub check failed
 
+The must-fix bar is crisp: a finding is must-fix when this PR's contract (an
+AC or NG), correctness, or security is violated. Everything else worth doing
+is a deferred finding — it does not block this merge, and it does not live in
+verdict prose either. Deferred findings go to the milestone's hardening issue:
+
+- The Linear issue linked from the PR belongs to a milestone chain; the
+  hardening issue is that chain's tail — the issue whose title starts with
+  `M` and contains `hardening`. Locate it by walking the chain's blocked-by
+  relations or with a title search scoped to `repo:SLUG`. Never guess
+  identifiers; use exactly what Linear returns.
+- Append each deferred finding to that issue via the Linear connector as the
+  next numbered AC, written spec-quality: file path, current behavior, target
+  behavior, and a test expectation. You just read the code; you have all of
+  this.
+- Group 2 of the verdict is then one line per finding: the finding in one
+  sentence plus `deferred to TEAMKEY-NNN AC-K`.
+- If no hardening issue exists for the milestone — a chain specced before
+  this mechanism — do NOT create one — creation is spec logic, not review
+  logic. State plainly in the verdict that a deferred finding has no home,
+  list it in group 2 in full, and send a Slack notification so a human
+  creates the tail, using the webhook mechanism from step 4 with text
+  `"🧰 [SLUG] PR #N deferred finding has no hardening issue — URL"`. This
+  should only ever happen for pre-mechanism chains.
+- A finding judged not worth doing at all is neither fixed nor appended:
+  state it in one line in group 2 with "not worth a change because X".
+
+Nothing lands in limbo: every finding is fixed now, appended to the hardening
+tail, or explicitly rejected with a reason.
+
 Non-goals are binding. If fixing a finding would require behavior excluded by
 an `NG-N`, do not prescribe code. Record
 `[SCOPE-CONFLICT AC-N ↔ NG-N]` with the exact contradiction and mark the PR for
@@ -132,7 +161,7 @@ Summary: one or two plain-language sentences on what this PR does.
 
 None.
 
-## 2. Should fix soon
+## 2. Deferred findings
 
 None.
 
