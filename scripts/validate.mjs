@@ -301,6 +301,41 @@ const requiredContracts = [
       roadmapFlat.includes("does this reduce Yoyo's required touches?"),
     "ROADMAP must contain the North star section",
   ],
+  [
+    specFlat.includes("hardening: deferred findings") &&
+      specFlat.includes("filed by this spec session as the chain's final issue"),
+    "spec must end every milestone chain with a hardening tail issue",
+  ],
+  [
+    specFlat.includes("The spec never marks it `agent-ready`"),
+    "spec must never mark the hardening tail agent-ready",
+  ],
+  [
+    reviewFlat.includes(
+      "a finding is must-fix when this PR's contract (an AC or NG), correctness, or security is violated",
+    ),
+    "reviewer must state the must-fix rubric",
+  ],
+  [
+    reviewFlat.includes("Append each deferred finding to that issue via the Linear connector as the next numbered AC"),
+    "reviewer must append deferred findings to the hardening issue as ACs",
+  ],
+  [
+    reviewFlat.includes("do NOT create one — creation is spec logic"),
+    "reviewer must never create the hardening issue; creation is spec logic",
+  ],
+  [
+    reviewFlat.includes("send a Slack notification so a human creates the tail"),
+    "reviewer's missing-tail path must notify Slack",
+  ],
+  [
+    buildFlat.includes("the number of existing builder comments whose first line begins `Fix round`"),
+    "builder must count its own fix-round comments against max_fix_rounds, not reviewer verdicts",
+  ],
+  [
+    buildFlat.includes("first line is exactly `Fix round N pushed as SHA`"),
+    "builder repair report must carry the Fix round anchor line the counting depends on",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

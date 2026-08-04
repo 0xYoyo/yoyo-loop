@@ -107,12 +107,14 @@ reliably lock each other.
 ## Slack notifications
 
 Optional and outbound-only: the loop posts a message when something needs a
-human, and nothing in Slack can act back on the loop. Four events notify:
+human, and nothing in Slack can act back on the loop. Five events notify:
 
 - an issue became `blocked` (builder has a question)
 - a PR became `loop-stuck` (fix rounds exhausted)
 - a PR became `needs-human-review` (escalation, from builder or reviewer)
 - a PR became `loop-approved` (ready for your merge decision)
+- a deferred review finding has no hardening issue to hold it (only chains
+  specced before the hardening-tail mechanism)
 
 Setup (about 3 minutes): create a Slack app at https://api.slack.com/apps →
 enable **Incoming Webhooks** → activate → add it to a channel → copy the
@@ -145,6 +147,12 @@ node scripts/validate.mjs
 - One issue per PR, sized to a day of agent work or less.
 - Acceptance criteria are observable outcomes; non-goals are binding. A PR
   comment cannot expand scope — only editing the issue can.
+- Review findings never evaporate. A must-fix finding blocks the merge;
+  anything else worth doing is appended by the reviewer to the milestone's
+  hardening issue in Linear as a new acceptance criterion — not left in PR
+  comments — and a finding not worth doing is rejected with a reason in the
+  verdict. Every finding is fixed, deferred, or rejected; the loop never
+  leaves one without a home.
 - Blocked issues, `loop-stuck` PRs, and unfixable escalations leave the
   automated queue until a human acts. `needs-human-review` alone gates the
   merge, not the repair: a PR carrying it alongside `loop-changes-requested`

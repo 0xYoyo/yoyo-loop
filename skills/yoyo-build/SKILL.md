@@ -88,8 +88,11 @@ labels is still the builder's to fix.
 If any PR remains, choose the least recently updated one. Read its linked
 Linear issue and latest `Yoyo-loop review of COMMIT_SHA` verdict. Check out its
 branch, fix only the "Must fix before merge" items, run the relevant checks,
-push, remove `loop-changes-requested`, and comment with what changed. End this
-pass.
+push, remove `loop-changes-requested`, and post the repair report: a comment
+whose first line is exactly `Fix round N pushed as SHA` — `N` is the count of
+prior fix-round comments plus one, `SHA` is the new head commit — followed by
+what changed. That first line is the anchor the round counting below depends
+on; never omit or reword it. End this pass.
 
 Repair pushes are append-only: fix commits go on top of the existing branch
 history — never force-push, never rewrite already-reviewed commits. The
@@ -97,13 +100,17 @@ reviewer records verdicts against exact SHAs, and a history rewrite orphans
 that evidence; squash-merge flattens the history at merge anyway.
 
 Before fixing, count the fix rounds already spent on this PR: the number of
-comments beginning `Yoyo-loop review of` that contain at least one entry under
-"Must fix before merge". That count includes the verdict you are about to act
-on, so compare it with `>`, not `>=`: only when it exceeds `max_fix_rounds`
-from `.claude/yoyo.md` do you stop. With `max_fix_rounds: 2` the second repair
-still happens and the third changes-requested verdict is the one that gives up.
+existing builder comments whose first line begins `Fix round` — the repair
+reports above, one per repair actually performed. That count is of completed
+rounds, so compare it with `>=`: when it has reached `max_fix_rounds` from
+`.claude/yoyo.md`, stop instead of fixing. With `max_fix_rounds: 2` the first
+and second repairs happen and each posts its numbered comment; once two
+fix-round comments exist, the next changes-requested verdict is the one that
+gives up. Counting the builder's own repair reports — not reviewer verdicts —
+means a superseded or duplicate verdict (for example a manual reroute posting
+twice against the same SHA) cannot burn a round in which no repair happened.
 
-When the count does exceed the cap, do not attempt another fix. Apply
+When the count has reached the cap, do not attempt another fix. Apply
 `loop-stuck`, remove `loop-changes-requested`, comment listing the findings
 that keep recurring, and end the pass. An agent should not argue with a
 reviewer forever.
