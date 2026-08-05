@@ -336,6 +336,21 @@ const requiredContracts = [
     buildFlat.includes("first line is exactly `Fix round N pushed as SHA`"),
     "builder repair report must carry the Fix round anchor line the counting depends on",
   ],
+  [
+    buildFlat.includes(
+      "the reviewer notifies only on labels its verdict newly adds, so a label applied at ship would otherwise never notify at all",
+    ),
+    "builder must send the needs-human-review Slack notification at the ship step; the reviewer only notifies its own transitions",
+  ],
+  [
+    buildFlat.includes("never `git branch -D` or any force-delete fallback") &&
+      buildFlat.includes("that refusal is evidence of unmerged work"),
+    "builder must delete merged branches with -d only and treat a -d refusal as evidence of unmerged work",
+  ],
+  [
+    !buildFlat.replace("never `git branch -D` or any force-delete fallback", "").includes("branch -D"),
+    "builder must not mention branch -D anywhere outside the prohibition; no force-delete path may exist",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
