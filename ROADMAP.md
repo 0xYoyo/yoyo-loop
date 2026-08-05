@@ -1,6 +1,7 @@
 # Roadmap
 
-Last updated: 3 August 2026 — pass-hygiene hardening + north star.
+Last updated: 5 August 2026 — notification evidence; Phase 6 absorbed;
+post-M2 queue.
 
 ## North star
 
@@ -62,14 +63,22 @@ tooling+CI as issue 2. Trigger: before the next project's init.
 5a — outbound Slack lane — ✅ DONE (2026-08-02): outbound Slack messages
 only — issue became blocked; PR became loop-approved / needs-human-review /
 loop-stuck. No inbound actions, so no approver allowlists or signature
-verification needed yet.
+verification needed yet. 2026-08-05: all notification sites now capture and
+report the webhook HTTP status; silent unverifiable "sent" claims are
+contract-banned.
 5b (later): interactive approvals from Slack with signature verification,
 approver allowlist, idempotency, and re-reading live Linear/GitHub state at
 action time. (Finn §2.)
 
-**Phase 6 — Fresh-reviewer convergence — deferred until a PR needs fix rounds**
-Builder PR → clean-context reviewer → fix rounds → existing loop-stuck cap.
-(Finn §1.) Build when the failure mode first appears.
+**Phase 6 — Fresh-reviewer convergence — ✅ ABSORBED BY ARCHITECTURE**
+The failure mode Finn §1 guards (a builder reviewing its own work without
+clean context) cannot occur here — build and review run as fully separate
+sessions, and convergence (fix rounds, max_fix_rounds cap, loop-stuck)
+landed in PRs #22–#24. The remaining delta vs Finn §1 is only PR-to-review
+latency from independent 15m crons; deliberately NOT solved by
+builder-spawned reviewers (a spawned reviewer arrives before checks finish
+and must poll) but by Phase 7's event-driven triggers when the latency
+actually hurts.
 
 **Phase 7 — Off the open session**
 Cloud Routines on GitHub events first; leased persistent workers only if
@@ -78,10 +87,20 @@ loops run concurrently (confirmed 2026-08-02); the remaining constraint
 Phase 7 removes is that sessions must stay open on an awake machine.
 (Finn §8.) Trigger: loop latency actually hurting across projects.
 
-**Phase 8 — Later layers**
-Preview + documentation merge gates (Finn §5); risk-tiered merging
-(Finn §3); morning director + factory watchdog (Finn §6–7); post-merge
-learning loop (Finn §9); /yoyo-plan autonomous milestone planning.
+**Phase 8 — Post-M2 queue (in order)**
+1. UI-verification gate — pre-M3 MUST, designed at the M2→M3 boundary
+   (Finn §5).
+2. Risk-tiered merge policy — loop-approved + green + non-sensitive merges
+   on the loop's verdict alone; chat review remains for needs-human-review,
+   loop-stuck, factory PRs, and first-of-a-kind changes (Finn §3).
+3. Factory watchdog/manager — scheduled read-only pass verifying the
+   system's claims against primary sources (Slack channel, Linear issues,
+   GitHub state), alerting only on mismatch; pulled forward by the
+   2026-08-05 unverifiable-notification failure (Finn §7).
+
+Later layers: documentation merge gates (Finn §5); morning director
+(Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
+milestone planning.
 
 Note: hosting, deployments, and secrets are NOT a factory phase — they are
 milestone 1 of each product repo, specified in its PRD.
@@ -96,6 +115,9 @@ milestone 1 of each product repo, specified in its PRD.
 - The guard has two verdicts, deny and allow. Former ASK-tier commands deny
   with escalation guidance; each denied-but-safe pattern gets triaged with
   the user and promoted to a permanent allow.
+- Identical logic duplicated across skills (e.g. branch tidy in both build
+  and review) must be changed in every copy in the same PR; the validator
+  should pin both copies.
 
 ## Notes
 
