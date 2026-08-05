@@ -344,8 +344,10 @@ const requiredContracts = [
   ],
   [
     buildFlat.includes("never `git branch -D` or any force-delete fallback") &&
-      buildFlat.includes("that refusal is evidence of unmerged work"),
-    "builder must delete merged branches with -d only and treat a -d refusal as evidence of unmerged work",
+      buildFlat.includes(
+        "When `-d` refuses after that confirmed `MERGED` state, leave the branch alone silently",
+      ),
+    "builder must delete merged branches with -d only and leave a confirmed-MERGED -d refusal alone silently",
   ],
   [
     !buildFlat.replace("never `git branch -D` or any force-delete fallback", "").includes("branch -D"),

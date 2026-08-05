@@ -52,8 +52,12 @@ Before changing Linear, GitHub, branches, or files:
   `gh pr view BRANCH --json state`. Only when the state is exactly `MERGED`,
   delete the local branch with `git branch -d BRANCH` only — never
   `git branch -D` or any force-delete fallback — then run
-  `git remote prune origin`. If `-d` refuses, that refusal is evidence of
-  unmerged work: report it in the pass output and leave the branch alone.
+  `git remote prune origin`. The confirmed `MERGED` state from GitHub is the
+  merge evidence, and it has already passed by this point; a squash- or
+  rebase-merged branch's tip is not an ancestor of the default branch, so
+  `-d` routinely refuses on legitimately merged branches. When `-d` refuses
+  after that confirmed `MERGED` state, leave the branch alone silently — no
+  report, no force-delete; it is harmless clutter, not unmerged work.
   Never delete a branch whose PR is open or closed-without-merging, a branch
   with no PR at all, or the default branch. When `gh pr view` fails or the
   state is ambiguous, leave the branch alone.
