@@ -353,6 +353,41 @@ const requiredContracts = [
     !buildFlat.replace("never `git branch -D` or any force-delete fallback", "").includes("branch -D"),
     "builder must not mention branch -D anywhere outside the prohibition; no force-delete path may exist",
   ],
+  [
+    reviewFlat.includes("never `git branch -D` or any force-delete fallback") &&
+      reviewFlat.includes(
+        "When `-d` refuses after that confirmed `MERGED` state, leave the branch alone silently",
+      ),
+    "reviewer must delete merged branches with -d only and leave a confirmed-MERGED -d refusal alone silently",
+  ],
+  [
+    !reviewFlat.replace("never `git branch -D` or any force-delete fallback", "").includes("branch -D"),
+    "reviewer must not mention branch -D anywhere outside the prohibition; no force-delete path may exist",
+  ],
+  [
+    buildFlat.includes('status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
+    "builder notifications must capture the webhook HTTP status as send evidence",
+  ],
+  [
+    reviewFlat.includes('status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
+    "reviewer notifications must capture the webhook HTTP status as send evidence",
+  ],
+  [
+    buildFlat.includes("a send may never be claimed without having run the command and read its status"),
+    "builder must never claim a notification send without having run the command and read its status",
+  ],
+  [
+    reviewFlat.includes("a send may never be claimed without having run the command and read its status"),
+    "reviewer must never claim a notification send without having run the command and read its status",
+  ],
+  [
+    buildFlat.includes('reported as "notifications not configured", never as "sent"'),
+    "builder must report a missing webhook file as notifications not configured, never as sent",
+  ],
+  [
+    reviewFlat.includes('reported as "notifications not configured", never as "sent"'),
+    "reviewer must report a missing webhook file as notifications not configured, never as sent",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

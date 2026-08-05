@@ -126,14 +126,22 @@ from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
 notification silently and continue — notifications are optional. Send:
 
 ```bash
-curl -m 5 -s -X POST -H 'Content-type: application/json' \
+status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+  -H 'Content-type: application/json' \
   --data '{"text":"🛑 [SLUG] PR #N loop-stuck — recurring findings URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
 ```
 
 substituting the `repo_slug`, the real PR number, a one-line summary of the
-recurring findings, and the PR URL. A notification failure must never fail the
-pass.
+recurring findings, and the PR URL.
+
+These rules govern every Slack notification this skill sends, including steps
+7 and 8: a notification failure must never fail the pass. The pass output
+must report the send truthfully — "Slack notification sent (HTTP 200)" or
+"Slack notification FAILED (status/reason)" — and a send may never be claimed
+without having run the command and read its status. A missing webhook file
+remains a silent skip and is reported as "notifications not configured",
+never as "sent".
 
 If a proposed fix would cross an issue non-goal, touch a path listed in
 `sensitive_paths`, or requires a product decision, do not implement it.
@@ -146,13 +154,14 @@ webhook URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist,
 skip notification silently and continue — notifications are optional. Send:
 
 ```bash
-curl -m 5 -s -X POST -H 'Content-type: application/json' \
+status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+  -H 'Content-type: application/json' \
   --data '{"text":"👀 [SLUG] PR #N needs-human-review — REASON URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
 ```
 
 substituting the `repo_slug`, the real PR number, a one-line reason, and the
-PR URL. A notification failure must never fail the pass.
+PR URL.
 
 ## 2. Pick
 
@@ -295,14 +304,14 @@ After applying `blocked`, send a Slack notification. Read the webhook URL from
 silently and continue — notifications are optional. Send:
 
 ```bash
-curl -m 5 -s -X POST -H 'Content-type: application/json' \
+status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+  -H 'Content-type: application/json' \
   --data '{"text":"🚧 [SLUG] TEAMKEY-NNN blocked — QUESTION URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
 ```
 
 substituting the `repo_slug`, the issue's real identifier, a one-line version
-of the question, and the issue URL. A notification failure must never fail the
-pass.
+of the question, and the issue URL.
 
 Never use "this is unclear" as the question. State the exact decision, the
 available options, and which acceptance criterion it affects. End the pass so

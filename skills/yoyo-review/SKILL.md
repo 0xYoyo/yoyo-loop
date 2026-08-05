@@ -200,17 +200,25 @@ URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
 notification silently and continue — notifications are optional. Send:
 
 ```bash
-curl -m 5 -s -X POST -H 'Content-type: application/json' \
+status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+  -H 'Content-type: application/json' \
   --data '{"text":"✅ [SLUG] PR #N loop-approved — TITLE URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)" || true
+  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
 ```
 
 using text `"✅ [SLUG] PR #N loop-approved — TITLE URL"` for `loop-approved`
 and `"👀 [SLUG] PR #N needs-human-review — REASON URL"` for
 `needs-human-review`, substituting the `repo_slug`, the real PR number, the PR
 title or a one-line reason, and the PR URL. Do not notify on
-`loop-changes-requested` — that stays inside the automated repair loop. A
-notification failure must never fail the pass.
+`loop-changes-requested` — that stays inside the automated repair loop.
+
+These rules govern every Slack notification this skill sends, including the
+missing-tail notification in step 2: a notification failure must never fail
+the pass. The pass output must report the send truthfully — "Slack
+notification sent (HTTP 200)" or "Slack notification FAILED (status/reason)"
+— and a send may never be claimed without having run the command and read its
+status. A missing webhook file remains a silent skip and is reported as
+"notifications not configured", never as "sent".
 
 Only the unfixable escalations — scope conflict, no checks at all, a product
 decision — deliberately leave the automated repair queue. For those, a human
@@ -234,9 +242,13 @@ At the end of the pass, prune what merging has already finished with:
 
 - For each local branch other than the default branch, check its PR with
   `gh pr view BRANCH --json state`. Only when the state is exactly `MERGED`,
-  delete the local branch — `git branch -d BRANCH`, escalating to `-D` only
-  when git refuses because the merge was a squash or rebase (the `MERGED`
-  state from GitHub is the authority, not git's ancestry check).
+  delete the local branch with `git branch -d BRANCH` only — never
+  `git branch -D` or any force-delete fallback. The confirmed `MERGED` state
+  from GitHub is the merge evidence; a squash- or rebase-merged branch's tip
+  is not an ancestor of the default branch, so `-d` routinely refuses on
+  legitimately merged branches. When `-d` refuses after that confirmed
+  `MERGED` state, leave the branch alone silently — no report, no alarm, no
+  force-delete; it is harmless clutter, not unmerged work.
 - Then run `git remote prune origin`.
 
 Never delete a branch whose PR is open or closed-without-merging, a branch
