@@ -210,26 +210,32 @@ not the repair.
   escalation is reserved for these findings a builder cannot fix: those PRs
   wait entirely on a human.
 
-When this verdict newly adds `loop-approved` or `needs-human-review` — the
-label was absent before this pass — send a Slack notification; those are the
-two verdicts that need a human. Do not re-notify when the label was already
-present: a sensitive-path PR keeps `needs-human-review` across fix rounds, and
-only the transition pings. Read the webhook
-URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
+After posting the verdict and setting labels, ALWAYS send one Slack
+notification when the PR is now in a human-decision state: this verdict left
+it `loop-approved`, or `needs-human-review` is present — whether this
+verdict applied it or preserved a pre-existing one. The trigger is "review
+evidence complete", not "label changed": the ping fires even when no label
+transitioned, because the completed verdict is the moment a human can
+actually decide merge or hold. Read the webhook URL from
+`~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
 notification silently and continue — notifications are optional. Send:
 
 ```bash
 status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
   -H 'Content-type: application/json' \
-  --data '{"text":"✅ [SLUG] PR #N loop-approved — TITLE URL"}' \
+  --data '{"text":"✅ [SLUG] PR #N loop-approved — TITLE — CI: STATE URL"}' \
   "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
 ```
 
-using text `"✅ [SLUG] PR #N loop-approved — TITLE URL"` for `loop-approved`
-and `"👀 [SLUG] PR #N needs-human-review — REASON URL"` for
-`needs-human-review`, substituting the `repo_slug`, the real PR number, the PR
-title or a one-line reason, and the PR URL. Do not notify on
-`loop-changes-requested` — that stays inside the automated repair loop.
+using text `"✅ [SLUG] PR #N loop-approved — TITLE — CI: STATE URL"` when the
+verdict is loop-approved and
+`"👀 [SLUG] PR #N human decision required — REASON — CI: STATE URL"` when
+`needs-human-review` is present, substituting the `repo_slug`, the real PR
+number, the verdict headline (the PR title for approvals, a one-line reason
+for human-decision escalations), the CI state exactly as the verdict records
+it (checks passed | failed | not configured), and the PR URL. Do not notify
+on `loop-changes-requested` alone — that stays inside the automated repair
+loop.
 
 These rules govern every Slack notification this skill sends, including the
 missing-tail notification in step 2: a notification failure must never fail
@@ -237,7 +243,11 @@ the pass. The pass output must report the send truthfully — "Slack
 notification sent (HTTP 200)" or "Slack notification FAILED (status/reason)"
 — and a send may never be claimed without having run the command and read its
 status. A missing webhook file remains a silent skip and is reported as
-"notifications not configured", never as "sent".
+"notifications not configured", never as "sent". A send whose captured HTTP
+status is 2xx is final: never run the same send again in the pass — not to
+double-check, not because the response felt slow. Retry at most once, and
+only when the captured status is non-2xx or the command failed or timed out;
+report both attempts' statuses.
 
 Only the unfixable escalations — scope conflict, no checks at all, a product
 decision — deliberately leave the automated repair queue. For those, a human

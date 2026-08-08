@@ -76,10 +76,18 @@ sources. Thresholds below are defaults; a `watchdog_thresholds` block in
 4. **answer-wait** — an issue labeled `blocked` with no human comment after
    the blocking question for > 24 hours.
 5. **red-main** — the default branch's latest commit has failing checks.
-6. **missing-notification** — within the last 24 hours, a PR gained
-   `loop-approved`, `needs-human-review`, or `loop-stuck`, or an issue
-   gained `blocked`, but no matching message exists in the channel history.
-   This is the claimed-but-never-sent class; name the exact PR/issue.
+6. **missing-notification** — within the last 24 hours, either: (a) a PR
+   received a `Yoyo-loop review of ...` verdict on its current head that
+   left it in a human-decision state — `loop-approved`, or
+   `needs-human-review` present, whether that verdict applied it or
+   preserved it — but no matching reviewer verdict ping exists in the
+   channel history; or (b) a PR gained `loop-stuck` or an issue gained
+   `blocked` with no matching message — those interrupt-class pings fire
+   immediately at the event. A PR that gained `needs-human-review` at the
+   builder's ship step (sensitive-path self-application, no verdict on its
+   head yet) is intentionally silent — expect its ping from the reviewer's
+   verdict, not from the builder ship site; do not alarm on it. This is the
+   claimed-but-never-sent class; name the exact PR/issue.
 7. **dead-loop** — the agent-ready unassigned queue is non-empty, yet no
    loop activity (new PRs, verdict comments, repair pushes) for
    > 90 minutes.
@@ -100,7 +108,10 @@ which were skipped and why.
   `✅ resolved [slug] condition — subject`.
 - Every send uses the webhook and reports its HTTP status in the pass
   output (the existing notification evidence discipline; never claim an
-  unverified send).
+  unverified send). A send whose captured HTTP status is 2xx is final:
+  never run the same send again in the pass. Retry at most once, and only
+  when the captured status is non-2xx or the command failed or timed out;
+  report both attempts' statuses.
 
 ## Pass output
 

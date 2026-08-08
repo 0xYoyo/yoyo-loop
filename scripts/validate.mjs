@@ -258,8 +258,8 @@ const requiredContracts = [
     "reviewer must read the Slack webhook from ~/.claude/yoyo-slack.webhook",
   ],
   [
-    reviewFlat.includes("newly adds `loop-approved` or `needs-human-review`"),
-    "reviewer must notify Slack only when a verdict newly adds loop-approved or needs-human-review",
+    reviewFlat.includes("ALWAYS send one Slack notification when the PR is now in a human-decision state"),
+    "reviewer must always notify on a human-decision verdict; the trigger is review evidence complete, not a label transition",
   ],
   [
     buildFlat.includes("skip notification silently"),
@@ -341,10 +341,8 @@ const requiredContracts = [
     "builder repair report must carry the Fix round anchor line the counting depends on",
   ],
   [
-    buildFlat.includes(
-      "the reviewer notifies only on labels its verdict newly adds, so a label applied at ship would otherwise never notify at all",
-    ),
-    "builder must send the needs-human-review Slack notification at the ship step; the reviewer only notifies its own transitions",
+    buildFlat.includes("Send NO Slack notification at ship: review evidence does not exist yet"),
+    "builder ship site must stay silent; the reviewer's verdict ping is the merge-decision call to action",
   ],
   [
     buildFlat.includes("never `git branch -D` or any force-delete fallback") &&
@@ -521,6 +519,16 @@ const requiredContracts = [
   [
     reviewFlat.includes("Must-fix present: add `loop-changes-requested`; remove `loop-approved`; preserve a pre-existing `needs-human-review` label"),
     "reviewer's must-fix branch must preserve a pre-existing needs-human-review label",
+  ],
+  [
+    watchdogFlat.includes("expect its ping from the reviewer's verdict, not from the builder ship site"),
+    "watchdog missing-notification condition must expect the reviewer verdict ping and not alarm on the silent builder ship site",
+  ],
+  [
+    buildFlat.includes("A send whose captured HTTP status is 2xx is final") &&
+      reviewFlat.includes("A send whose captured HTTP status is 2xx is final") &&
+      watchdogFlat.includes("A send whose captured HTTP status is 2xx is final"),
+    "every send mechanism must state that a 2xx send is final and retries happen only on non-2xx/failure/timeout",
   ],
 ];
 
