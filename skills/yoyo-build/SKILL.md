@@ -110,9 +110,19 @@ gh pr list --state open --label loop-changes-requested --json number,title,headR
 ```
 
 Skip every PR carrying `loop-stuck`; it has left the automated repair queue
-until a human resolves the escalation. Do not skip on `needs-human-review`
-alone: that label gates the merge, not the repair, so a PR carrying both
-labels is still the builder's to fix.
+until a human resolves the escalation. Skip a PR carrying
+`needs-human-review` only when it does not also carry
+`loop-changes-requested`. A PR carrying BOTH is a builder-escalated
+sensitive-path PR that received a mechanical must-fix from the reviewer — a
+merge conflict, a CI failure — and it is still the builder's to service: fix
+only the "Must fix before merge" items, and never remove
+`needs-human-review` during repair — it is the human MERGE gate, not a
+repair freeze; only `loop-changes-requested` comes off after the fix. The
+escalation constraint below applies unchanged: if the fix itself would touch
+a `sensitive_paths` path, cross a non-goal, or requires a product decision,
+escalate instead of implementing. Reviewer-applied `needs-human-review`
+(scope conflict, no checks at all, a product decision) never carries
+`loop-changes-requested` and remains a hard dead-end by design.
 
 If any PR remains, choose the least recently updated one. Read its linked
 Linear issue and latest `Yoyo-loop review of COMMIT_SHA` verdict. Check out its
