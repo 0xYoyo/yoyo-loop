@@ -21,6 +21,11 @@ Ask the user, offering detected defaults:
 - GitHub repository name and visibility (private unless told otherwise).
 - Linear team key — default `YOY`.
 - Test, lint, and typecheck commands for this project, if any.
+- Whether this project has (or will have) a user interface. If yes: which
+  paths count as UI (globs, e.g. `app/components/**`, `src/ui/**`,
+  `extension/**`) and what command runs its UI tests (e.g.
+  `npx playwright test`). Both may be deferred for a project with no UI
+  yet; the first UI spec establishes them.
 
 ## 2. Preflight
 
@@ -160,6 +165,10 @@ sensitive_paths:
   - Makefile
   - ".claude/**"
 
+ui_paths:
+  - (none yet — set when the project grows a UI)
+ui_test_command: (none yet)
+
 max_fix_rounds: 2
 ```
 
@@ -177,6 +186,12 @@ protect the config.
 Add project-specific sensitive paths — auth, billing, permissions, schema,
 deployment config — based on what is actually in this repository. Show the
 list to the user and ask what to add.
+
+When ui_paths is set, any pull request touching those paths must carry
+executable UI tests run by ui_test_command in CI — that is the UI
+verification gate. A project with no UI leaves both keys unset and the
+gate stays dormant. The gate keys on paths, not on milestones or issue
+titles.
 
 ## 8. Permissions
 

@@ -75,6 +75,13 @@ required, the reviewer demands that *every* check pass instead. The one
 exposure is a PR that edits its own workflow, which is why
 `.github/workflows/` is in `sensitive_paths` and always escalates to a human.
 
+**UI verification gate.** Projects with a UI set ui_paths and
+ui_test_command in .claude/yoyo.md. Any PR touching ui_paths must carry
+executable UI tests covering its issue's verify steps, run by CI; the
+reviewer treats a UI-path diff without them as must-fix. Committed tests
+are the evidence — session walkthroughs and loose screenshots are not.
+Projects without a UI leave both unset; nothing changes for them.
+
 ## Daily rhythm
 
 ```

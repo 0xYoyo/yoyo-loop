@@ -178,6 +178,18 @@ Rules for the draft:
   workflow that only runs on pushes to the default branch leaves every pull
   request with no checks, which makes the reviewer escalate all of them to a
   human. Do not leave the trigger implicit.
+- When an issue's work touches paths listed in ui_paths in
+  .claude/yoyo.md, every 'How to verify' step must be written as a
+  testable assertion — a concrete element, state, or behavior a UI test
+  can check (including visual snapshot baselines where layout matters,
+  e.g. RTL mirroring) — not 'looks right' language. These steps are the
+  contract the builder's UI tests implement.
+- When a chain introduces a project's first UI work and ui_test_command
+  is not yet set, the chain's first UI issue must establish the UI test
+  lane: a runnable local harness target, the UI test framework,
+  a CI job running it on pull_request, and the ui_paths/ui_test_command
+  values written to .claude/yoyo.md. Later UI issues in the chain depend
+  on it.
 
 ## 5. Confirm and file
 
