@@ -6,7 +6,8 @@ description: Read-only status of the yoyo loop across all factory projects — w
 # Yoyo-loop status
 
 One pass produces one ordered list: everything in the loop that is waiting on
-the human, most urgent first, merged across every factory project. It reports;
+the human, most urgent first, across every factory project, plus two
+informational categories showing what is safely in flight. It reports;
 it never plans, and it gives no advice beyond the list.
 
 ## Discover projects
@@ -62,7 +63,10 @@ attachments as the categories below need them.
 
 ## The list
 
-One merged, ordered list across all reported projects, most urgent first.
+Two sections, most urgent first within each: **factory** — projects whose
+`repo:` label is `repo:yoyo-loop` — then **product** — every other
+`repo:*` project. The same categories apply in both; the split keeps work
+on the factory itself from mixing with product work.
 Every line carries a leading `[slug]` tag naming its project, e.g.
 `[briza] YOY-10 — ...`. Within a category, order lines by project, then by
 age (oldest first).
@@ -79,24 +83,39 @@ age (oldest first).
    category above) — those are awaiting your decision, with the escalation
    reason pulled from the latest verdict comment. A PR carrying both
    `needs-human-review` and `loop-changes-requested` is still the agent's to
-   fix — no action from you yet — so it is not listed. Each PR appears in
-   exactly one category, never two.
+   fix — no action from you yet — so it is listed only under **agent
+   working** below. Each PR appears in exactly one category, never two.
 3. **answer** — Linear issues labeled `blocked` (with `repo:SLUG`), quoting
    the blocking question from the issue's latest comment.
 4. **approve or discard** — issues with `repo:SLUG`, not labeled
    `agent-ready` and not labeled `blocked`, in backlog or todo states:
    spec-drafted work awaiting the human's `agent-ready` decision. A
    `blocked` issue belongs to the answer category above, never here — no
-   issue appears in two categories.
+   issue appears in two categories. Container and hardening-tail issues —
+   titles marking a chain's container or hardening tail (`MN hardening`,
+   `Post-MN hardening`) — are excluded here: they wait by design and belong
+   in the waiting-by-design category below, not in this decision queue.
 5. **investigate** — anything in progress or in review with no attached PR
    and no visible activity. State it neutrally — what is observed, e.g.
    "in progress, no PR attached, no activity visible" — never speculate
    about a cause.
 
+6. **agent working** — informational, no action: open PRs labeled
+   `loop-changes-requested` (the repair queue, including those also carrying
+   `needs-human-review`), and issues in progress or in review with an
+   attached PR or visible recent activity. Listing them keeps "the agent is
+   on it" distinguishable from "nothing exists"; the action is
+   "none — agent working".
+7. **waiting by design** — container and hardening-tail issues in backlog
+   that need nothing yet: a tail accumulates deferred findings until its
+   chain completes and the human reads the set. The action is
+   "none — waits for its chain".
+
 Each line: `[slug]` tag, identifier, title, one action verb, one URL.
 
 After the list, exactly one summary line: the count in each category, and
-whether the queue is empty — when all five categories are empty across every
-reported project, the whole report is that nothing is waiting on the human.
+whether the queue is empty — when the five action categories are empty across
+every reported project, the whole report is that nothing is waiting on the
+human, whatever sits in the two informational categories.
 
 No advice beyond the list: no next steps, no recommendations, no plans.

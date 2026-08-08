@@ -69,6 +69,8 @@ const specFlat = spec.replace(/\s+/g, " ");
 const initFlat = init.replace(/\s+/g, " ");
 const statusFlat = status.replace(/\s+/g, " ");
 const roadmapFlat = roadmap.replace(/\s+/g, " ");
+const oneOff = read("docs/one-off-prompts.md");
+const oneOffFlat = oneOff.replace(/\s+/g, " ");
 
 const requiredContracts = [
   [build.includes("not labeled `blocked`"), "builder must exclude blocked issues"],
@@ -423,6 +425,34 @@ const requiredContracts = [
   [
     buildFlat.includes("never an invitation to rephrase"),
     "builder must state that a guard denial is never an invitation to rephrase the command",
+  ],
+  [
+    specFlat.includes("no AC counts, no AC-specific file lists"),
+    "spec must keep the hardening tail's scaffolding generic — no AC counts, no AC-specific file lists",
+  ],
+  [
+    reviewFlat.includes("never contradict the tail's existing scaffolding"),
+    "reviewer's tail append must keep the issue self-consistent with its scaffolding",
+  ],
+  [
+    review.includes("Post-MN hardening"),
+    "reviewer must send between-milestone deferred findings to the standing Post-MN hardening interim tail",
+  ],
+  [
+    spec.includes("Post-MN hardening"),
+    "spec must chain an existing Post-MN hardening interim tail instead of filing a duplicate",
+  ],
+  [
+    oneOffFlat.includes("The first step is `git status` against a stated expected state"),
+    "one-off prompt template must open with a git status check against an expected state",
+  ],
+  [
+    oneOffFlat.includes("The last steps are `git checkout main` and a clean `git status`"),
+    "one-off prompt template must end with git checkout main and a clean git status",
+  ],
+  [
+    readme.includes("docs/one-off-prompts.md"),
+    "README must reference the one-off prompt template",
   ],
 ];
 
