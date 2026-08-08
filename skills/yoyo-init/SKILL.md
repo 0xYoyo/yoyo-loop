@@ -224,12 +224,24 @@ file IS the approval gate. Instead:
 4. Wait for the user to confirm they ran it, verify `.claude/settings.json`
    now exists and matches the proposal by reading it, then delete
    `.claude/settings.proposed.json`.
+5. Commit `.claude/settings.json` alongside `.claude/yoyo.md` and push. The
+   file is tracked deliberately, not by accident: a tracked settings file
+   materializes in every worktree via checkout, so the builder worktree gets
+   its permissions the moment it syncs and never floods the user with
+   permission prompts — and a tracked file never registers as an untracked
+   path, so it can never stall the builder's clean-tree preflight as dirt.
+   An untracked copy fails both ways at once; this is the pattern proven by
+   the unfiltered repo, which committed its settings from the start and hit
+   neither failure.
 
 The proposed settings must contain only:
 
 - `Read(path)` and `Edit(path)` allows for this project and its `../SLUG.build`
   worktree sibling
-- a broad Bash allow (`Bash(*)`), so loops never stall on command prompts
+- a broad Bash allow (`Bash(*)`), so loops never stall on command prompts.
+  `Bash(*)` is intentional, committed file included: the guard hook is the
+  real safety layer for every command, and the allow list exists only to
+  prevent prompt stalls — it grants nothing the guard would deny.
 
 Do not emit a Bash deny list or a command whitelist. Every Bash command still
 passes through the guard hook, which denies review-bypassing and destructive

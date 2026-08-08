@@ -12,6 +12,11 @@ unless the prompt supplies them. Every one-off prompt follows these rules:
   committed. The final diff must show those files and nothing else.
 - **Never touch `.env*` or untracked files.** They are outside every one-off
   task's scope, whatever the prompt is about.
+- **Settings files are committed.** As of YOY-56, `/yoyo-init` commits
+  `.claude/settings.json`, so it is a tracked file like any other — not an
+  untracked loop fixture to work around. An untracked
+  `.claude/settings.json` indicates a repo initialised before this change
+  and should be committed.
 - **Scope is per-item.** An agent that finds an adjacent same-class case —
   the same bug in a sibling file, the same pattern one directory over —
   reports it back instead of extending the task to cover it.

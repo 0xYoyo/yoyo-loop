@@ -16,14 +16,17 @@ Before changing Linear, GitHub, branches, or files:
 - Detect the repository's default branch with
   `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`; never
   assume it is `main`.
-- Require a clean working tree (`git status --porcelain` must be empty). If it
-  is dirty, report the paths and end the pass. Never stash, reset, overwrite,
-  or commit unrelated work.
-- With the tree clean, fetch and then check for unpushed work — before moving
-  `HEAD`, because moving it is what would lose that work:
+- Fetch first — it moves no local ref and touches no file, so it is safe on
+  any tree state, and every check below needs the fetched refs:
 
   ```bash
   git fetch origin
+  ```
+
+- Then check for unpushed work — before moving `HEAD`, because moving it is
+  what would lose that work:
+
+  ```bash
   git log --oneline HEAD --not --remotes
   ```
 
@@ -33,10 +36,28 @@ Before changing Linear, GitHub, branches, or files:
   the check reports nothing, so running it afterwards proves only that the
   detach already happened. Never force-reset to catch up.
 
-- Only with that check clean, detach onto the default branch you just fetched.
-  Never check out the local default branch: git refuses to have one branch
-  checked out in two worktrees at once, and the primary clone already holds the
-  default branch, so this worktree stays detached for its whole life.
+- With that check clean, require a clean working tree: run
+  `git status --porcelain`. Any modification to a tracked file makes the tree
+  dirty, exactly as before. An untracked path does NOT make the tree dirty
+  when either (a) `origin/DEFAULT_BRANCH`'s `.gitignore` — read with
+  `git show origin/DEFAULT_BRANCH:.gitignore`, treating a missing file as
+  empty — covers the path, or (b) the file is byte-identical to
+  `origin/DEFAULT_BRANCH`'s tracked copy of the same path. Evaluate ignore
+  rules against the fetched default branch, never this checkout's stale
+  `.gitignore`: a checkout predating a merged `.gitignore` otherwise
+  deadlocks — the dirt blocks the sync and only the sync removes the dirt.
+  Tracked-file modifications and any untracked path failing both tests still
+  end the pass exactly as before: report the paths and end the pass. Never
+  stash, reset, overwrite, or commit unrelated work.
+
+- Before detaching, delete only the untracked files that passed test (b) —
+  they are byte-identical to the fetched default branch's tracked copies, and
+  the checkout restores them tracked, so nothing is lost. Leave paths covered
+  by (a) in place; the synced `.gitignore` keeps them invisible. Then detach
+  onto the default branch you just fetched. Never check out the local default
+  branch: git refuses to have one branch checked out in two worktrees at
+  once, and the primary clone already holds the default branch, so this
+  worktree stays detached for its whole life.
 
   ```bash
   git switch --detach origin/DEFAULT_BRANCH
