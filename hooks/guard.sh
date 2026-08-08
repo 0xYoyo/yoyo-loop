@@ -34,7 +34,7 @@ deny() { decide deny "$1"; }
 # escalates instead of waiting on a prompt nobody will answer. Each
 # denied-but-safe pattern gets triaged with the user and promoted to a
 # permanent allow.
-ESCALATE_MSG='yoyo-loop guard: this command class requires a human and is denied in agent sessions. Do not retry it. Escalate instead: builders comment the exact command and why it is needed, apply `blocked` (issue) or `needs-human-review` (PR), and end the pass.'
+ESCALATE_MSG='yoyo-loop guard: this command class requires a human and is denied in agent sessions. Do not retry it. Escalate instead: builders comment the exact command and why it is needed, apply `blocked` (issue) or `needs-human-review` (PR), and end the pass. A denial is never an invitation to find an equivalent phrasing — the only paths are escalation (comment the exact command, label, end the pass) or a human-approved permanent allow line. When a denial aborts a chained command partway, report which parts executed, because partial execution can leave the tree or refs mid-state.'
 escalate() { decide deny "$ESCALATE_MSG Context: $1"; }
 
 project_root() {
@@ -210,6 +210,15 @@ while IFS= read -r seg; do
     deny "Blocked: expiring the reflog removes the last recovery path."
   [[ "$seg" =~ ^git[[:space:]]+gc([[:space:]].*)?--prune ]] && \
     deny "Blocked: 'git gc --prune' drops unreachable objects permanently."
+  # Rewriting the default branch ref locally is the same damage as pushing to
+  # it: reviewed history moves without a PR. Same main|master rule as the
+  # push-to-default deny; non-default branches are unaffected.
+  if [[ "$seg" =~ ^git[[:space:]]+branch([[:space:]].*)?([[:space:]]-f([[:space:]]|$)|--force([[:space:]]|=|$)) ]]; then
+    [[ "$seg" =~ [[:space:]](main|master)([[:space:]]|$) ]] && \
+      deny "Blocked: 'git branch -f' would rewrite the default branch ref."
+  fi
+  [[ "$seg" =~ ^git[[:space:]]+update-ref([[:space:]].*)?[[:space:]](refs/heads/)?(main|master)([[:space:]]|$) ]] && \
+    deny "Blocked: 'git update-ref' on the default branch rewrites it outside review."
 
   # -- credentials and secrets -------------------------------------------
   [[ "$seg" =~ ^gh[[:space:]]+auth[[:space:]]+(logout|refresh|token)([[:space:]]|$) ]] && \
@@ -227,8 +236,21 @@ while IFS= read -r seg; do
     done
     [ "$env_only_example" = true ] || deny "Blocked: printing a .env file."
   fi
-  [[ "$seg" =~ ^git[[:space:]]+add([[:space:]].*)?(\.env|\.pem|\.key|id_rsa) ]] && \
-    deny "Blocked: staging a secret file (.env*, *.pem, *.key, id_rsa*)."
+  # Staging follows the same .env.example exemption as printing: allowed only
+  # when every .env* token in the segment has that exact basename, at any
+  # directory depth. Any other .env*, *.pem, *.key, or id_rsa* still denies.
+  if [[ "$seg" =~ ^git[[:space:]]+add([[:space:]].*)?(\.env|\.pem|\.key|id_rsa) ]]; then
+    add_only_example=true
+    for tok in $seg; do
+      tok="${tok%\'}"; tok="${tok#\'}"; tok="${tok%\"}"; tok="${tok#\"}"
+      case "$tok" in
+        *.pem|*.key|*id_rsa*) add_only_example=false ;;
+        *.env*) [ "${tok##*/}" = ".env.example" ] || add_only_example=false ;;
+      esac
+    done
+    [ "$add_only_example" = true ] || \
+      deny "Blocked: staging a secret file (.env*, *.pem, *.key, id_rsa*)."
+  fi
   # Only when a file-consuming command actually operates on the path - a mere
   # mention (grep pattern, commit message, doc text) must not be refused.
   if [[ "$seg" =~ ^(cat|bat|less|more|head|tail|nl|od|xxd|strings|cp|mv|scp|rsync|tar|zip|ssh-keygen|ssh-add|open|vi|vim|nano|emacs)([[:space:]]|$) ]] && \
