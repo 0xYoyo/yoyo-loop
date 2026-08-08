@@ -497,6 +497,19 @@ const requiredContracts = [
     roadmapFlat.includes("first factory window after M3"),
     "ROADMAP must record Phase 7's promotion to the first factory window after M3",
   ],
+  [
+    initFlat.includes("Commit `.claude/settings.json` alongside `.claude/yoyo.md`"),
+    "init must commit .claude/settings.json; tracked settings materialize in every worktree and never read as dirt",
+  ],
+  [
+    build.includes("git show origin/DEFAULT_BRANCH:.gitignore"),
+    "builder clean-tree check must evaluate untracked paths against origin's default-branch .gitignore, not the stale checkout's",
+  ],
+  [
+    buildFlat.includes("byte-identical") &&
+      buildFlat.includes("the checkout restores them tracked, so nothing is lost"),
+    "builder may delete byte-identical untracked files only because the checkout restores them tracked",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
