@@ -510,6 +510,18 @@ const requiredContracts = [
       buildFlat.includes("the checkout restores them tracked, so nothing is lost"),
     "builder may delete byte-identical untracked files only because the checkout restores them tracked",
   ],
+  [
+    buildFlat.includes("A PR carrying BOTH is a builder-escalated sensitive-path PR that received a mechanical must-fix from the reviewer"),
+    "builder must service PRs carrying both needs-human-review and loop-changes-requested",
+  ],
+  [
+    buildFlat.includes("never remove `needs-human-review` during repair"),
+    "builder must never remove needs-human-review during repair; it is the human merge gate, not a repair freeze",
+  ],
+  [
+    reviewFlat.includes("Must-fix present: add `loop-changes-requested`; remove `loop-approved`; preserve a pre-existing `needs-human-review` label"),
+    "reviewer's must-fix branch must preserve a pre-existing needs-human-review label",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

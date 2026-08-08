@@ -196,7 +196,8 @@ not the repair.
 - No must-fix and no new escalation: add `loop-approved`; remove
   `loop-changes-requested`. Preserve a pre-existing `needs-human-review` label
   because it may represent a separate high-risk human gate.
-- Must-fix present: add `loop-changes-requested`; remove `loop-approved`.
+- Must-fix present: add `loop-changes-requested`; remove `loop-approved`;
+  preserve a pre-existing `needs-human-review` label.
 - Sensitive-path diff: add `needs-human-review`; remove `loop-approved`; set
   "Safe to merge" to `No — human decision required.` If there are also
   must-fix findings, add `loop-changes-requested` too and do not remove it:
