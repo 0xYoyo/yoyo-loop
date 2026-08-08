@@ -1,6 +1,6 @@
 # yoyo-loop
 
-Five Claude Code skills that turn Linear + GitHub into a small, human-gated
+Six Claude Code skills that turn Linear + GitHub into a small, human-gated
 software factory. Adapted from [Finn-loop](https://github.com/finna/Finn-loop)
 by Alex Finn (MIT), with per-repo scoping and a bootstrap command added.
 
@@ -17,6 +17,7 @@ One approval label, one rule: **humans merge**.
 | `/yoyo-build` | Claims the next safe `agent-ready` issue, implements only its contract, opens a PR. Runs under `/loop`. |
 | `/yoyo-review` | Reviews open PRs against their issue and CI, posts a three-group verdict. Runs under `/loop`. |
 | `/yoyo-status` | Read-only list of everything waiting on you: PRs to merge, escalations to read, blocked questions to answer, specs awaiting `agent-ready`. Cross-project by default, single project by slug argument. Never writes anything. |
+| `/yoyo-watchdog` | Scheduled read-only health sweep: verifies the loop's claims against primary sources (Linear, GitHub, Slack) and alerts once per condition — stalls, missing notifications, red main. Never fixes anything. Runs under `/loop`. |
 
 ## Changes from Finn-loop
 
@@ -43,9 +44,9 @@ git clone <this repo> ~/repos/yoyo-loop
 cd ~/repos/yoyo-loop && ./install.sh
 ```
 
-This symlinks each skill into `~/.claude/skills/`, so all five commands exist
+This symlinks each skill into `~/.claude/skills/`, so all six commands exist
 in every project you open, and editing a skill here takes effect immediately
-everywhere. Then run `/reload-skills` and confirm `/skills` lists all five.
+everywhere. Then run `/reload-skills` and confirm `/skills` lists all six.
 
 ## Set up a project (once per project)
 
@@ -106,6 +107,9 @@ window 2 — cd ~/repos/myproject.build  → /loop 15m /yoyo-build
 5. Run `/yoyo-status` any time to see everything waiting on you — merges,
    escalations, blocked questions, specs awaiting `agent-ready` — in one
    read-only list.
+6. Optionally run `/loop 30m /yoyo-watchdog` in a third window during active
+   milestones; it alerts on stalls and missing notifications and never fixes
+   anything.
 
 Run only one builder loop per repository. The Linear assignee is a cooperative
 lock between people; two sessions authenticated as the same user cannot

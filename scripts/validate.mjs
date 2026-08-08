@@ -12,7 +12,7 @@ function assert(condition, message) {
   }
 }
 
-const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status"];
+const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status", "yoyo-watchdog"];
 const skillDirectory = new URL("skills/", root);
 const actualSkillNames = readdirSync(skillDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -60,6 +60,7 @@ const review = read("skills/yoyo-review/SKILL.md");
 const init = read("skills/yoyo-init/SKILL.md");
 const spec = read("skills/yoyo-spec/SKILL.md");
 const status = read("skills/yoyo-status/SKILL.md");
+const watchdog = read("skills/yoyo-watchdog/SKILL.md");
 
 // Line wrapping in the skills is prose, not contract: match against a
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
@@ -68,6 +69,7 @@ const reviewFlat = review.replace(/\s+/g, " ");
 const specFlat = spec.replace(/\s+/g, " ");
 const initFlat = init.replace(/\s+/g, " ");
 const statusFlat = status.replace(/\s+/g, " ");
+const watchdogFlat = watchdog.replace(/\s+/g, " ");
 const roadmapFlat = roadmap.replace(/\s+/g, " ");
 const oneOff = read("docs/one-off-prompts.md");
 const oneOffFlat = oneOff.replace(/\s+/g, " ");
@@ -453,6 +455,47 @@ const requiredContracts = [
   [
     readme.includes("docs/one-off-prompts.md"),
     "README must reference the one-off prompt template",
+  ],
+  [
+    watchdog.includes("Read-only"),
+    "watchdog must declare itself read-only",
+  ],
+  [
+    /never invents fixes/i.test(watchdogFlat),
+    "watchdog must never invent fixes; alerts name condition, subject, and URL only",
+  ],
+  [
+    watchdogFlat.includes("no later resolved message"),
+    "watchdog must alert once per condition: silent while an alert is open with no later resolved message",
+  ],
+  [
+    watchdogFlat.includes("reports its HTTP status"),
+    "watchdog sends must report the webhook HTTP status as send evidence",
+  ],
+  [
+    watchdog.includes("not_in_channel") &&
+      watchdogFlat.includes("the bot must be invited"),
+    "watchdog must give the /invite guidance on a not_in_channel error",
+  ],
+  [
+    watchdogFlat.includes("do not post alerts at all"),
+    "watchdog degraded mode must post no alerts; without dedupe reads, repeated alerts would spam",
+  ],
+  [
+    read("install.sh").includes("yoyo-watchdog"),
+    "install.sh must symlink the watchdog skill",
+  ],
+  [
+    readme.includes("/yoyo-watchdog"),
+    "README must document the watchdog skill",
+  ],
+  [
+    roadmapFlat.includes("REJECTED"),
+    "ROADMAP must record the merge-policy rejection",
+  ],
+  [
+    roadmapFlat.includes("first factory window after M3"),
+    "ROADMAP must record Phase 7's promotion to the first factory window after M3",
   ],
 ];
 

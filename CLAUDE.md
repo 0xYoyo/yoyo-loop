@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Source of the yoyo-loop skills: five `SKILL.md` files under `skills/`, a
+Source of the yoyo-loop skills: six `SKILL.md` files under `skills/`, a
 validator in `scripts/validate.mjs`, and the CI workflow that runs it.
 
 Update `ROADMAP.md` when a phase lands.
@@ -16,6 +16,7 @@ Update `ROADMAP.md` when a phase lands.
 ~/.claude/skills/yoyo-review -> ~/repos/yoyo-loop/skills/yoyo-review
 ~/.claude/skills/yoyo-spec   -> ~/repos/yoyo-loop/skills/yoyo-spec
 ~/.claude/skills/yoyo-status -> ~/repos/yoyo-loop/skills/yoyo-status
+~/.claude/skills/yoyo-watchdog -> ~/repos/yoyo-loop/skills/yoyo-watchdog
 ```
 
 So whatever branch this repo has checked out *is* the user's installed skill
