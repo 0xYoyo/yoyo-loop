@@ -168,13 +168,16 @@ status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
 substituting the `repo_slug`, the real PR number, a one-line summary of the
 recurring findings, and the PR URL.
 
-These rules govern every Slack notification this skill sends, including steps
-7 and 8: a notification failure must never fail the pass. The pass output
+These rules govern every Slack notification this skill sends, including step
+8: a notification failure must never fail the pass. The pass output
 must report the send truthfully — "Slack notification sent (HTTP 200)" or
 "Slack notification FAILED (status/reason)" — and a send may never be claimed
 without having run the command and read its status. A missing webhook file
 remains a silent skip and is reported as "notifications not configured",
-never as "sent".
+never as "sent". A send whose captured HTTP status is 2xx is final: never
+run the same send again in the pass — not to double-check, not because the
+response felt slow. Retry at most once, and only when the captured status is
+non-2xx or the command failed or timed out; report both attempts' statuses.
 
 If a proposed fix would cross an issue non-goal, touch a path listed in
 `sensitive_paths`, or requires a product decision, do not implement it.
@@ -325,11 +328,12 @@ amended before opening the PR.
 
 If the diff touches any path in `sensitive_paths`, apply `needs-human-review`
 to the PR immediately. The reviewer will not approve it, and that is intended.
-Applying the label here is the label transition, so send the 👀
-needs-human-review Slack notification now, using the same webhook mechanism as
-step 1 (a missing webhook file means skip notification silently): the reviewer
-notifies only on labels its verdict newly adds, so a label applied at ship
-would otherwise never notify at all.
+Send NO Slack notification at ship: review evidence does not exist yet — no
+verdict, no CI result — so there is nothing for a human to decide on, and the
+reviewer's verdict ping is the call to action. Immediate pings are reserved
+for events that stop automated work — a `blocked` issue, `loop-stuck`, a
+repair-pass escalation — which need the human now to keep the loop moving,
+while merge-decision pings wait for the reviewer's completed verdict.
 
 Comment the PR URL on the Linear issue. Move it to the team's review state if
 one exists; otherwise leave it in the started state for the Linear-GitHub
