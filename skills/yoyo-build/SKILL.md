@@ -251,6 +251,21 @@ verifying; that is a change to the repository, not a check of it. If a kind of
 check is neither configured nor detectable, run nothing for it and say so
 explicitly in the PR, naming which check was unavailable.
 
+UI gate: read ui_paths and ui_test_command from .claude/yoyo.md. If the
+diff touches any path in ui_paths, this PR must add or update UI tests
+covering the issue's 'How to verify' steps, and ui_test_command must pass
+locally before shipping. Interactive browser exploration (browser tools or
+MCP) is allowed and encouraged while developing and diagnosing, but it is
+never evidence: anything discovered by exploring must be distilled into
+committed tests, because a finding that lives only in a session is lost.
+Visual snapshot baselines are the durable form of screenshot evidence.
+One exception: when the issue itself establishes the UI test lane per its
+acceptance criteria (first UI issue of a chain), the gate it creates
+applies from the next UI pull request onward. If the diff touches ui_paths
+but the issue's verify steps cannot be expressed as tests and the issue
+does not establish the lane, go to step 8 — that is a spec defect to
+resolve, not a reason to ship untested UI.
+
 All checks attributable to this change must pass before opening a PR. If a
 broad check has a pre-existing unrelated failure, run the relevant targeted
 check, preserve the evidence, and disclose both results in the PR.
@@ -269,6 +284,8 @@ Push and open a PR with `gh pr create`. Its description must include:
 - Numbered manual test steps matching what was actually built
 - Automated checks run and their results
 - Risk: Low / Medium / High
+- For ui_paths diffs: which UI tests cover which verify steps (one line
+  per step), and the ui_test_command result
 
 If `Other behavior changes: None` is not true, stop and get the Linear issue
 amended before opening the PR.

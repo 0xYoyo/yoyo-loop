@@ -388,6 +388,38 @@ const requiredContracts = [
     reviewFlat.includes('reported as "notifications not configured", never as "sent"'),
     "reviewer must report a missing webhook file as notifications not configured, never as sent",
   ],
+  [
+    init.includes("ui_paths:") && init.includes("ui_test_command:"),
+    "init config template must carry the ui_paths and ui_test_command keys of the UI verification gate",
+  ],
+  [
+    specFlat.includes("testable assertion"),
+    "spec must require UI-path verify steps to be written as testable assertions",
+  ],
+  [
+    specFlat.includes("establish the UI test lane"),
+    "spec must make a chain's first UI issue establish the UI test lane",
+  ],
+  [
+    build.includes("ui_paths") && build.includes("ui_test_command"),
+    "builder must read ui_paths and ui_test_command for the UI verification gate",
+  ],
+  [
+    buildFlat.includes("never evidence"),
+    "builder must state that interactive browser exploration is never evidence",
+  ],
+  [
+    buildFlat.includes("distilled into committed tests"),
+    "builder must require exploration findings to be distilled into committed tests",
+  ],
+  [
+    review.includes("ui_paths"),
+    "reviewer must enforce the UI verification gate on ui_paths diffs",
+  ],
+  [
+    reviewFlat.includes("claims, not evidence"),
+    "reviewer must treat session walkthroughs and uncommitted artifacts as claims, not evidence",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

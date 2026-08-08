@@ -97,6 +97,15 @@ human escalation.
 If the diff touches any path listed in `sensitive_paths`, mark the PR for human
 escalation regardless of how clean the change looks.
 
+UI gate: read ui_paths from .claude/yoyo.md. If the diff touches any path
+in ui_paths and does not add or update UI tests covering the issue's
+'How to verify' steps, that is a must-fix finding tagged [AC-N] against
+the untested criteria — unless the issue itself establishes the UI test
+lane per its acceptance criteria. Committed tests running in CI are the
+only acceptable UI evidence; agent-reported walkthroughs, session
+screenshots, or uncommitted artifacts are claims, not evidence, and do
+not satisfy the gate.
+
 ## 3. Check merge evidence
 
 Inspect the current PR head, mergeability, and checks:
@@ -263,3 +272,4 @@ state is ambiguous, leave the branch alone.
   comment plus labels because the loop may run on the PR author's token and
   GitHub rejects self-reviews.
 - `loop-approved` is evidence for a human, not merge authorization.
+- Never accept session claims or uncommitted artifacts as UI evidence.
