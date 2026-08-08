@@ -420,6 +420,10 @@ const requiredContracts = [
     reviewFlat.includes("claims, not evidence"),
     "reviewer must treat session walkthroughs and uncommitted artifacts as claims, not evidence",
   ],
+  [
+    buildFlat.includes("never an invitation to rephrase"),
+    "builder must state that a guard denial is never an invitation to rephrase the command",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
@@ -534,6 +538,26 @@ assert(
 assert(
   buildFlat.includes("do not retry it and do not work around it"),
   "builder must escalate, not retry, when the guard denies a command with the escalation message",
+);
+assert(
+  guard.includes("add_only_example"),
+  "guard must allow staging the exact basename .env.example while denying every other .env* path",
+);
+assert(
+  guard.includes("'git branch -f' would rewrite the default branch ref"),
+  "guard must deny git branch -f/--force on the default branch",
+);
+assert(
+  guard.includes("'git update-ref' on the default branch rewrites it outside review"),
+  "guard must deny git update-ref on the default branch",
+);
+assert(
+  guard.includes("never an invitation to find an equivalent phrasing"),
+  "guard escalation message must state a denial is never an invitation to rephrase",
+);
+assert(
+  guard.includes("report which parts executed"),
+  "guard escalation message must require reporting which parts of a chained command executed",
 );
 
 // Init cannot write .claude/settings.json itself — the guard denies agent
