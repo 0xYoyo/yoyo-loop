@@ -7,7 +7,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEST="${HOME}/.claude/skills"
 mkdir -p "$DEST"
 
-for skill in yoyo-spec yoyo-build yoyo-review yoyo-init yoyo-status; do
+for skill in yoyo-spec yoyo-build yoyo-review yoyo-init yoyo-status yoyo-watchdog; do
   src="${REPO}/skills/${skill}"
   [ -d "$src" ] || { echo "missing: $src"; exit 1; }
   ln -sfn "$src" "${DEST}/${skill}"
@@ -21,4 +21,4 @@ echo "linked ${HOOKS_DEST}/guard.sh -> ${REPO}/hooks/guard.sh"
 
 echo
 echo "Done. Run /reload-skills in Claude Code (or restart it),"
-echo "then check /skills lists yoyo-spec, yoyo-build, yoyo-review, yoyo-init, yoyo-status."
+echo "then check /skills lists yoyo-spec, yoyo-build, yoyo-review, yoyo-init, yoyo-status, yoyo-watchdog."

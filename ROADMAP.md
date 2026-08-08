@@ -1,7 +1,7 @@
 # Roadmap
 
-Last updated: 5 August 2026 — notification evidence; Phase 6 absorbed;
-post-M2 queue.
+Last updated: 8 August 2026 — factory watchdog (YOY-40); merge policy
+rejected; Phase 7 promoted to NEXT.
 
 ## North star
 
@@ -69,6 +69,9 @@ contract-banned.
 5b (later): interactive approvals from Slack with signature verification,
 approver allowlist, idempotency, and re-reading live Linear/GitHub state at
 action time. (Finn §2.)
+2026-08-08: interactive Slack approvals evaluated and REJECTED — the delta
+over GitHub mobile merging is a few seconds against real new infrastructure
+(see YOY-39); outbound-only stands.
 
 **Phase 6 — Fresh-reviewer convergence — ✅ ABSORBED BY ARCHITECTURE**
 The failure mode Finn §1 guards (a builder reviewing its own work without
@@ -85,18 +88,23 @@ Cloud Routines on GitHub events first; leased persistent workers only if
 open sessions become the bottleneck. The /loop scheduler is per-session and
 loops run concurrently (confirmed 2026-08-02); the remaining constraint
 Phase 7 removes is that sessions must stay open on an awake machine.
-(Finn §8.) Trigger: loop latency actually hurting across projects.
+(Finn §8.) NEXT — the first factory window after M3 ships; condition (loop
+latency and laptop-tethering actually hurting) was met 2026-08-08 per the
+user.
+- Includes orchestrated parallel builders — queue partitioning + leases
+  (absorbs YOY-37).
+- Candidate compute: the $300 GCP credit — verify its ~90-day activation
+  expiry.
 
 **Phase 8 — Post-M2 queue (in order)**
-1. UI-verification gate — pre-M3 MUST, designed at the M2→M3 boundary
-   (Finn §5).
-2. Risk-tiered merge policy — loop-approved + green + non-sensitive merges
-   on the loop's verdict alone; chat review remains for needs-human-review,
-   loop-stuck, factory PRs, and first-of-a-kind changes (Finn §3).
-3. Factory watchdog/manager — scheduled read-only pass verifying the
-   system's claims against primary sources (Slack channel, Linear issues,
-   GitHub state), alerting only on mismatch; pulled forward by the
-   2026-08-05 unverifiable-notification failure (Finn §7).
+1. UI-verification gate — ✅ DONE (PR #27, YOY-38).
+2. Risk-tiered merge policy — REJECTED 2026-08-08: unattended agent merges
+   rejected on safety; the Slack-approval variant rejected on value; human
+   merge via GitHub stays, now phone-viable. See YOY-39's closing comment.
+3. Factory watchdog — this PR (YOY-40): scheduled read-only pass verifying
+   the system's claims against primary sources (Slack channel, Linear
+   issues, GitHub state), alerting once per condition; pulled forward by
+   the 2026-08-05 unverifiable-notification failure (Finn §7).
 
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
@@ -125,3 +133,5 @@ milestone 1 of each product repo, specified in its PRD.
   trusted MCP servers are allowed by name at user level in
   `templates/user-settings.json`. New connectors get one allow line there,
   never per-repo.
+- Pending fold-ins: YOY-37 (orchestrated parallel builders) absorbed into
+  Phase 7 on 2026-08-08; none outstanding.

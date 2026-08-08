@@ -169,6 +169,9 @@ ui_paths:
   - (none yet — set when the project grows a UI)
 ui_test_command: (none yet)
 
+slack_channel_id: (optional — the notifications channel ID, enables the
+watchdog's Slack verification)
+
 max_fix_rounds: 2
 ```
 
