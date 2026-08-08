@@ -73,7 +73,10 @@ verdict prose either. Deferred findings go to the milestone's hardening issue:
 - Append each deferred finding to that issue via the Linear connector as the
   next numbered AC, written spec-quality: file path, current behavior, target
   behavior, and a test expectation. You just read the code; you have all of
-  this.
+  this. The append must keep the issue self-consistent: an appended AC must
+  never contradict the tail's existing scaffolding (Non-goals, Relevant
+  files, Test expectations, How to verify) — each AC carries its own
+  specifics instead of amending the scaffolding.
 - Group 2 of the verdict is then one line per finding: the finding in one
   sentence plus `deferred to TEAMKEY-NNN AC-K`.
 - If no hardening issue exists for the milestone — a chain specced before
@@ -83,6 +86,12 @@ verdict prose either. Deferred findings go to the milestone's hardening issue:
   creates the tail, using the webhook mechanism from step 4 with text
   `"🧰 [SLUG] PR #N deferred finding has no hardening issue — URL"`. This
   should only ever happen for pre-mechanism chains.
+- Between milestones — when no milestone chain is active — deferred findings
+  go to the standing interim tail: the issue titled `Post-MN hardening`
+  (N is the last completed milestone), created by a human after the 🧰
+  missing-tail ping. Append to it exactly as to a milestone tail. The next
+  /yoyo-spec milestone session chains that interim tail rather than
+  duplicating it.
 - A finding judged not worth doing at all is neither fixed nor appended:
   state it in one line in group 2 with "not worth a change because X".
 

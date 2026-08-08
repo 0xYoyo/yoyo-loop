@@ -126,6 +126,17 @@ Chain rules:
   accumulated set.*
   ```
 
+  Write the tail's scaffolding — Non-goals, Relevant files, Test
+  expectations, How to verify — generically, so the body holds any number
+  of later-appended ACs: no AC counts, no AC-specific file lists. Each
+  appended AC carries its own specifics; the scaffolding must not need
+  editing when one lands.
+
+  When a standing interim tail titled `Post-MN hardening` already exists
+  for this repository — created by a human to hold findings deferred
+  between milestones — chain that issue as this milestone's tail rather
+  than filing a duplicate.
+
   The spec never marks it `agent-ready` — the same hard rule as every other
   issue.
 

@@ -166,6 +166,9 @@ node scripts/validate.mjs
   stays in the repair queue.
 - **Spec quality is the bottleneck.** Vague acceptance criteria produce
   confident wrong PRs. Let `/yoyo-spec` ask as many questions as it needs.
+- One-off agent work outside the loop follows the prompt template in
+  [docs/one-off-prompts.md](docs/one-off-prompts.md): declared expected
+  state, an exact file list, per-item scope, and a return to `main`.
 - Agents never merge, never enable auto-merge, and never apply `agent-ready`.
 
 `loop-approved` means the reviewer found no must-fix issue, checks passed, and
