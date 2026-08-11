@@ -130,6 +130,14 @@ const requiredContracts = [
     "spec must chain split issues with Linear blocked-by relations",
   ],
   [
+    specFlat.includes("Order the chain so every such reference points to an earlier issue"),
+    "spec must run the backward-reference ordering check: an AC referencing an artifact another chain issue introduces must sit after that issue",
+  ],
+  [
+    specFlat.includes("show the user the conflicting references in plain terms"),
+    "spec must stop on a reference cycle and resolve the split with the user instead of guessing an order",
+  ],
+  [
     specFlat.includes("Only after the user approves the set"),
     "spec must require user approval of the split before drafting or filing",
   ],

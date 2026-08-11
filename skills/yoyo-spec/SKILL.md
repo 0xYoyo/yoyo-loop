@@ -106,6 +106,20 @@ Chain rules:
   relation created at filing time — never as prose like "after the previous
   issue" inside an issue body. Each body must read as a complete contract on
   its own.
+- Backward-reference ordering check: before filing, walk every draft
+  issue's Acceptance Criteria and Test expectations for references to
+  artifacts, files, behaviors, scripts, or endpoints that another issue in
+  the same chain creates or first introduces — a content reference is a
+  dependency even when no file collides. Order the chain so every such
+  reference points to an earlier issue: the builder must never reach an AC
+  whose dependency exists only in a later issue's unmerged work. The linear
+  immediate-predecessor filing rule is unchanged; this check only decides
+  the order the chain is filed in.
+- If no linear order satisfies every reference — a genuine cycle, or two
+  issues each creating a piece of the other's dependency — do not guess:
+  show the user the conflicting references in plain terms and resolve the
+  split with them (merge the issues, move an AC between them, or re-cut
+  the boundaries) before filing anything.
 - Bootstrap chains (repository has no application code yet): the
   tooling + CI issue comes immediately after the scaffold issue, and
   its contract states that it extends or replaces the seed hygiene
@@ -205,7 +219,9 @@ Rules for the draft:
 ## 5. Confirm and file
 
 Show the full draft in chat — every draft, when there is a chain — and get
-the user's go-ahead. Then create each issue on the `linear_team` Linear team
+the user's go-ahead. For a chain, that pre-filing summary states the
+backward-reference check's outcome: either "all cross-issue references
+point backward" or which issues were reordered and why. Then create each issue on the `linear_team` Linear team
 (via the Linear connector) with its draft as the body.
 
 Apply the `repo:SLUG` label using the `repo_slug` from `.claude/yoyo.md`.
