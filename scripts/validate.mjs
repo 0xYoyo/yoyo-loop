@@ -714,6 +714,34 @@ assert(
   guard.includes("add_only_example"),
   "guard must allow staging the exact basename .env.example while denying every other .env* path",
 );
+// YOY-76: env writes deny for file tools exactly as for Bash. Two narrow
+// exceptions stay allowed — example/sample/template filenames (key-name
+// documentation, not secrets) and scratch paths under /tmp/. The read
+// denial is untouched by this rule.
+assert(
+  guard.includes("Blocked: writing an env file"),
+  "guard must deny Write/Edit/NotebookEdit of env-like paths (.env, .env.*) — YOY-76",
+);
+assert(
+  guard.includes("*example*|*sample*|*template*"),
+  "guard's env-write deny must exempt example/sample/template filenames — YOY-76",
+);
+assert(
+  guard.includes("/tmp/*|/private/tmp/*) ;;"),
+  "guard's env-write deny must exempt scratch paths under /tmp/ — YOY-76",
+);
+assert(
+  guardTest.includes('check_file deny  Write "$ENV_PROJ/.env"'),
+  "guard.test.sh must prove a project-path .env write denies — YOY-76",
+);
+assert(
+  guardTest.includes('check_file allow Write "$ENV_PROJ/.env.example"'),
+  "guard.test.sh must prove the .env.example write exception — YOY-76",
+);
+assert(
+  guardTest.includes('check_file allow Write "/tmp/yoy76-fixtures/.env"'),
+  "guard.test.sh must prove the /tmp scratch write exception — YOY-76",
+);
 assert(
   guard.includes("'git branch -f' would rewrite the default branch ref"),
   "guard must deny git branch -f/--force on the default branch",
