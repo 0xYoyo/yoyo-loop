@@ -91,6 +91,11 @@ sources. Thresholds below are defaults; a `watchdog_thresholds` block in
 7. **dead-loop** — the agent-ready unassigned queue is non-empty, yet no
    loop activity (new PRs, verdict comments, repair pushes) for
    > 90 minutes.
+8. **auto-closed-tail** — an issue whose workflow status is Done/completed
+   while unchecked acceptance criteria remain and `agent-ready` is present:
+   the Linear-GitHub integration auto-closed a multi-PR issue at an
+   intermediate merge, and the Done status hides the remaining ACs from the
+   builder's pick query until a human reopens it.
 
 Skip conditions gracefully where a primary source is unavailable and say
 which were skipped and why.
@@ -111,7 +116,10 @@ which were skipped and why.
   unverified send). A send whose captured HTTP status is 2xx is final:
   never run the same send again in the pass. Retry at most once, and only
   when the captured status is non-2xx or the command failed or timed out;
-  report both attempts' statuses.
+  report both attempts' statuses. The captured variable is `http_status`,
+  never `status`: zsh reserves `status` as a read-only parameter, so a
+  `status=` assignment fails *after* the webhook has already delivered,
+  mis-scoring a delivered send as failed and triggering a duplicate retry.
 
 ## Pass output
 

@@ -22,7 +22,7 @@ so and end the pass.
 ## 1. Find a PR needing review
 
 ```bash
-gh pr list --state open --json number,title,labels,isDraft,headRefOid,updatedAt,url
+gh pr list --state open --json number,title,labels,isDraft,headRefOid,mergeable,updatedAt,url
 ```
 
 Skip drafts. For each PR, find the latest comment whose first line is
@@ -35,6 +35,24 @@ review, including when `needs-human-review` sits alongside
 `loop-changes-requested`: new commits pushed during a fix round are re-reviewed
 like any others. If nothing needs review, say so and end the pass.
 
+Exception — conflicting despite approved: a PR carrying `loop-approved` whose
+current mergeability is CONFLICTING is selected for action even when its head
+SHA equals the recorded verdict SHA. `loop-approved` means "no must-fix AND
+not conflicting at the reviewed commit"; the default branch moving out from
+under the PR falsifies the second clause, so the label is stale evidence the
+loop itself must retract — otherwise the PR is invisible to both loops until
+a human notices the conflict. Do not run a full re-review. Instead: remove
+`loop-approved`, add `loop-changes-requested`, and post the comment
+`Yoyo-loop: approval retracted — PR became conflicting after SHA was
+approved; queued for rebase`, substituting the recorded verdict SHA. Then
+send one Slack notification via the webhook mechanism of step 4 with text
+`"↩️ [SLUG] PR #N approval retracted — became conflicting after approval;
+earlier merge-ready ping superseded — URL"`, so the user does not merge from
+the stale earlier ✅ ping. This retraction ping is a deliberate exception to
+"do not notify on `loop-changes-requested` alone": it supersedes a
+previously-announced merge-ready message rather than announcing repair work.
+The full re-review happens on the repaired head as normal, on a later pass.
+
 Make the skip decision against a re-fetch of the PR performed immediately
 before deciding — never against the listing output from the start of the
 pass; a same-pass race between listing and deciding has already produced a
@@ -43,8 +61,10 @@ posting in step 3 is the separate exit-side one.
 
 ## 2. Read the contract and code
 
-- Parse the linked issue identifier from `Closes TEAMKEY-NNN` in the PR body,
-  where `TEAMKEY` is `linear_team` from `.claude/yoyo.md`, and fetch the full
+- Parse the linked issue identifier from `Closes TEAMKEY-NNN` or
+  `Part of TEAMKEY-NNN` in the PR body — `Part of` marks an intermediate PR
+  of a multi-PR issue, which must not auto-close the issue at merge — where
+  `TEAMKEY` is `linear_team` from `.claude/yoyo.md`, and fetch the full
   Linear issue including comments and relations. No linked issue is a must-fix
   finding.
 - Read the full diff and every changed file in context.
@@ -221,10 +241,10 @@ actually decide merge or hold. Read the webhook URL from
 notification silently and continue — notifications are optional. Send:
 
 ```bash
-status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
   -H 'Content-type: application/json' \
   --data '{"text":"✅ [SLUG] PR #N loop-approved — TITLE — CI: STATE URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
+  "$(cat ~/.claude/yoyo-slack.webhook)") || http_status="failed"
 ```
 
 using text `"✅ [SLUG] PR #N loop-approved — TITLE — CI: STATE URL"` when the
@@ -247,7 +267,10 @@ status. A missing webhook file remains a silent skip and is reported as
 status is 2xx is final: never run the same send again in the pass — not to
 double-check, not because the response felt slow. Retry at most once, and
 only when the captured status is non-2xx or the command failed or timed out;
-report both attempts' statuses.
+report both attempts' statuses. The captured variable is `http_status`,
+never `status`: zsh reserves `status` as a read-only parameter, so a
+`status=` assignment fails *after* the webhook has already delivered,
+mis-scoring a delivered send as failed and triggering a duplicate retry.
 
 Only the unfixable escalations — scope conflict, no checks at all, a product
 decision — deliberately leave the automated repair queue. For those, a human
