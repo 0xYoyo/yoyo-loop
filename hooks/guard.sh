@@ -93,6 +93,30 @@ case "$tool" in
         deny "Blocked: writes to credential material (~/.ssh, ~/.aws, ~/.gnupg, keychain, Claude credentials) are never permitted." ;;
     esac
 
+    # YOY-76: env-like paths (.env, .env.*) deny for Write/Edit/file tools
+    # exactly as for Bash — an allowed write can clobber a real env file
+    # (e.g. apps/shopify-app/.env), which is destructive even without
+    # exfiltration. Decision approved by the user via the YOY-76 PR merge.
+    # Two narrow exceptions stay allowed:
+    #   (i)  filenames containing "example", "sample", or "template"
+    #        (.env.example and kin are key-name documentation, not secrets);
+    #   (ii) paths under /tmp/ (scratch fixtures; includes /private/tmp,
+    #        which /tmp symlinks to on macOS).
+    # The read denial (settings.json Read deny rules and the Bash printing
+    # rule below) is untouched by this rule and must not weaken.
+    envbase="${path##*/}"
+    case "$envbase" in
+      .env|.env.*)
+        case "$envbase" in
+          *example*|*sample*|*template*) ;;
+          *)
+            case "$path" in
+              /tmp/*|/private/tmp/*) ;;
+              *) deny "Blocked: writing an env file ($path). Env files hold secrets and a write can clobber the real one. Allowed exceptions: filenames containing example/sample/template, or scratch paths under /tmp/." ;;
+            esac ;;
+        esac ;;
+    esac
+
     # Claude settings changes need a human: denied with escalation guidance
     # so the loop fails fast instead of waiting on a prompt.
     case "$path" in

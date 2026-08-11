@@ -80,6 +80,25 @@ check_escalate() { # check_escalate <cwd> <command>: deny carrying the escalatio
   fi
 }
 
+check_file() { # check_file <expected> <tool> <file_path>
+  local expected="$1" tool="$2" path="$3" out got
+  out="$(jq -nc --arg t "$tool" --arg p "$path" --arg cwd "$MAIN_REPO" \
+    '{tool_name: $t, tool_input: {file_path: $p}, cwd: $cwd}' \
+    | bash "$GUARD")"
+  if [ -z "$out" ]; then
+    got=allow
+  else
+    got="$(printf '%s' "$out" | jq -r '.hookSpecificOutput.permissionDecision')"
+  fi
+  if [ "$got" = "$expected" ]; then
+    PASS=$((PASS + 1))
+    echo "ok    [$expected] $tool $path"
+  else
+    FAIL=$((FAIL + 1))
+    echo "FAIL  [got $got, want $expected] $tool $path"
+  fi
+}
+
 # --- bare push: judged against the branch of the checkout it runs in -------
 check deny  "$MAIN_REPO"    "git push"
 check allow "$FEATURE_REPO" "git push"
@@ -123,6 +142,26 @@ check allow "$MAIN_REPO" "git add config/.env.example"
 check deny  "$MAIN_REPO" "git add .env"
 check deny  "$MAIN_REPO" "git add .env.local"
 check deny  "$MAIN_REPO" "git add secrets/.env.production"
+
+# --- YOY-76: env-like paths deny for file tools exactly as for Bash, with
+# --- two narrow exceptions: example/sample/template filenames, and scratch
+# --- paths under /tmp/. Ordinary writes are unaffected. The fake project
+# --- root sits under $HOME, never /tmp: mktemp -d lands in /tmp on Linux CI,
+# --- where the /tmp scratch exception would mask the deny under test. ------
+ENV_PROJ="$HOME/yoy76-envtest-project"   # never created; guard string-matches
+SAVED_CPD="$CLAUDE_PROJECT_DIR"
+export CLAUDE_PROJECT_DIR="$ENV_PROJ"
+check_file deny  Write "$ENV_PROJ/.env"
+check_file deny  Write "$ENV_PROJ/apps/shopify-app/.env"
+check_file deny  Edit  "$ENV_PROJ/.env.production"
+check_file deny  NotebookEdit "$ENV_PROJ/.env.local"
+check_file allow Write "$ENV_PROJ/.env.example"
+check_file allow Write "$ENV_PROJ/config/.env.sample"
+check_file allow Write "$ENV_PROJ/.env.template"
+check_file allow Write "/tmp/yoy76-fixtures/.env"
+check_file allow Write "/private/tmp/yoy76-fixtures/.env.local"
+check_file allow Write "$ENV_PROJ/README.md"
+export CLAUDE_PROJECT_DIR="$SAVED_CPD"
 
 # --- rewriting the default branch ref locally is denied; feature branches
 # --- are unaffected ---------------------------------------------------------
