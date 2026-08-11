@@ -98,7 +98,10 @@ age (oldest first).
 5. **investigate** — anything in progress or in review with no attached PR
    and no visible activity. State it neutrally — what is observed, e.g.
    "in progress, no PR attached, no activity visible" — never speculate
-   about a cause.
+   about a cause. Also flag here, one line per issue: issues whose workflow
+   status is Done/completed while unchecked acceptance criteria remain and
+   `agent-ready` is present — an integration auto-close stranded a multi-PR
+   issue's remaining ACs invisibly; the action is "reopen".
 
 6. **agent working** — informational, no action: open PRs labeled
    `loop-changes-requested` (the repair queue, including those also carrying

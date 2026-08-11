@@ -367,11 +367,11 @@ const requiredContracts = [
     "reviewer must not mention branch -D anywhere outside the prohibition; no force-delete path may exist",
   ],
   [
-    buildFlat.includes('status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
+    buildFlat.includes('http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
     "builder notifications must capture the webhook HTTP status as send evidence",
   ],
   [
-    reviewFlat.includes('status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
+    reviewFlat.includes('http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}"'),
     "reviewer notifications must capture the webhook HTTP status as send evidence",
   ],
   [
@@ -523,6 +523,50 @@ const requiredContracts = [
   [
     watchdogFlat.includes("expect its ping from the reviewer's verdict, not from the builder ship site"),
     "watchdog missing-notification condition must expect the reviewer verdict ping and not alarm on the silent builder ship site",
+  ],
+  [
+    ![buildFlat, reviewFlat, watchdogFlat].some((flat) => /(?<![A-Za-z0-9_])status=(\$\(|")/.test(flat)),
+    "no send mechanism may assign to a bare `status` variable; zsh reserves it read-only, so the assignment fails after the webhook delivers and the send is retried as a duplicate",
+  ],
+  [
+    [buildFlat, reviewFlat, watchdogFlat].every((flat) =>
+      flat.includes("The captured variable is `http_status`, never `status`"),
+    ),
+    "every send mechanism must pin the captured variable name http_status and state why bare status is banned",
+  ],
+  [
+    buildFlat.includes("write `Closes TEAMKEY-NNN` only when this PR completes every remaining acceptance criterion") &&
+      buildFlat.includes("write `Part of TEAMKEY-NNN` instead"),
+    "builder PR bodies must use Part of for intermediate PRs of a multi-PR issue and Closes only when every remaining AC is completed",
+  ],
+  [
+    reviewFlat.includes("`Closes TEAMKEY-NNN` or `Part of TEAMKEY-NNN`"),
+    "reviewer must parse the linked issue from either Closes or Part of; intermediate multi-PR bodies carry Part of",
+  ],
+  [
+    buildFlat.includes("retry that mutation once and re-fetch again") &&
+      buildFlat.includes("retry the unassign once and re-fetch again"),
+    "builder must verify every Linear assign/unassign/state mutation by re-fetch, retry once, and report a persisting old value instead of assuming success",
+  ],
+  [
+    statusFlat.includes("Done/completed while unchecked acceptance criteria remain and `agent-ready` is present"),
+    "status must flag Done issues with unchecked ACs and agent-ready as an auto-close inconsistency",
+  ],
+  [
+    watchdogFlat.includes("auto-closed-tail"),
+    "watchdog must check for integration-auto-closed issues with unchecked ACs (auto-closed-tail)",
+  ],
+  [
+    reviewFlat.includes("selected for action even when its head SHA equals the recorded verdict SHA"),
+    "reviewer must select a loop-approved PR whose mergeability is CONFLICTING even at an unchanged head; a later conflict falsifies the approval",
+  ],
+  [
+    reviewFlat.includes("approval retracted — PR became conflicting after SHA was approved; queued for rebase"),
+    "reviewer retraction must swap the labels and post the approval-retracted comment instead of a full re-review",
+  ],
+  [
+    reviewFlat.includes("earlier merge-ready ping superseded"),
+    "reviewer retraction must send one ping superseding the earlier merge-ready message so the user does not merge from a stale ping",
   ],
   [
     buildFlat.includes("A send whose captured HTTP status is 2xx is final") &&

@@ -159,10 +159,10 @@ from `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip
 notification silently and continue — notifications are optional. Send:
 
 ```bash
-status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
   -H 'Content-type: application/json' \
   --data '{"text":"🛑 [SLUG] PR #N loop-stuck — recurring findings URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
+  "$(cat ~/.claude/yoyo-slack.webhook)") || http_status="failed"
 ```
 
 substituting the `repo_slug`, the real PR number, a one-line summary of the
@@ -178,6 +178,10 @@ never as "sent". A send whose captured HTTP status is 2xx is final: never
 run the same send again in the pass — not to double-check, not because the
 response felt slow. Retry at most once, and only when the captured status is
 non-2xx or the command failed or timed out; report both attempts' statuses.
+The captured variable is `http_status`, never `status`: zsh reserves `status`
+as a read-only parameter, so a `status=` assignment fails *after* the webhook
+has already delivered, mis-scoring a delivered send as failed and triggering
+a duplicate retry.
 
 If a proposed fix would cross an issue non-goal, touch a path listed in
 `sensitive_paths`, or requires a product decision, do not implement it.
@@ -190,10 +194,10 @@ webhook URL from `~/.claude/yoyo-slack.webhook`; if that file does not exist,
 skip notification silently and continue — notifications are optional. Send:
 
 ```bash
-status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
   -H 'Content-type: application/json' \
   --data '{"text":"👀 [SLUG] PR #N needs-human-review — REASON URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
+  "$(cat ~/.claude/yoyo-slack.webhook)") || http_status="failed"
 ```
 
 substituting the `repo_slug`, the real PR number, a one-line reason, and the
@@ -245,6 +249,14 @@ Assign yourself and move the issue to the team's started workflow state
 code. Re-fetch the issue immediately after the update; if it is blocked,
 assigned to somebody else, or no longer `agent-ready`, do not work it and
 return to step 2.
+
+The re-fetch also verifies the mutation itself: confirm the assignee and
+workflow state actually changed to what was written. The connector is known to
+silently keep the old value while reporting success. If a field did not
+change, retry that mutation once and re-fetch again; if it still holds the old
+value, report the discrepancy explicitly in the pass output instead of
+assuming success. This applies to every Linear mutation that assigns,
+unassigns, or changes state — here and in the blocked flow of step 8.
 
 The assignee prevents different people from taking the same issue. It is not
 an atomic lock between simultaneous sessions authenticated as the same Linear
@@ -314,7 +326,14 @@ unrelated work or generated secrets.
 Push and open a PR with `gh pr create`. Its description must include:
 
 - What changed and why
-- `Closes TEAMKEY-NNN`, using the issue's real Linear identifier
+- The issue link, using the issue's real Linear identifier: write
+  `Closes TEAMKEY-NNN` only when this PR completes every remaining acceptance
+  criterion of the issue. When the PR covers only a subset of the issue's
+  acceptance criteria — a multi-PR issue, such as a hardening tail worked per
+  its own sizing note — write `Part of TEAMKEY-NNN` instead: the Linear-GitHub
+  integration auto-closes the issue at merge on `Closes`, and a mid-tail
+  auto-close makes the remaining ACs invisible to the pick query. The PR title
+  keeps naming the ACs it covers.
 - A scope ledger: one evidence line per `AC-N`, one preservation line per
   `NG-N`, and `Other behavior changes: None`
 - Numbered manual test steps matching what was actually built
@@ -347,21 +366,22 @@ query explicitly excludes `blocked`, so the issue safely reappears only after
 a human answers and removes that label.
 
 After unassigning, re-fetch the issue and confirm the assignee actually
-cleared. If the connector refused or the assignee persists, state it
+cleared. If the connector refused or the assignee persists, retry the
+unassign once and re-fetch again. If it still persists, state it
 explicitly in the pass output as a must-act failure — an assigned issue is
 invisible to the pick query and strands silently — and include the failed
 unassign in the blocked Slack notification below. Do not retry in a loop: one
-re-fetch, one report.
+retry, one report.
 
 After applying `blocked`, send a Slack notification. Read the webhook URL from
 `~/.claude/yoyo-slack.webhook`; if that file does not exist, skip notification
 silently and continue — notifications are optional. Send:
 
 ```bash
-status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
+http_status=$(curl -m 5 -s -o /dev/null -w "%{http_code}" -X POST \
   -H 'Content-type: application/json' \
   --data '{"text":"🚧 [SLUG] TEAMKEY-NNN blocked — QUESTION URL"}' \
-  "$(cat ~/.claude/yoyo-slack.webhook)") || status="failed"
+  "$(cat ~/.claude/yoyo-slack.webhook)") || http_status="failed"
 ```
 
 substituting the `repo_slug`, the issue's real identifier, a one-line version
