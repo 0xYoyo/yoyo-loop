@@ -24,3 +24,5 @@ jobs:
         run: node scripts/validate.mjs
       - name: Test the guard hook
         run: bash hooks/guard.test.sh
+      - name: Test the repo-map template
+        run: node scripts/repo-map-template.test.mjs

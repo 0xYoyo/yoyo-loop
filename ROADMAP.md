@@ -1,7 +1,7 @@
 # Roadmap
 
-Last updated: 8 August 2026 — factory watchdog (YOY-40); merge policy
-rejected; Phase 7 promoted to NEXT.
+Last updated: 11 August 2026 — factory window shipped (YOY-59/62/63/65/66/76,
+PRs #34–#37); Phase 7 deferred; debug and UX gates proposed (YOY-73/74).
 
 ## North star
 
@@ -88,9 +88,13 @@ Cloud Routines on GitHub events first; leased persistent workers only if
 open sessions become the bottleneck. The /loop scheduler is per-session and
 loops run concurrently (confirmed 2026-08-02); the remaining constraint
 Phase 7 removes is that sessions must stay open on an awake machine.
-(Finn §8.) NEXT — the first factory window after M3 ships; condition (loop
+(Finn §8.) DEFERRED — the first factory window after M3 ships; condition (loop
 latency and laptop-tethering actually hurting) was met 2026-08-08 per the
 user.
+DEFERRED 2026-08-11: the user reversed the Aug-8 promotion. Caffeinate plus
+an open screen is fine and tethering is not actually hurting, so the
+build-when-the-failure-mode-appears rule applies. Condition re-parked:
+revisit when loop latency or laptop tethering genuinely hurts.
 - Includes orchestrated parallel builders — queue partitioning + leases
   (absorbs YOY-37).
 - Candidate compute: the $300 GCP credit — verify its ~90-day activation
@@ -101,10 +105,40 @@ user.
 2. Risk-tiered merge policy — REJECTED 2026-08-08: unattended agent merges
    rejected on safety; the Slack-approval variant rejected on value; human
    merge via GitHub stays, now phone-viable. See YOY-39's closing comment.
-3. Factory watchdog — this PR (YOY-40): scheduled read-only pass verifying
+3. Factory watchdog — ✅ DONE (YOY-40): scheduled read-only pass verifying
    the system's claims against primary sources (Slack channel, Linear
    issues, GitHub state), alerting once per condition; pulled forward by
    the 2026-08-05 unverifiable-notification failure (Finn §7).
+
+**2026-08-11 factory window — ✅ SHIPPED (PRs #34–#37)**
+- YOY-59 — zsh-safe notification sends: captured variable renamed to
+  http_status at every send site; bare status= assignments banned by
+  validator. Kills the duplicate-ping ghost.
+- YOY-63 — the reviewer retracts loop-approved on PRs that turn conflicting
+  because main moved, with a Slack ping superseding the earlier merge-ready
+  message.
+- YOY-65 — multi-PR issues use Part of on intermediate PRs and Closes only
+  on the closing PR; every Linear assign, unassign, or state mutation is
+  verified by re-fetch with one retry; status and watchdog both flag
+  auto-closed tails.
+- YOY-62 — spec runs a backward-reference ordering check before filing a
+  chain: every AC content reference must point to an earlier issue, with a
+  stop-on-cycle rule. The chain stays strictly linear by decision, because
+  a dependency graph buys parallelism that a single builder loop per repo
+  cannot use.
+- YOY-66 — generated repo map plus import graph with a CI drift guard,
+  shipped as a factory template and seeded by init; env paths listed,
+  contents never read. Adoption is per-repo (unfiltered: YOY-75, shipped in
+  its PR #64; template fix: YOY-77).
+- YOY-76 — guard consistency: env-like paths now deny for file-tool writes
+  exactly as for Bash, with example/sample/template filenames and /tmp
+  scratch paths as the two allowed exceptions. Shipped in PR #37.
+- Validator grew from 125 to 140+ contracts across the window.
+- Proposals filed in the same window, awaiting user sign-off before build:
+  YOY-73 (/yoyo-debug — a terminal-side debugger role: offline-first repro,
+  hypothesis with a decisive test, evidence to durable homes) and YOY-74
+  (UX quality gate — committed DESIGN.md bar, builder screenshot evidence,
+  reviewer visual judgment as must-fix).
 
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
@@ -126,6 +160,13 @@ milestone 1 of each product repo, specified in its PRD.
 - Identical logic duplicated across skills (e.g. branch tidy in both build
   and review) must be changed in every copy in the same PR; the validator
   should pin both copies.
+- Deferred or parked Linear issues carry a bracketed title prefix such as
+  [M5], [LATER: ...], or [PROPOSAL — awaiting user sign-off], so the active
+  queue reads unambiguously at a glance; an unprefixed issue is on duty now.
+- Direction notes are promoted to full AC contracts before any agent is
+  pointed at them. Agents correctly stop on AC-less issues and on
+  contract-versus-live mismatches (the YOY-62 and YOY-66 lesson), and that
+  stop is rewarded behavior.
 
 ## Notes
 
