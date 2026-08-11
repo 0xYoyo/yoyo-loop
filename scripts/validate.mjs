@@ -792,6 +792,28 @@ assert(
   repoMapTemplate.includes('FIX_COMMAND = "node scripts/repo-map.mjs"'),
   "repo-map drift guard must name the exact fix command in its failure message",
 );
+// YOY-77: example/sample/template-named env files are documentation and must
+// survive the listing filter in both modes, or envPaths()'s tracked-example
+// detection is dead code in git mode. A functional regression test proves it
+// against a real fixture repo; CI runs that test.
+assert(
+  repoMapTemplate.includes("(!ENV_FILE.test(f) || ENV_EXAMPLE.test(f))") &&
+    repoMapTemplate.includes("!ENV_FILE.test(f) || ENV_EXAMPLE.test(f)), mode: \"walk\""),
+  "repo-map listing filter must exempt example/sample/template env names in git and walk modes — YOY-77",
+);
+const repoMapTest = read("scripts/repo-map-template.test.mjs");
+assert(
+  repoMapTest.includes("tracked .env.example appears in the key-locations section"),
+  "repo-map template test must pin the git-mode .env.example regression — YOY-77",
+);
+assert(
+  repoMapTest.includes("a real env file stays out of the map even when tracked"),
+  "repo-map template test must prove real env files stay excluded — YOY-77",
+);
+assert(
+  read(".github/workflows/validate.yml").includes("scripts/repo-map-template.test.mjs"),
+  "CI must run the repo-map template test — YOY-77",
+);
 
 console.log(
   `Validated ${skillNames.length} skills, README links, and ${requiredContracts.length} safety contracts.`,
