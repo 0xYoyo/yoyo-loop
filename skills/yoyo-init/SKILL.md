@@ -134,6 +134,50 @@ you cannot. Branch protection and rulesets are unavailable on free private
 repositories, and the reviewer does not need them: when nothing is marked
 required, it simply demands that every check pass.
 
+### Repo map and drift guard
+
+Every product repo carries a generated map of its own structure —
+`docs/REPO-MAP.md`: a source tree, key locations (config files, env-file
+paths, entrypoints, scripts, fixtures, migrations), and a module-level
+import map. The map is generated, never hand-maintained: hand edits are
+forbidden — the generator overwrites them, and the CI drift guard fails any
+committed copy that does not match a fresh generation. The generator lists
+env files by path only and never reads their contents; the guard hook denies
+env reads by design, and the generator works under that guard.
+
+Seed it in three idempotent moves — re-running repairs, never duplicates:
+
+1. Copy the generator from the factory template into the project:
+
+   ```bash
+   YOYO_LOOP="$(cd "$(dirname "$(readlink ~/.claude/skills/yoyo-init)")/.." && pwd)"
+   mkdir -p scripts
+   cp "$YOYO_LOOP/templates/repo-map.mjs" scripts/repo-map.mjs
+   ```
+
+   The skill symlink resolves to the yoyo-loop checkout, so the copy always
+   comes from the installed factory version. Overwrite an existing copy —
+   that is the repair path; generator improvements belong upstream in the
+   factory template, never as local edits.
+
+2. Run the initial generation with `node scripts/repo-map.mjs`, then commit
+   `scripts/repo-map.mjs` and `docs/REPO-MAP.md` together.
+
+3. Add the drift guard to the CI workflow — the seed hygiene workflow above
+   or the project's real one — as a step of a job that runs on
+   `pull_request`, only when no step runs it yet:
+
+   ```yaml
+   - name: Repo map current
+     run: node scripts/repo-map.mjs --check
+   ```
+
+   The check regenerates the map in CI and fails when the committed copy
+   differs, naming the exact fix command (`node scripts/repo-map.mjs`) in
+   its failure message. The map cannot rot by construction: any layout
+   change that forgets to regenerate turns the PR red with the fix spelled
+   out.
+
 ## 6. Builder worktree
 
 ```bash
@@ -294,3 +338,32 @@ If the project had no code, close by telling them exactly what to do next:
 3. Expect the first pull request to need their review rather than come back
    approved — nothing could be checked when it was written.
 4. Read it and merge it. Nothing else to do; the loop takes over from there.
+
+## Adopting the repo map in an existing repo
+
+A product repository initialised before the repo map existed adopts it with
+one copy-paste spec issue — file it via `/yoyo-spec` with exactly this
+contract:
+
+```md
+## Problem
+
+Agents and chats rediscover this repository's structure every session. A
+generated, drift-guarded repo map makes structure knowledge durable and
+always current.
+
+## Acceptance Criteria
+
+- [ ] AC-1 — `scripts/repo-map.mjs` exists, copied unmodified from the
+  yoyo-loop factory template `templates/repo-map.mjs`, and running
+  `node scripts/repo-map.mjs` writes `docs/REPO-MAP.md` (source tree, key
+  locations listing env-file paths only, module import map).
+- [ ] AC-2 — CI runs `node scripts/repo-map.mjs --check` on `pull_request`
+  and fails on a stale map, naming the fix command in the failure message.
+- [ ] AC-3 — `docs/REPO-MAP.md` is committed and current on this PR's head.
+
+## Non-goals
+
+- NG-1 — No hand edits to `docs/REPO-MAP.md`, ever; the file is generated.
+- NG-2 — The generator never reads env-file contents; paths only.
+```

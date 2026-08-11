@@ -582,6 +582,19 @@ const requiredContracts = [
       watchdogFlat.includes("A send whose captured HTTP status is 2xx is final"),
     "every send mechanism must state that a 2xx send is final and retries happen only on non-2xx/failure/timeout",
   ],
+  [
+    initFlat.includes('cp "$YOYO_LOOP/templates/repo-map.mjs" scripts/repo-map.mjs') &&
+      initFlat.includes("node scripts/repo-map.mjs --check"),
+    "init must seed the repo-map generator from the factory template and add the CI drift-guard step",
+  ],
+  [
+    initFlat.includes("The map is generated, never hand-maintained: hand edits are forbidden"),
+    "init must state the repo map is generated and hand edits are forbidden",
+  ],
+  [
+    initFlat.includes("lists env files by path only and never reads their contents"),
+    "init must state the repo-map generator lists env files by path only and never reads their contents",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
@@ -731,6 +744,25 @@ assert(
 assert(
   initFlat.includes("the human copying the file IS the approval gate"),
   "init must state that the human copying the file is the approval gate",
+);
+
+// The repo-map generator ships as a factory template. Its env-file rule is
+// structural: the single readText() gate refuses env-like paths, so no code
+// path can read env-file contents; the map lists their paths only.
+assert(existsSync(new URL("templates/repo-map.mjs", root)), "templates/repo-map.mjs must exist");
+const repoMapTemplate = read("templates/repo-map.mjs");
+assert(
+  repoMapTemplate.includes("never read env-file contents") &&
+    repoMapTemplate.includes("refusing to read env file contents"),
+  "repo-map template must refuse env-file reads at its single read gate; paths only",
+);
+assert(
+  repoMapTemplate.includes("do not edit by hand"),
+  "repo-map template must stamp its output as generated, never hand-edited",
+);
+assert(
+  repoMapTemplate.includes('FIX_COMMAND = "node scripts/repo-map.mjs"'),
+  "repo-map drift guard must name the exact fix command in its failure message",
 );
 
 console.log(
