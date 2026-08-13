@@ -1,6 +1,6 @@
-# Factory handoff — process routing
+# Factory process routing
 
-Durable process documentation for chats and sessions working with the yoyo
+Durable process-routing reference for chats and sessions working with the yoyo
 loop. What lives here must survive chat migrations: read it before routing
 work into the factory.
 

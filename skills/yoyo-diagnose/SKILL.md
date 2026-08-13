@@ -6,7 +6,7 @@ description: Turn a symptom set or failed run into one complete, evidence-backed
 # Yoyo-loop diagnoser
 
 Manually invoked with a symptom set or a failed-run reference (lane 3 of the
-bug routing table in `docs/HANDOFF.md`). One pass produces one complete
+bug routing table in `docs/PROCESS.md`). One pass produces one complete
 diagnosis report so that ONE consolidated fix cycle can cover everything
 found — the alternative this skill exists to kill is whack-a-mole: fix one
 defect, run, discover the next.

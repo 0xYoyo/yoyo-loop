@@ -2,7 +2,7 @@
 
 Last updated: 13 August 2026 — factory window shipped YOY-73 (three-lane bug
 intake + /yoyo-diagnose), YOY-74 (UX quality gate v2), YOY-80 (standing
-decisions recorded).
+decisions recorded), YOY-79 (/yoyo-design; docs/HANDOFF.md → docs/PROCESS.md).
 
 ## North star
 
@@ -148,14 +148,21 @@ revisit when loop latency or laptop tethering genuinely hurts.
   first, diagnosis posted as a Linear comment) unless a `Yoyo-diagnose report`
   comment already maps the mechanism; new /yoyo-diagnose skill —
   diagnosis-only, completeness-ruled, ends in a consolidated fix contract
-  proposal. Routing table recorded in docs/HANDOFF.md.
+  proposal. Routing table recorded in docs/PROCESS.md.
 - YOY-74 — UX quality gate v2: docs/DESIGN.md holds invariants only, authored
-  by /yoyo-design (YOY-79, later); init seeds the placeholder; spec gates
+  by /yoyo-design (YOY-79, shipped in this window); init seeds the
+  placeholder; spec gates
   UI milestones on an authored DESIGN.md; builder attaches screenshot
   evidence on UI-touching PRs; reviewer judges `[DESIGN]` with must-fix only
   on citation.
 - YOY-80 — standing decisions: scope discipline, fragility rule, three-lane
   bug routing.
+- YOY-79 — /yoyo-design: specialist design-authoring skill; sole deliverable
+  docs/DESIGN.md (invariants + direction system proportional to owned design
+  surface); Claude Design as optional upstream, never a dependency. Run once
+  on unfiltered before the M4 spec session. docs/HANDOFF.md renamed to
+  docs/PROCESS.md in the same PR (name collided with the user's separate
+  session-handoff document).
 
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous

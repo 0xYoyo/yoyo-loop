@@ -1,6 +1,6 @@
 # yoyo-loop
 
-Seven Claude Code skills that turn Linear + GitHub into a small, human-gated
+Eight Claude Code skills that turn Linear + GitHub into a small, human-gated
 software factory. Adapted from [Finn-loop](https://github.com/finna/Finn-loop)
 by Alex Finn (MIT), with per-repo scoping and a bootstrap command added.
 
@@ -18,7 +18,8 @@ One approval label, one rule: **humans merge**.
 | `/yoyo-review` | Reviews open PRs against their issue and CI, posts a three-group verdict. Runs under `/loop`. |
 | `/yoyo-status` | Read-only list of everything waiting on you: PRs to merge, escalations to read, blocked questions to answer, specs awaiting `agent-ready`. Cross-project by default, single project by slug argument. Never writes anything. |
 | `/yoyo-watchdog` | Scheduled read-only health sweep: verifies the loop's claims against primary sources (Linear, GitHub, Slack) and alerts once per condition — stalls, missing notifications, red main. Never fixes anything. Runs under `/loop`. |
-| `/yoyo-diagnose` | Turns a symptom set or failed run into one complete, evidence-backed diagnosis report with a proposed consolidated fix contract, posted as a Linear comment. Diagnosis only — never edits code, never opens PRs. Manually invoked; see the bug routing table in [docs/HANDOFF.md](docs/HANDOFF.md). |
+| `/yoyo-diagnose` | Turns a symptom set or failed run into one complete, evidence-backed diagnosis report with a proposed consolidated fix contract, posted as a Linear comment. Diagnosis only — never edits code, never opens PRs. Manually invoked; see the bug routing table in [docs/PROCESS.md](docs/PROCESS.md). |
+| `/yoyo-design` | Authors or re-authors `docs/DESIGN.md` — design invariants plus a direction system proportional to the design surface the project owns — from the PRD, the repo, and a spec-style interview. Run manually once per project and again for direction-level changes. DESIGN.md is its entire write surface. |
 
 ## Changes from Finn-loop
 
@@ -45,9 +46,9 @@ git clone <this repo> ~/repos/yoyo-loop
 cd ~/repos/yoyo-loop && ./install.sh
 ```
 
-This symlinks each skill into `~/.claude/skills/`, so all seven commands exist
+This symlinks each skill into `~/.claude/skills/`, so all eight commands exist
 in every project you open, and editing a skill here takes effect immediately
-everywhere. Then run `/reload-skills` and confirm `/skills` lists all seven.
+everywhere. Then run `/reload-skills` and confirm `/skills` lists all eight.
 
 ## Set up a project (once per project)
 
@@ -175,7 +176,7 @@ node scripts/validate.mjs
   [docs/one-off-prompts.md](docs/one-off-prompts.md): declared expected
   state, an exact file list, per-item scope, and a return to `main`.
 - Bugs route through the three-lane table in
-  [docs/HANDOFF.md](docs/HANDOFF.md): trivial → chat one-off (fast lane,
+  [docs/PROCESS.md](docs/PROCESS.md): trivial → chat one-off (fast lane,
   protected); single unknown-cause symptom → `bug` issue through the loop;
   multi-symptom or failed run → `/yoyo-diagnose`, then one consolidated fix
   cycle.
