@@ -75,7 +75,12 @@ GitHub, on this repository:
 
 Linear, on the team:
 
-- `agent-ready`, `blocked`, `repo:SLUG`
+- `agent-ready`, `blocked`, `bug`, `repo:SLUG`
+
+Linear label names are unique case-insensitively across the workspace, so an
+existing `Bug` label already satisfies `bug` — treat it as present, never try
+to create a differently-cased duplicate. `bug` means exactly one thing in the
+loop: cause currently unknown (see the builder's bug-issue rule).
 
 `repo:SLUG` is what lets one Linear team serve many repositories without their
 queues mixing. Confirm to the user that it now exists.
@@ -177,6 +182,26 @@ Seed it in three idempotent moves — re-running repairs, never duplicates:
    its failure message. The map cannot rot by construction: any layout
    change that forgets to regenerate turns the PR red with the fix spelled
    out.
+
+### Design invariants placeholder
+
+Seed `docs/DESIGN.md` as one idempotent step alongside the seeds above: only
+when the file does not exist, write it with exactly this content, commit, and
+push:
+
+```md
+# Design invariants
+
+Placeholder — run /yoyo-design to author this file.
+
+This file will hold the design rules that stay true while the UI changes
+(invariants only — it never describes the current UI). Until it is authored
+and approved by the user, the reviewer's design judgment has no bar to judge
+against, and /yoyo-spec stops UI milestones that reach this placeholder.
+```
+
+Never overwrite an existing `docs/DESIGN.md` — an authored file is
+user-approved content, and re-running init must repair, not regress it.
 
 ## 6. Builder worktree
 

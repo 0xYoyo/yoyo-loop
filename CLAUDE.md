@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Source of the yoyo-loop skills: six `SKILL.md` files under `skills/`, a
+Source of the yoyo-loop skills: seven `SKILL.md` files under `skills/`, a
 validator in `scripts/validate.mjs`, and the CI workflow that runs it.
 
 Update `ROADMAP.md` when a phase lands.
@@ -12,6 +12,7 @@ Update `ROADMAP.md` when a phase lands.
 
 ```
 ~/.claude/skills/yoyo-build  -> ~/repos/yoyo-loop/skills/yoyo-build
+~/.claude/skills/yoyo-diagnose -> ~/repos/yoyo-loop/skills/yoyo-diagnose
 ~/.claude/skills/yoyo-init   -> ~/repos/yoyo-loop/skills/yoyo-init
 ~/.claude/skills/yoyo-review -> ~/repos/yoyo-loop/skills/yoyo-review
 ~/.claude/skills/yoyo-spec   -> ~/repos/yoyo-loop/skills/yoyo-spec

@@ -43,6 +43,10 @@ Never file issues for more than one milestone in a session — the next
 milestone is specced only after the previous one's code is merged (rolling
 wave).
 
+UI-milestone gate: if the milestone being specced touches shopper-facing UI
+and `docs/DESIGN.md` is still the placeholder ("run /yoyo-design to author
+this file"), tell the user to run /yoyo-design first and stop.
+
 If the user's answers during the interview contradict the PRD, the user
 wins. Note the contradiction in chat and record in the filed issue(s) that
 `docs/PRD.md` needs a version bump for X.
