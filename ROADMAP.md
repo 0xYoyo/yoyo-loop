@@ -1,7 +1,8 @@
 # Roadmap
 
-Last updated: 11 August 2026 — factory window shipped (YOY-59/62/63/65/66/76,
-PRs #34–#37); Phase 7 deferred; debug and UX gates proposed (YOY-73/74).
+Last updated: 13 August 2026 — factory window shipped YOY-73 (three-lane bug
+intake + /yoyo-diagnose), YOY-74 (UX quality gate v2), YOY-80 (standing
+decisions recorded).
 
 ## North star
 
@@ -140,6 +141,22 @@ revisit when loop latency or laptop tethering genuinely hurts.
   (UX quality gate — committed DESIGN.md bar, builder screenshot evidence,
   reviewer visual judgment as must-fix).
 
+**2026-08-13 factory window — ✅ SHIPPED**
+- YOY-73 — bug intake v2 (supersedes the /yoyo-debug v1 proposal): three-lane
+  routing with the trivial fast lane protected; `bug` label = cause currently
+  unknown; builder diagnoses symptom-only `bug` issues before fixing (offline
+  first, diagnosis posted as a Linear comment) unless a `Yoyo-diagnose report`
+  comment already maps the mechanism; new /yoyo-diagnose skill —
+  diagnosis-only, completeness-ruled, ends in a consolidated fix contract
+  proposal. Routing table recorded in docs/HANDOFF.md.
+- YOY-74 — UX quality gate v2: docs/DESIGN.md holds invariants only, authored
+  by /yoyo-design (YOY-79, later); init seeds the placeholder; spec gates
+  UI milestones on an authored DESIGN.md; builder attaches screenshot
+  evidence on UI-touching PRs; reviewer judges `[DESIGN]` with must-fix only
+  on citation.
+- YOY-80 — standing decisions: scope discipline, fragility rule, three-lane
+  bug routing.
+
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
 milestone planning.
@@ -167,6 +184,22 @@ milestone 1 of each product repo, specified in its PRD.
   pointed at them. Agents correctly stop on AC-less issues and on
   contract-versus-live mismatches (the YOY-62 and YOY-66 lesson), and that
   stop is rewarded behavior.
+- **Scope discipline:** a skill never absorbs duties outside its stated
+  purpose. New capability goes into an existing skill only when genuinely
+  in-scope; otherwise a new skill — and a new skill only when the capability
+  warrants a whole role. One bloated skill and a hundred micro-skills are the
+  same disease.
+- **Fragility rule:** every yoyo-loop change is examined from every direction
+  before implementation — every consumer, every dependent, every interaction
+  with existing mechanisms, every label and state it touches. The factory
+  runs the entire show; no change is "just adding a thing." (Generalizes the
+  existing consumer-mapping rule from mechanism changes to all factory
+  changes.)
+- **Bug routing:** bugs route through the three-lane table (trivial → chat
+  one-off, fast lane protected; single unknown-cause symptom → `bug` issue
+  through the loop; multi-symptom/failed run → /yoyo-diagnose → consolidated
+  contract). Defined in YOY-73; recorded here so the routing survives chat
+  migrations.
 
 ## Notes
 

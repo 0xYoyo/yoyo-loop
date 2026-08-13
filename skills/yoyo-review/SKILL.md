@@ -79,6 +79,8 @@ Every must-fix code finding starts with one of:
 - `[DEFECT]` — the implementation is broken while staying inside scope
 - `[SECURITY]` — a severe security issue blocks shipping
 - `[CI]` — a required GitHub check failed
+- `[DESIGN]` — design judgment on a UI-touching PR; must-fix only with a
+  citation (see the design judgment rule below)
 
 The must-fix bar is crisp: a finding is must-fix when this PR's contract (an
 AC or NG), correctness, or security is violated. Everything else worth doing
@@ -134,6 +136,24 @@ lane per its acceptance criteria. Committed tests running in CI are the
 only acceptable UI evidence; agent-reported walkthroughs, session
 screenshots, or uncommitted artifacts are claims, not evidence, and do
 not satisfy the gate.
+
+Design judgment: for UI-touching PRs, view the screenshots the builder
+attached to the PR (desktop + mobile, RTL where applicable, plus
+empty/loading/error states) and judge against `docs/DESIGN.md`. Missing
+screenshot evidence on a UI-touching PR is a `[DESIGN]` must-fix. Design
+findings use the `[DESIGN]` marker and split HARD:
+
+- A `[DESIGN]` finding is must-fix only with a citation: either a named
+  DESIGN.md invariant violated, or objectively broken rendering (overflow or
+  clipping, broken RTL, unreadable contrast, missing loading/error/empty
+  state). No citation ⇒ not a must-fix. This is the anti-nitpick rule:
+  design is judged like code, where must-fixes are real but rare.
+- Everything subjective (spacing, feel, could-look-better) is a should-fix:
+  a deferred finding that flows to the hardening tail exactly like deferred
+  code findings, per the deferred-findings mechanism above.
+
+These design screenshots are evidence for design judgment only; they never
+substitute for the committed-test gate above.
 
 ## 3. Check merge evidence
 

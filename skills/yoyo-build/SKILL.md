@@ -271,6 +271,20 @@ acceptance criteria. Non-goals are binding. Compare every `AC-N` against every
 If an acceptance criterion is ambiguous, conflicts with a non-goal, or depends
 on an unresolved blocker, go to step 8. Never guess.
 
+### Bug issues
+
+The `bug` label means exactly one thing: cause currently unknown. On a
+claimed `bug` issue stating a symptom without a mechanism, FIRST check its
+comments for one whose first line is exactly `Yoyo-diagnose report`:
+present → skip diagnosis and implement using the report as the mechanism
+map; absent → diagnose before fixing: reproduce first — offline from
+logs, recordings, or fixtures where they exist, live only when nothing
+recorded covers it — identify the cause, and post the diagnosis as a
+comment on the Linear issue (symptom → evidence → cause). Then fix in the
+same pass and ship normally. Symptom-shaped ACs ("searching X returns Y;
+should return Z; repro steps") are valid contracts on `bug` issues. No
+path re-diagnoses; no path skips a needed diagnosis.
+
 ## 5. Build
 
 - Fetch the latest default branch from `origin` and create or resume a branch
@@ -314,6 +328,15 @@ but the issue's verify steps cannot be expressed as tests and the issue
 does not establish the lane, go to step 8 — that is a spec defect to
 resolve, not a reason to ship untested UI.
 
+Design evidence: when the diff touches any path in ui_paths, also drive the
+real rendered UI via the existing Playwright lane and attach screenshot
+evidence to the PR: desktop + mobile viewports, RTL where applicable, and
+each state the issue's How-to-verify names plus empty/loading/error. These
+screenshots are design-review evidence for the reviewer's `[DESIGN]`
+judgment against `docs/DESIGN.md`; they complement and never replace the
+committed-test gate above. Missing screenshot evidence on a UI-touching PR
+is a reviewer must-fix.
+
 All checks attributable to this change must pass before opening a PR. If a
 broad check has a pre-existing unrelated failure, run the relevant targeted
 check, preserve the evidence, and disclose both results in the PR.
@@ -340,7 +363,8 @@ Push and open a PR with `gh pr create`. Its description must include:
 - Automated checks run and their results
 - Risk: Low / Medium / High
 - For ui_paths diffs: which UI tests cover which verify steps (one line
-  per step), and the ui_test_command result
+  per step), the ui_test_command result, and the attached screenshot
+  evidence per the design-evidence rule in step 6
 
 If `Other behavior changes: None` is not true, stop and get the Linear issue
 amended before opening the PR.

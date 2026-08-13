@@ -12,7 +12,7 @@ function assert(condition, message) {
   }
 }
 
-const skillNames = ["yoyo-build", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status", "yoyo-watchdog"];
+const skillNames = ["yoyo-build", "yoyo-diagnose", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status", "yoyo-watchdog"];
 const skillDirectory = new URL("skills/", root);
 const actualSkillNames = readdirSync(skillDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -61,6 +61,7 @@ const init = read("skills/yoyo-init/SKILL.md");
 const spec = read("skills/yoyo-spec/SKILL.md");
 const status = read("skills/yoyo-status/SKILL.md");
 const watchdog = read("skills/yoyo-watchdog/SKILL.md");
+const diagnose = read("skills/yoyo-diagnose/SKILL.md");
 
 // Line wrapping in the skills is prose, not contract: match against a
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
@@ -71,6 +72,9 @@ const initFlat = init.replace(/\s+/g, " ");
 const statusFlat = status.replace(/\s+/g, " ");
 const watchdogFlat = watchdog.replace(/\s+/g, " ");
 const roadmapFlat = roadmap.replace(/\s+/g, " ");
+const diagnoseFlat = diagnose.replace(/\s+/g, " ");
+const handoff = read("docs/HANDOFF.md");
+const handoffFlat = handoff.replace(/\s+/g, " ");
 const oneOff = read("docs/one-off-prompts.md");
 const oneOffFlat = oneOff.replace(/\s+/g, " ");
 
@@ -594,6 +598,94 @@ const requiredContracts = [
   [
     initFlat.includes("lists env files by path only and never reads their contents"),
     "init must state the repo-map generator lists env files by path only and never reads their contents",
+  ],
+  // YOY-73: three-lane bug intake. The bug label means cause currently
+  // unknown; the builder diagnoses before fixing unless a diagnose report
+  // already maps the mechanism, and the diagnose skill is diagnosis-only.
+  [
+    buildFlat.includes("FIRST check its comments for one whose first line is exactly `Yoyo-diagnose report`"),
+    "builder must check a bug issue's comments for the Yoyo-diagnose report header BEFORE diagnosing — YOY-73",
+  ],
+  [
+    buildFlat.includes("absent → diagnose before fixing"),
+    "builder must diagnose before fixing on a bug issue with no diagnose report — YOY-73",
+  ],
+  [
+    buildFlat.includes("post the diagnosis as a comment on the Linear issue (symptom → evidence → cause)"),
+    "builder must post its diagnosis as a Linear comment (symptom → evidence → cause) — YOY-73",
+  ],
+  [
+    buildFlat.includes("No path re-diagnoses; no path skips a needed diagnosis"),
+    "builder bug rule must close both leaks: no re-diagnosis, no skipped diagnosis — YOY-73",
+  ],
+  [
+    initFlat.includes("`agent-ready`, `blocked`, `bug`, `repo:SLUG`"),
+    "init must create the bug label idempotently alongside the other Linear labels — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes("DIAGNOSIS ONLY") &&
+      diagnoseFlat.includes("never edits product code, never opens PRs"),
+    "diagnose skill must pin its diagnosis-only boundary: never edits product code, never opens PRs — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes("Offline first") &&
+      diagnoseFlat.includes("only when nothing recorded covers it"),
+    "diagnose skill must reproduce offline-first, going live only when nothing recorded covers it — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes("hypothesis + cheap decisive test + stop-if-disproved"),
+    "diagnose skill must state every diagnosis as hypothesis + cheap decisive test + stop-if-disproved — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes(
+      "attributed to an identified mechanism or explicitly listed as unexplained together with the next probe",
+    ),
+    "diagnose skill must carry the completeness rule: every observation attributed or unexplained-with-probe — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes("never merges, never applies `agent-ready`"),
+    "diagnose skill must never merge and never apply agent-ready — YOY-73",
+  ],
+  [
+    diagnoseFlat.includes("Yoyo-diagnose report"),
+    "diagnose skill report must carry the fixed Yoyo-diagnose report first line — YOY-73",
+  ],
+  [
+    handoffFlat.includes("three lanes, fastest that fits, never forced") &&
+      handoffFlat.includes("Yoyo-diagnose report"),
+    "docs/HANDOFF.md must record the three-lane routing table and the diagnose report header — YOY-73",
+  ],
+  // YOY-74: UX quality gate. Screenshot evidence is design-review input for
+  // the reviewer's [DESIGN] judgment; it never replaces the committed-test
+  // gate, and design must-fixes require a citation.
+  [
+    buildFlat.includes("attach screenshot evidence to the PR: desktop + mobile viewports, RTL where applicable"),
+    "builder must attach screenshot evidence on UI-touching PRs: desktop + mobile, RTL where applicable — YOY-74",
+  ],
+  [
+    buildFlat.includes("they complement and never replace the committed-test gate"),
+    "builder design screenshots must complement, never replace, the committed-test gate — YOY-74",
+  ],
+  [
+    reviewFlat.includes("judge against `docs/DESIGN.md`"),
+    "reviewer must judge UI-touching PRs' screenshots against docs/DESIGN.md — YOY-74",
+  ],
+  [
+    reviewFlat.includes("must-fix only with a citation") &&
+      reviewFlat.includes("No citation ⇒ not a must-fix"),
+    "reviewer [DESIGN] must-fixes require a citation: a named DESIGN.md invariant or objectively broken rendering — YOY-74",
+  ],
+  [
+    reviewFlat.includes("Missing screenshot evidence on a UI-touching PR is a `[DESIGN]` must-fix"),
+    "reviewer must treat missing screenshot evidence on a UI-touching PR as a must-fix — YOY-74",
+  ],
+  [
+    initFlat.includes("run /yoyo-design to author this file"),
+    "init must seed docs/DESIGN.md as the run-/yoyo-design placeholder — YOY-74",
+  ],
+  [
+    initFlat.includes("Never overwrite an existing `docs/DESIGN.md`"),
+    "init's DESIGN.md seeding must never overwrite an authored file — YOY-74",
   ],
 ];
 
