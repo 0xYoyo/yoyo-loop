@@ -12,7 +12,7 @@ function assert(condition, message) {
   }
 }
 
-const skillNames = ["yoyo-build", "yoyo-diagnose", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status", "yoyo-watchdog"];
+const skillNames = ["yoyo-build", "yoyo-design", "yoyo-diagnose", "yoyo-init", "yoyo-review", "yoyo-spec", "yoyo-status", "yoyo-watchdog"];
 const skillDirectory = new URL("skills/", root);
 const actualSkillNames = readdirSync(skillDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -62,6 +62,7 @@ const spec = read("skills/yoyo-spec/SKILL.md");
 const status = read("skills/yoyo-status/SKILL.md");
 const watchdog = read("skills/yoyo-watchdog/SKILL.md");
 const diagnose = read("skills/yoyo-diagnose/SKILL.md");
+const design = read("skills/yoyo-design/SKILL.md");
 
 // Line wrapping in the skills is prose, not contract: match against a
 // whitespace-normalised copy so a reflowed paragraph cannot break a check.
@@ -73,8 +74,9 @@ const statusFlat = status.replace(/\s+/g, " ");
 const watchdogFlat = watchdog.replace(/\s+/g, " ");
 const roadmapFlat = roadmap.replace(/\s+/g, " ");
 const diagnoseFlat = diagnose.replace(/\s+/g, " ");
-const handoff = read("docs/HANDOFF.md");
-const handoffFlat = handoff.replace(/\s+/g, " ");
+const designFlat = design.replace(/\s+/g, " ");
+const process_doc = read("docs/PROCESS.md");
+const processFlat = process_doc.replace(/\s+/g, " ");
 const oneOff = read("docs/one-off-prompts.md");
 const oneOffFlat = oneOff.replace(/\s+/g, " ");
 
@@ -651,9 +653,9 @@ const requiredContracts = [
     "diagnose skill report must carry the fixed Yoyo-diagnose report first line — YOY-73",
   ],
   [
-    handoffFlat.includes("three lanes, fastest that fits, never forced") &&
-      handoffFlat.includes("Yoyo-diagnose report"),
-    "docs/HANDOFF.md must record the three-lane routing table and the diagnose report header — YOY-73",
+    processFlat.includes("three lanes, fastest that fits, never forced") &&
+      processFlat.includes("Yoyo-diagnose report"),
+    "docs/PROCESS.md must record the three-lane routing table and the diagnose report header — YOY-73",
   ],
   // YOY-74: UX quality gate. Screenshot evidence is design-review input for
   // the reviewer's [DESIGN] judgment; it never replaces the committed-test
@@ -686,6 +688,45 @@ const requiredContracts = [
   [
     initFlat.includes("Never overwrite an existing `docs/DESIGN.md`"),
     "init's DESIGN.md seeding must never overwrite an authored file — YOY-74",
+  ],
+  // YOY-79: /yoyo-design authors DESIGN.md. Its output splits invariants
+  // from a direction system sized to the owned design surface, Claude
+  // Design stays optional upstream, and the file is its only write surface.
+  [
+    designFlat.includes("proportional to how much design surface the project actually owns") &&
+      designFlat.includes("the file must state which case applies and why"),
+    "design skill must pin the proportionality rule: direction depth matches owned design surface, case stated — YOY-79",
+  ],
+  [
+    designFlat.includes("the host store's design IS the design"),
+    "design skill widget-class case must state the host store's design IS the design — YOY-79",
+  ],
+  [
+    designFlat.includes("exactly two content sections") &&
+      designFlat.includes("**Invariants** — always present") &&
+      designFlat.includes("**Direction system** — proportional"),
+    "design skill output must be the two-section split: Invariants always present, Direction system proportional — YOY-79",
+  ],
+  [
+    designFlat.includes("NEVER describes the current UI"),
+    "design skill must state DESIGN.md holds invariants, never current-UI description — YOY-79",
+  ],
+  [
+    designFlat.includes("The loop never depends on Claude Design existing"),
+    "design skill must keep Claude Design an optional upstream, never a dependency — YOY-79",
+  ],
+  [
+    designFlat.includes("is this skill's entire write surface") &&
+      designFlat.includes("never edits product code"),
+    "design skill write surface must be DESIGN.md and its PR only; never edits product code — YOY-79",
+  ],
+  [
+    designFlat.includes("never applies `agent-ready`, and never merges"),
+    "design skill must never apply agent-ready and never merge — YOY-79",
+  ],
+  [
+    designFlat.includes("Never ask the user something the PRD or the repository already answers"),
+    "design skill must research PRD and repo before interviewing and never re-ask what they answer — YOY-79",
   ],
 ];
 
