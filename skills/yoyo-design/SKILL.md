@@ -123,9 +123,12 @@ writing anything — their approval of this file is what activates the
 design gate. Then write `docs/DESIGN.md`, commit it on a feature branch,
 push, and open a PR for the user to merge. When the repository has the
 repo-map drift guard (`scripts/repo-map.mjs` with a `--check` CI step),
-run `node scripts/repo-map.mjs` after writing DESIGN.md and commit the
-regenerated `docs/REPO-MAP.md` in the same PR — a new file changes the
-tree, and the guard fails the PR otherwise.
+run `node scripts/repo-map.mjs` after DESIGN.md is committed (or at
+minimum staged), not merely written — the generator lists tracked files
+only, so an unstaged DESIGN.md leaves the map unchanged and the guard
+fails the PR — and commit the regenerated `docs/REPO-MAP.md` in the same
+PR. Then `git checkout main` and confirm a clean `git status`: the ship
+step ends on main, never on the feature branch.
 
 ## Hard rules
 
@@ -134,7 +137,8 @@ tree, and the guard fails the PR otherwise.
   never applies `agent-ready`, and never merges. One mechanical carve-out:
   when the target repository has the repo-map drift guard
   (`scripts/repo-map.mjs` with a `--check` CI step), the skill regenerates
-  `docs/REPO-MAP.md` in the same PR after writing DESIGN.md — a
+  `docs/REPO-MAP.md` in the same PR after DESIGN.md is committed (or at
+  minimum staged), because the generator lists tracked files only — a
   CI-mechanical regeneration by running the generator, never a hand edit,
   and never license to touch product code or any other file.
 - Never invent product facts: direction comes from the PRD, the repo, the

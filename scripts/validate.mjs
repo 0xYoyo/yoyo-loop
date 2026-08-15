@@ -733,11 +733,17 @@ const requiredContracts = [
   // fails CI unless the map is regenerated. One mechanical carve-out,
   // pinned in both directions: regeneration allowed, other files still
   // forbidden. The same class is pinned for init's seeding order and the
-  // one-off template.
+  // one-off template. YOY-85: the generator lists tracked files only, so
+  // regeneration must run after the new files are committed (or staged),
+  // not merely written — otherwise the map is silently unchanged.
   [
     designFlat.includes("One mechanical carve-out: when the target repository has the repo-map drift guard") &&
-      designFlat.includes("the skill regenerates `docs/REPO-MAP.md` in the same PR after writing DESIGN.md"),
-    "design skill must regenerate docs/REPO-MAP.md in the same PR when the repo has the drift guard — YOY-83",
+      designFlat.includes("the skill regenerates `docs/REPO-MAP.md` in the same PR after DESIGN.md is committed (or at minimum staged), because the generator lists tracked files only"),
+    "design skill must regenerate docs/REPO-MAP.md in the same PR after DESIGN.md is committed or staged, tracked-only generator stated — YOY-83/YOY-85",
+  ],
+  [
+    designFlat.includes("run `node scripts/repo-map.mjs` after DESIGN.md is committed (or at minimum staged), not merely written — the generator lists tracked files only"),
+    "design skill ship step must run the generator after DESIGN.md is committed or staged, never merely written — YOY-85",
   ],
   [
     designFlat.includes("a CI-mechanical regeneration by running the generator, never a hand edit, and never license to touch product code or any other file") &&
@@ -751,8 +757,20 @@ const requiredContracts = [
   ],
   [
     oneOffFlat.includes("Regenerate the repo map when the tree changes.") &&
+      oneOffFlat.includes("runs `node scripts/repo-map.mjs` after the task's new or renamed files are staged or committed, because the generator lists tracked files only") &&
       oneOffFlat.includes("never license to touch any other file"),
-    "one-off template must carry the repo-map regeneration carve-out without widening its file list — YOY-83",
+    "one-off template must carry the repo-map regeneration carve-out (after staging, tracked-only generator) without widening its file list — YOY-83/YOY-85",
+  ],
+  [
+    oneOffFlat.includes("run it after the new or renamed files are staged or committed; the generator lists tracked files only"),
+    "one-off skeleton verify hint must regenerate the repo map after staging or committing — YOY-85",
+  ],
+  // YOY-85: /yoyo-design was the one tree-writing act that did not end on
+  // main; a design run left a project checkout on its feature branch and
+  // tripped the next one-off's preflight.
+  [
+    designFlat.includes("Then `git checkout main` and confirm a clean `git status`: the ship step ends on main, never on the feature branch"),
+    "design skill ship step must end with git checkout main and a clean git status — YOY-85",
   ],
 ];
 
