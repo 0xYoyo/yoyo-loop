@@ -17,6 +17,13 @@ unless the prompt supplies them. Every one-off prompt follows these rules:
   untracked loop fixture to work around. An untracked
   `.claude/settings.json` indicates a repo initialised before this change
   and should be committed.
+- **Regenerate the repo map when the tree changes.** In a repo with the
+  repo-map drift guard (`scripts/repo-map.mjs` with a `--check` CI step), a
+  task that adds, removes, or renames a file lists `docs/REPO-MAP.md` among
+  its allowed files and runs `node scripts/repo-map.mjs` in its verify
+  step — a CI-mechanical regeneration, never a hand edit, and never license
+  to touch any other file. Without it the PR fails CI by construction and
+  the "name the files" rule forbids the fix.
 - **Scope is per-item.** An agent that finds an adjacent same-class case —
   the same bug in a sibling file, the same pattern one directory over —
   reports it back instead of extending the task to cover it.
@@ -35,8 +42,9 @@ One-off task: <what and why, one line>. Do NOT improvise or extend scope.
    <file list>. Never touch .env* or untracked files.
 3. Scope is per-item: report adjacent same-class findings back instead of
    fixing them.
-4. Verify: <checks to run>. git diff --stat must show only the files named
-   above; anything else: STOP and report.
+4. Verify: <checks to run> (plus `node scripts/repo-map.mjs` when the task
+   changes the file tree in a drift-guarded repo). git diff --stat must
+   show only the files named above; anything else: STOP and report.
 5. Commit "<message>", push, open a PR with a summary. Do not merge;
    report the PR URL.
 6. git checkout main; confirm git status clean.
