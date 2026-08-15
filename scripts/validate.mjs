@@ -728,6 +728,32 @@ const requiredContracts = [
     designFlat.includes("Never ask the user something the PRD or the repository already answers"),
     "design skill must research PRD and repo before interviewing and never re-ask what they answer — YOY-79",
   ],
+  // YOY-83: the write surface collides with the repo-map drift guard — a
+  // new DESIGN.md changes the tree, so every design PR on a guarded repo
+  // fails CI unless the map is regenerated. One mechanical carve-out,
+  // pinned in both directions: regeneration allowed, other files still
+  // forbidden. The same class is pinned for init's seeding order and the
+  // one-off template.
+  [
+    designFlat.includes("One mechanical carve-out: when the target repository has the repo-map drift guard") &&
+      designFlat.includes("the skill regenerates `docs/REPO-MAP.md` in the same PR after writing DESIGN.md"),
+    "design skill must regenerate docs/REPO-MAP.md in the same PR when the repo has the drift guard — YOY-83",
+  ],
+  [
+    designFlat.includes("a CI-mechanical regeneration by running the generator, never a hand edit, and never license to touch product code or any other file") &&
+      designFlat.includes("never touches any other file"),
+    "design skill carve-out must stay mechanical: never a hand edit, never license to touch product code or any other file — YOY-83",
+  ],
+  [
+    initFlat.includes("Regenerate last.") &&
+      initFlat.includes("After the run's final commit (the settings commit in section 8), run `node scripts/repo-map.mjs`"),
+    "init must regenerate the repo map after its last seed so the first PR does not fail the drift guard — YOY-83",
+  ],
+  [
+    oneOffFlat.includes("Regenerate the repo map when the tree changes.") &&
+      oneOffFlat.includes("never license to touch any other file"),
+    "one-off template must carry the repo-map regeneration carve-out without widening its file list — YOY-83",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {

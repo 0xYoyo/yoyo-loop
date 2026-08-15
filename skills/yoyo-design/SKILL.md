@@ -121,13 +121,22 @@ direction changes — no other update path, no generation pipeline.
 Show the user the complete draft in chat and get their go-ahead before
 writing anything — their approval of this file is what activates the
 design gate. Then write `docs/DESIGN.md`, commit it on a feature branch,
-push, and open a PR for the user to merge.
+push, and open a PR for the user to merge. When the repository has the
+repo-map drift guard (`scripts/repo-map.mjs` with a `--check` CI step),
+run `node scripts/repo-map.mjs` after writing DESIGN.md and commit the
+regenerated `docs/REPO-MAP.md` in the same PR — a new file changes the
+tree, and the guard fails the PR otherwise.
 
 ## Hard rules
 
 - `docs/DESIGN.md` (and the PR that ships it) is this skill's entire write
   surface: it never edits product code, never touches any other file,
-  never applies `agent-ready`, and never merges.
+  never applies `agent-ready`, and never merges. One mechanical carve-out:
+  when the target repository has the repo-map drift guard
+  (`scripts/repo-map.mjs` with a `--check` CI step), the skill regenerates
+  `docs/REPO-MAP.md` in the same PR after writing DESIGN.md — a
+  CI-mechanical regeneration by running the generator, never a hand edit,
+  and never license to touch product code or any other file.
 - Never invent product facts: direction comes from the PRD, the repo, the
   user's answers, and optional Claude Design output — cited, not guessed.
 - Interactive only: never run unattended, and never write the file without

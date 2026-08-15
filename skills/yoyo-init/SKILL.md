@@ -183,6 +183,16 @@ Seed it in three idempotent moves — re-running repairs, never duplicates:
    change that forgets to regenerate turns the PR red with the fix spelled
    out.
 
+Regenerate last. The map lists tracked files, so it goes stale the moment a
+later seed commits a new file — the DESIGN.md placeholder below and the
+`.claude/` config in sections 7–8 both do (and the generator itself is
+missing from its own map when generated before it is tracked). After the
+run's final commit (the settings commit in section 8), run
+`node scripts/repo-map.mjs` and, if `docs/REPO-MAP.md` changed, commit and
+push it. Init's seeds land on the default branch without a pull request, so
+the guard never runs on them — but a stale seeded map fails the first pull
+request by construction, whichever skill opens it.
+
 ### Design invariants placeholder
 
 Seed `docs/DESIGN.md` as one idempotent step alongside the seeds above: only
