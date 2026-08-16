@@ -765,6 +765,16 @@ const requiredContracts = [
     oneOffFlat.includes("run it after the new or renamed files are staged or committed; the generator lists tracked files only"),
     "one-off skeleton verify hint must regenerate the repo map after staging or committing — YOY-85",
   ],
+  // The builder had no such carve-out, so any PR adding or removing files
+  // failed the drift guard and burned a full fix round (PRs #71/#73/#75).
+  [
+    buildFlat.includes("Regenerate the map when the tree changes.") &&
+      buildFlat.includes(
+        "regenerate the map and include the regenerated file in the same commit before opening the PR",
+      ) &&
+      buildFlat.includes("A stale map is a guaranteed CI failure, not a reviewer question"),
+    "builder verify step must regenerate the repo map in the same commit when the diff adds, removes, or renames files",
+  ],
   // YOY-85: /yoyo-design was the one tree-writing act that did not end on
   // main; a design run left a project checkout on its feature branch and
   // tripped the next one-off's preflight.
