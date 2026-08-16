@@ -341,6 +341,14 @@ All checks attributable to this change must pass before opening a PR. If a
 broad check has a pre-existing unrelated failure, run the relevant targeted
 check, preserve the evidence, and disclose both results in the PR.
 
+Regenerate the map when the tree changes. When the diff adds, removes, or
+renames files and the repository has a generated repo map with a drift guard —
+a map generator such as `scripts/repo-map.mjs`, detected from the repository
+and never invented — regenerate the map and include the regenerated file in the
+same commit before opening the PR. Run the generator after the added or renamed
+files are staged or committed, because the generator lists tracked files only.
+A stale map is a guaranteed CI failure, not a reviewer question.
+
 Review `git diff` and `git status` before shipping. Stop if the diff contains
 unrelated work or generated secrets.
 
