@@ -135,6 +135,33 @@ check allow "$MAIN_REPO" "grep 'rm -rf /' README.md"
 check allow "$MAIN_REPO" "printf 'FOO=bar\n' > .env.example"
 check deny  "$MAIN_REPO" "printf 'FOO=bar\n' > .env"
 
+# --- YOY-88: reads carry the SAME example/sample/template exception as
+# --- writes. An example env file is committed and world-readable on GitHub,
+# --- so a local read-deny blocks legitimate work and protects nothing. Real
+# --- env files stay denied for BOTH reads and writes. ----------------------
+check allow "$MAIN_REPO" "cat .env.example"
+check allow "$MAIN_REPO" "cat apps/shopify-app/.env.example"
+check allow "$MAIN_REPO" "cat .env.sample"
+check allow "$MAIN_REPO" "cat .env.template"
+check allow "$MAIN_REPO" "head -n 5 apps/shopify-app/.env.sample"
+check deny  "$MAIN_REPO" "cat .env"
+check deny  "$MAIN_REPO" "cat apps/shopify-app/.env"
+check deny  "$MAIN_REPO" "cat .env.local"
+check deny  "$MAIN_REPO" "cat .env.production"
+
+# --- writes: the same four allowed, the same four denied -------------------
+check allow "$MAIN_REPO" "printf 'FOO=bar\n' > apps/shopify-app/.env.example"
+check allow "$MAIN_REPO" "printf 'FOO=bar\n' > .env.sample"
+check allow "$MAIN_REPO" "printf 'FOO=bar\n' > .env.template"
+check deny  "$MAIN_REPO" "printf 'FOO=bar\n' > apps/shopify-app/.env"
+check deny  "$MAIN_REPO" "printf 'FOO=bar\n' > .env.local"
+check deny  "$MAIN_REPO" "printf 'FOO=bar\n' > .env.production"
+
+# --- mixed paths fail closed: one real env file denies the whole command ---
+check deny  "$MAIN_REPO" "cat .env.example .env"
+check deny  "$MAIN_REPO" "cat apps/shopify-app/.env.example .env.production"
+check deny  "$MAIN_REPO" "head -n 5 .env.sample .env.local"
+
 # --- staging: exact basename .env.example allowed at any depth; every other
 # --- .env* path still denies -----------------------------------------------
 check allow "$MAIN_REPO" "git add .env.example"
@@ -158,6 +185,7 @@ check_file deny  NotebookEdit "$ENV_PROJ/.env.local"
 check_file allow Write "$ENV_PROJ/.env.example"
 check_file allow Write "$ENV_PROJ/config/.env.sample"
 check_file allow Write "$ENV_PROJ/.env.template"
+check_file allow Edit  "$ENV_PROJ/apps/shopify-app/.env.example"
 check_file allow Write "/tmp/yoy76-fixtures/.env"
 check_file allow Write "/private/tmp/yoy76-fixtures/.env.local"
 check_file allow Write "$ENV_PROJ/README.md"

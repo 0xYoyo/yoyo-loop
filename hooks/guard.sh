@@ -247,18 +247,27 @@ while IFS= read -r seg; do
   # -- credentials and secrets -------------------------------------------
   [[ "$seg" =~ ^gh[[:space:]]+auth[[:space:]]+(logout|refresh|token)([[:space:]]|$) ]] && \
     deny "Blocked: mutating or printing the gh credential."
-  # .env.example is a committed placeholder with no secrets, reviewed in PRs
-  # like any other file. It is exempt only when every .env* token in the
-  # segment has that exact basename; any other .env* path still denies.
+  # Example env files (.env.example and kin) are committed placeholders with no
+  # secrets — world-readable on GitHub — so a local read-deny on them blocks
+  # legitimate work and protects nothing. They carry the SAME filename
+  # exception set as the env-write deny above: a basename containing
+  # "example", "sample", or "template". Fail closed on mixed commands: the
+  # segment is exempt only when EVERY .env* token in it is an excepted
+  # filename, at any directory depth; one real env file denies the whole
+  # command.
   if [[ "$seg" =~ ^(cat|bat|less|more|head|tail|echo|printf|xxd|od|strings|nl)([[:space:]].*)?\.env ]]; then
     env_only_example=true
     for tok in $seg; do
       tok="${tok%\'}"; tok="${tok#\'}"; tok="${tok%\"}"; tok="${tok#\"}"
       case "$tok" in
-        *.env*) [ "${tok##*/}" = ".env.example" ] || env_only_example=false ;;
+        *.env*)
+          case "${tok##*/}" in
+            *example*|*sample*|*template*) ;;
+            *) env_only_example=false ;;
+          esac ;;
       esac
     done
-    [ "$env_only_example" = true ] || deny "Blocked: printing a .env file."
+    [ "$env_only_example" = true ] || deny "Blocked: printing a .env file. Allowed exception: filenames containing example/sample/template, and only when every .env* path in the command is one of them."
   fi
   # Staging follows the same .env.example exemption as printing: allowed only
   # when every .env* token in the segment has that exact basename, at any
