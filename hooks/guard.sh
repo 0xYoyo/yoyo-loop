@@ -269,20 +269,26 @@ while IFS= read -r seg; do
     done
     [ "$env_only_example" = true ] || deny "Blocked: printing a .env file. Allowed exception: filenames containing example/sample/template, and only when every .env* path in the command is one of them."
   fi
-  # Staging follows the same .env.example exemption as printing: allowed only
-  # when every .env* token in the segment has that exact basename, at any
-  # directory depth. Any other .env*, *.pem, *.key, or id_rsa* still denies.
+  # Staging follows the same exemption as printing: the SAME filename exception
+  # set (basename containing example/sample/template), at any directory depth,
+  # and only when every .env* token in the segment is one of them. Any other
+  # .env*, *.pem, *.key, or id_rsa* still denies, so a mixed command fails
+  # closed.
   if [[ "$seg" =~ ^git[[:space:]]+add([[:space:]].*)?(\.env|\.pem|\.key|id_rsa) ]]; then
     add_only_example=true
     for tok in $seg; do
       tok="${tok%\'}"; tok="${tok#\'}"; tok="${tok%\"}"; tok="${tok#\"}"
       case "$tok" in
         *.pem|*.key|*id_rsa*) add_only_example=false ;;
-        *.env*) [ "${tok##*/}" = ".env.example" ] || add_only_example=false ;;
+        *.env*)
+          case "${tok##*/}" in
+            *example*|*sample*|*template*) ;;
+            *) add_only_example=false ;;
+          esac ;;
       esac
     done
     [ "$add_only_example" = true ] || \
-      deny "Blocked: staging a secret file (.env*, *.pem, *.key, id_rsa*)."
+      deny "Blocked: staging a secret file (.env*, *.pem, *.key, id_rsa*). Allowed exception: env filenames containing example/sample/template, and only when every .env* path in the command is one of them."
   fi
   # Only when a file-consuming command actually operates on the path - a mere
   # mention (grep pattern, commit message, doc text) must not be refused.

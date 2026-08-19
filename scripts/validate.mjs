@@ -899,11 +899,18 @@ assert(
 );
 assert(
   guard.includes("add_only_example"),
-  "guard must allow staging the exact basename .env.example while denying every other .env* path",
+  "guard must gate staging of .env* paths behind the example/sample/template filename set",
+);
+assert(
+  guardTest.includes('check allow "$MAIN_REPO" "git add .env.sample"') &&
+    guardTest.includes('check deny  "$MAIN_REPO" "git add .env.local"') &&
+    guardTest.includes('check deny  "$MAIN_REPO" "git add .env.sample .env.local"'),
+  "guard.test.sh must prove staging uses the same example/sample/template set as reads and writes, failing closed on mixed commands — " +
+    "guard-env-reads one-off, PR #44",
 );
 // YOY-76: env writes deny for file tools exactly as for Bash. Two narrow
 // exceptions stay allowed — example/sample/template filenames (key-name
-// documentation, not secrets) and scratch paths under /tmp/. YOY-88 gives
+// documentation, not secrets) and scratch paths under /tmp/. guard-env-reads one-off, PR #44 gives
 // the read deny the SAME filename exception set (see below), so reads and
 // writes of env files now agree; real env files stay denied for both.
 assert(
@@ -931,7 +938,7 @@ assert(
   "guard.test.sh must prove the /tmp scratch write exception — YOY-76",
 );
 
-// YOY-88: the read deny carries the SAME filename exception set as the write
+// guard-env-reads one-off, PR #44: the read deny carries the SAME filename exception set as the write
 // deny. An example env file is committed to the repo and world-readable on
 // GitHub, so denying a local read blocks legitimate work and protects
 // nothing. The exception set itself is unchanged, and a command touching
@@ -941,21 +948,21 @@ assert(
     "Allowed exception: filenames containing example/sample/template, " +
       "and only when every .env* path in the command is one of them",
   ),
-  "guard's env-read deny must exempt example/sample/template filenames and fail closed on mixed commands — YOY-88",
+  "guard's env-read deny must exempt example/sample/template filenames and fail closed on mixed commands — guard-env-reads one-off, PR #44",
 );
 assert(
   guardTest.includes('check allow "$MAIN_REPO" "cat .env.sample"') &&
     guardTest.includes('check allow "$MAIN_REPO" "cat apps/shopify-app/.env.example"'),
-  "guard.test.sh must prove example/sample env files are readable at any depth — YOY-88",
+  "guard.test.sh must prove example/sample env files are readable at any depth — guard-env-reads one-off, PR #44",
 );
 assert(
   guardTest.includes('check deny  "$MAIN_REPO" "cat .env"') &&
     guardTest.includes('check deny  "$MAIN_REPO" "cat apps/shopify-app/.env"'),
-  "guard.test.sh must prove real env files stay read-denied — YOY-88",
+  "guard.test.sh must prove real env files stay read-denied — guard-env-reads one-off, PR #44",
 );
 assert(
   guardTest.includes('check deny  "$MAIN_REPO" "cat .env.example .env"'),
-  "guard.test.sh must prove a mixed example/real env read fails closed — YOY-88",
+  "guard.test.sh must prove a mixed example/real env read fails closed — guard-env-reads one-off, PR #44",
 );
 assert(
   guard.includes("'git branch -f' would rewrite the default branch ref"),

@@ -135,7 +135,7 @@ check allow "$MAIN_REPO" "grep 'rm -rf /' README.md"
 check allow "$MAIN_REPO" "printf 'FOO=bar\n' > .env.example"
 check deny  "$MAIN_REPO" "printf 'FOO=bar\n' > .env"
 
-# --- YOY-88: reads carry the SAME example/sample/template exception as
+# --- guard-env-reads one-off, PR #44: reads carry the SAME example/sample/template exception as
 # --- writes. An example env file is committed and world-readable on GitHub,
 # --- so a local read-deny blocks legitimate work and protects nothing. Real
 # --- env files stay denied for BOTH reads and writes. ----------------------
@@ -162,13 +162,18 @@ check deny  "$MAIN_REPO" "cat .env.example .env"
 check deny  "$MAIN_REPO" "cat apps/shopify-app/.env.example .env.production"
 check deny  "$MAIN_REPO" "head -n 5 .env.sample .env.local"
 
-# --- staging: exact basename .env.example allowed at any depth; every other
-# --- .env* path still denies -----------------------------------------------
+# --- staging: the same example/sample/template basename set as reads and
+# --- writes, at any depth; every other .env* path still denies, and a mixed
+# --- command fails closed --------------------------------------------------
 check allow "$MAIN_REPO" "git add .env.example"
 check allow "$MAIN_REPO" "git add config/.env.example"
+check allow "$MAIN_REPO" "git add .env.sample"
+check allow "$MAIN_REPO" "git add .env.template"
+check allow "$MAIN_REPO" "git add apps/shopify-app/.env.sample"
 check deny  "$MAIN_REPO" "git add .env"
 check deny  "$MAIN_REPO" "git add .env.local"
 check deny  "$MAIN_REPO" "git add secrets/.env.production"
+check deny  "$MAIN_REPO" "git add .env.sample .env.local"
 
 # --- YOY-76: env-like paths deny for file tools exactly as for Bash, with
 # --- two narrow exceptions: example/sample/template filenames, and scratch
