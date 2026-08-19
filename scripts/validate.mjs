@@ -903,8 +903,9 @@ assert(
 );
 // YOY-76: env writes deny for file tools exactly as for Bash. Two narrow
 // exceptions stay allowed — example/sample/template filenames (key-name
-// documentation, not secrets) and scratch paths under /tmp/. The read
-// denial is untouched by this rule.
+// documentation, not secrets) and scratch paths under /tmp/. YOY-88 gives
+// the read deny the SAME filename exception set (see below), so reads and
+// writes of env files now agree; real env files stay denied for both.
 assert(
   guard.includes("Blocked: writing an env file"),
   "guard must deny Write/Edit/NotebookEdit of env-like paths (.env, .env.*) — YOY-76",
@@ -928,6 +929,33 @@ assert(
 assert(
   guardTest.includes('check_file allow Write "/tmp/yoy76-fixtures/.env"'),
   "guard.test.sh must prove the /tmp scratch write exception — YOY-76",
+);
+
+// YOY-88: the read deny carries the SAME filename exception set as the write
+// deny. An example env file is committed to the repo and world-readable on
+// GitHub, so denying a local read blocks legitimate work and protects
+// nothing. The exception set itself is unchanged, and a command touching
+// both an excepted file and a real env file fails closed.
+assert(
+  guard.includes(
+    "Allowed exception: filenames containing example/sample/template, " +
+      "and only when every .env* path in the command is one of them",
+  ),
+  "guard's env-read deny must exempt example/sample/template filenames and fail closed on mixed commands — YOY-88",
+);
+assert(
+  guardTest.includes('check allow "$MAIN_REPO" "cat .env.sample"') &&
+    guardTest.includes('check allow "$MAIN_REPO" "cat apps/shopify-app/.env.example"'),
+  "guard.test.sh must prove example/sample env files are readable at any depth — YOY-88",
+);
+assert(
+  guardTest.includes('check deny  "$MAIN_REPO" "cat .env"') &&
+    guardTest.includes('check deny  "$MAIN_REPO" "cat apps/shopify-app/.env"'),
+  "guard.test.sh must prove real env files stay read-denied — YOY-88",
+);
+assert(
+  guardTest.includes('check deny  "$MAIN_REPO" "cat .env.example .env"'),
+  "guard.test.sh must prove a mixed example/real env read fails closed — YOY-88",
 );
 assert(
   guard.includes("'git branch -f' would rewrite the default branch ref"),
