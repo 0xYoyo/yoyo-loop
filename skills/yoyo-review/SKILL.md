@@ -53,6 +53,30 @@ the stale earlier ✅ ping. This retraction ping is a deliberate exception to
 previously-announced merge-ready message rather than announcing repair work.
 The full re-review happens on the repaired head as normal, on a later pass.
 
+Exception — conflicting on the human gate (YOY-103): a PR whose only loop
+label is `needs-human-review` — no `loop-approved`, no
+`loop-changes-requested`, no `loop-stuck` — and whose current mergeability
+is CONFLICTING is otherwise invisible to the whole factory: this skill skips
+it (recorded SHA unchanged, verdict label present), the builder skips it by
+design (`needs-human-review` alone is out of the repair queue), and no ping
+fires. This exception is notification-only. Do NOT relabel: the escalation
+semantics stay untouched, the builder's skip rule stays untouched, and the
+human resolves it exactly as today — resolve the escalation reason, strip
+the label, and the queue takes over (swapping to `loop-changes-requested`
+re-enters repair on the rebased head). Post the comment `Yoyo-loop: gated
+PR went stale — became conflicting after SHA while waiting on a human;
+needs-human-review unchanged, resolve the escalation and rebase or swap to
+loop-changes-requested`, substituting the recorded verdict SHA, then send
+one Slack notification via the webhook mechanism of step 4 with text
+`"⚠️ [SLUG] PR #N needs-human-review PR became conflicting — earlier
+human-decision ping superseded — URL"`, so the human knows their gated PR
+needs a rebase as well as a decision. Once per state change, not per pass:
+before posting, read the PR's comments, and if a `Yoyo-loop: gated PR went
+stale` comment already exists after the latest `Yoyo-loop review of`
+verdict for this head SHA, stay silent — the note is already open, the same
+discipline as the watchdog's open alert. A new head SHA gets a fresh review
+instead, and turning conflicting again on that head is a new state change.
+
 Make the skip decision against a re-fetch of the PR performed immediately
 before deciding — never against the listing output from the start of the
 pass; a same-pass race between listing and deciding has already produced a
@@ -67,6 +91,20 @@ posting in step 3 is the separate exit-side one.
   `TEAMKEY` is `linear_team` from `.claude/yoyo.md`, and fetch the full
   Linear issue including comments and relations. No linked issue is a must-fix
   finding.
+- Cross-check the AC ticks against the diff. The builder ticks, at ship,
+  the `- [x] AC-N` boxes its PR completes, so a tick is a claim that this
+  PR carries the evidence. Every AC the PR's scope ledger claims must be
+  ticked on the issue and satisfied by the diff. A tick that neither this
+  diff nor an earlier merged PR of the same issue evidences is a must-fix
+  `[AC-N]` finding — a tick without evidence is a finding, never a courtesy.
+  A claimed AC left unticked is a must-fix `[DEFECT]`: the builder's resume
+  lane reads unticked as open work and would redo it. Then check the closure
+  convention against the tick state: `Closes` while an AC would remain
+  unchecked after this PR, or `Part of` on the PR that ticks the last open
+  AC, is a must-fix `[DEFECT]` — the wrong keyword either auto-closes the
+  issue mid-tail or leaves a finished issue open for a human to close. A
+  repair round unticks what its verdict reopened and re-ticks only what the
+  fix completes; the cross-check runs again on the repaired head.
 - Read the full diff and every changed file in context.
 - Review only against the linked issue: acceptance-criteria gaps, defects,
   broken data flow, unnecessary scope expansion, security problems, missing

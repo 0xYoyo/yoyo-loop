@@ -1,8 +1,10 @@
 # Roadmap
 
-Last updated: 13 August 2026 — factory window shipped YOY-73 (three-lane bug
-intake + /yoyo-diagnose), YOY-74 (UX quality gate v2), YOY-80 (standing
-decisions recorded), YOY-79 (/yoyo-design; docs/HANDOFF.md → docs/PROCESS.md).
+Last updated: 25 August 2026 — factory window shipped YOY-113 (multi-PR
+lifecycle: resume lane, AC ticks at ship, reviewer tick cross-check, closure
+convention) and YOY-103 (stale-gate notification for conflicting
+`needs-human-review` PRs); this refresh also catches up the 15–19 August
+one-offs (PRs #41–#45) and the product state through M4.
 
 ## North star
 
@@ -84,7 +86,7 @@ builder-spawned reviewers (a spawned reviewer arrives before checks finish
 and must poll) but by Phase 7's event-driven triggers when the latency
 actually hurts.
 
-**Phase 7 — Off the open session**
+**Phase 7 — Off the open session — CANDIDATE NAMED (2026-08-25)**
 Cloud Routines on GitHub events first; leased persistent workers only if
 open sessions become the bottleneck. The /loop scheduler is per-session and
 loops run concurrently (confirmed 2026-08-02); the remaining constraint
@@ -96,10 +98,19 @@ DEFERRED 2026-08-11: the user reversed the Aug-8 promotion. Caffeinate plus
 an open screen is fine and tethering is not actually hurting, so the
 build-when-the-failure-mode-appears rule applies. Condition re-parked:
 revisit when loop latency or laptop tethering genuinely hurts.
+2026-08-25: the concrete candidate is now named — **Claude Code cloud
+routines (`/schedule`)**: scheduled cloud agents running on a cron, no open
+session, no awake laptop. The first step is YOY-112 (recurring
+agent-executed live E2E smoke on the unfiltered deployment): a read-only,
+low-blast-radius job that proves a routine can run a skill against live
+Linear/GitHub/Slack from the cloud before any builder or reviewer loop moves
+there. Ordering after YOY-112: watchdog → reviewer → builder, each only
+after the previous one has run unattended for a milestone.
 - Includes orchestrated parallel builders — queue partitioning + leases
   (absorbs YOY-37).
 - Candidate compute: the $300 GCP credit — verify its ~90-day activation
-  expiry.
+  expiry. Superseded as the first option by cloud routines, which need no
+  compute of our own.
 
 **Phase 8 — Post-M2 queue (in order)**
 1. UI-verification gate — ✅ DONE (PR #27, YOY-38).
@@ -164,12 +175,83 @@ revisit when loop latency or laptop tethering genuinely hurts.
   docs/PROCESS.md in the same PR (name collided with the user's separate
   session-handoff document).
 
+**2026-08-15 → 19 one-offs — ✅ SHIPPED (PRs #41–#45)**
+- YOY-83 / YOY-85 — /yoyo-design's write surface collided with the repo-map
+  drift guard (every design PR failed CI by construction). One mechanical
+  carve-out: regenerate the map after DESIGN.md is committed or staged,
+  never a hand edit, never license to touch other files; the design run
+  ends on main.
+- PR #43 — the builder regenerates the repo map in the same commit whenever
+  the diff adds, removes, or renames files; a stale map is a guaranteed CI
+  failure, not a reviewer question (PRs #71/#73/#75 on unfiltered each
+  burned a fix round on it).
+- PRs #44–#45 — the guard's env-file read deny carries the same
+  example/sample/template exception as the write deny, failing closed on
+  mixed commands; the settings template stops denying reads of committed
+  example env files.
+
+**2026-08-25 factory window — ✅ SHIPPED (this PR)**
+- YOY-113 — multi-PR lifecycle. Resume lane: before the normal pick the
+  builder resumes its own self-assigned In Progress/In Review issue with
+  unchecked ACs and no open PR, never when blocked, never while a PR is
+  open. AC ticking is now somebody's job: the builder ticks the ACs its PR
+  completes at ship, the reviewer cross-checks every tick against the diff
+  at verdict (a tick without evidence is a finding), and a repair round
+  unticks what it reopens. Closure convention pinned: the slice completing
+  the LAST open AC writes `Closes`; earlier slices write `Part of`
+  (unfiltered PR #108 was the judgment call). Founder touches removed: one
+  unassign-and-reset per slice, one manual close per multi-PR issue, and
+  hand-ticking ACs.
+- YOY-103 — conflicting PRs whose only loop label is `needs-human-review`
+  were invisible to reviewer, builder, and Slack. Notification-only by
+  decision: the reviewer posts a stale-gate note and one ⚠️ ping, once per
+  state change; no relabel, builder skip rule untouched. The watchdog gains
+  `stale-gate-silent` and counts resumable issues in `dead-loop`.
+- Validator: 174 → 196 contracts; docs/PROCESS.md records the multi-PR
+  lifecycle and the stale-gate path.
+
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
 milestone planning.
 
 Note: hosting, deployments, and secrets are NOT a factory phase — they are
 milestone 1 of each product repo, specified in its PRD.
+
+## Product state (live Linear, team YOY — 25 August 2026)
+
+**unfiltered — M4 complete.** The playground milestone shipped in full
+through the loop: catalog registry and public-catalog sources (YOY-88,
+YOY-89), the search + click API with throttles and daily AI caps (YOY-90),
+the Render deployment (YOY-91), the playground shell with its UI test lane
+(YOY-92), AI states (YOY-93), the store-preload page (YOY-94), iterative
+HNSW scans for full small-tenant recall (YOY-105). YOY-95's live run on the
+deployed playground recorded 27/27 steps. YOY-109 — intent extraction
+failing intermittently on live — was diagnosed through the bug lane, fixed
+(low thinking on the intent call, intent-failure class logged) and verified
+live. YOY-96, the M4 hardening tail, closed at 21 ACs across thirteen
+`Part of` slices (PRs #96–#108) — the run that surfaced YOY-113: every
+intermediate merge needed a founder unassign, and no AC was ever ticked by
+an agent.
+
+**unfiltered — M5 pile (specced or direction-noted, not yet chained):**
+- YOY-64 — AI search latency: intent extraction dominates at 4.1–6.5s; the
+  founder bar is <2s end to end, which needs model/prompt-level work, not
+  tuning.
+- YOY-110 — colour-exclusion semantics: exclude by primary colour, not any
+  colourway (founder decision recorded).
+- YOY-111 — close matches respect explicit exclusions and relax constraints
+  one at a time (founder decision recorded).
+- YOY-112 — recurring agent-executed live E2E smoke on the deployment;
+  doubles as Phase 7's first cloud-routine step.
+Parked with `[LATER]`: YOY-97 (agent-agent debugging & UI-QA lane),
+YOY-102 (stop committing the widget bundle; build in CI).
+
+**briza — M1 shipped (PRs #1–#6, 2026-08-08)**, hardening tail YOY-55
+closed; no active milestone.
+
+**yoyo-loop — factory queue empty** after this window: YOY-113 and YOY-103
+close with this PR; nothing else carries `repo:yoyo-loop` in Backlog except
+the `[LATER]` YOY-97.
 
 ## Standing decisions
 
@@ -216,3 +298,7 @@ milestone 1 of each product repo, specified in its PRD.
   never per-repo.
 - Pending fold-ins: YOY-37 (orchestrated parallel builders) absorbed into
   Phase 7 on 2026-08-08; none outstanding.
+- Multi-PR issues: the checkbox state on the Linear issue is now the
+  source of truth for what has shipped (ticked at ship, cross-checked at
+  verdict). The pre-mechanism interim — founder resets the issue after each
+  intermediate merge, chat hand-ticks ACs — is retired with YOY-113.
