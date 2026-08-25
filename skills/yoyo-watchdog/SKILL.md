@@ -86,16 +86,28 @@ sources. Thresholds below are defaults; a `watchdog_thresholds` block in
    immediately at the event. A PR that gained `needs-human-review` at the
    builder's ship step (sensitive-path self-application, no verdict on its
    head yet) is intentionally silent — expect its ping from the reviewer's
-   verdict, not from the builder ship site; do not alarm on it. This is the
-   claimed-but-never-sent class; name the exact PR/issue.
-7. **dead-loop** — the agent-ready unassigned queue is non-empty, yet no
-   loop activity (new PRs, verdict comments, repair pushes) for
-   > 90 minutes.
+   verdict, not from the builder ship site; do not alarm on it. Also (c):
+   a PR carrying a `Yoyo-loop: approval retracted` or `Yoyo-loop: gated PR
+   went stale` comment with no matching superseding ping (↩️ or ⚠️) in the
+   channel history. This is the claimed-but-never-sent class; name the
+   exact PR/issue.
+7. **dead-loop** — the builder has work — the agent-ready unassigned queue
+   is non-empty, or the resume lane is: an `agent-ready` issue assigned to
+   the loop user, In Progress or In Review, with unchecked ACs, not
+   `blocked`, and every linked PR merged or closed — yet no loop activity
+   (new PRs, verdict comments, repair pushes) for > 90 minutes. A resumable
+   issue is loop work the unassigned queue does not show.
 8. **auto-closed-tail** — an issue whose workflow status is Done/completed
    while unchecked acceptance criteria remain and `agent-ready` is present:
    the Linear-GitHub integration auto-closed a multi-PR issue at an
    intermediate merge, and the Done status hides the remaining ACs from the
    builder's pick query until a human reopens it.
+9. **stale-gate-silent** — an open PR whose only loop label is
+   `needs-human-review` has been CONFLICTING for > 45 minutes with no
+   `Yoyo-loop: gated PR went stale` comment after its latest verdict: the
+   reviewer's notification-only stale-gate note (YOY-103) did not fire, so
+   the PR is invisible to every loop and to Slack. The watchdog names it;
+   it never relabels or comments on the PR.
 
 Skip conditions gracefully where a primary source is unavailable and say
 which were skipped and why.

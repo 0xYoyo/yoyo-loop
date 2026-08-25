@@ -41,3 +41,41 @@ Comprehensive diagnosis eliminates serial discovery of defects that coexist
 at diagnosis time. It cannot surface a defect that only becomes reachable
 after another fix unmasks it; a second round in such cases is not a process
 failure.
+
+## Multi-PR issue lifecycle (YOY-65, YOY-113)
+
+An issue larger than one PR — a hardening tail is the sanctioned case — moves
+through the loop in slices. Four rules keep it visible and un-redone, and
+they live in yoyo-build (steps 1, 2, 7), yoyo-review (step 2), yoyo-status,
+and the watchdog, changed together per the fragility rule:
+
+- **Closure convention.** Every intermediate slice writes `Part of TEAM-NNN`
+  in its PR body; the slice that completes the LAST open AC writes
+  `Closes TEAM-NNN`, so the issue closes itself at merge and never waits on
+  a human to notice it is done (unfiltered PR #108 was the case that
+  settled this). `Closes` mid-tail auto-closes the issue and hides the
+  remaining ACs; `Part of` on the last slice strands a finished issue open.
+- **Ticks at ship.** The builder ticks the `AC-N` checkboxes its PR
+  completes when it opens the PR — a tick means "claimed, evidence in this
+  PR". Nobody ticks after the fact and nobody ticks by hand.
+- **Cross-check at verdict.** The reviewer compares the ticks with the diff:
+  a tick without evidence is a must-fix finding, a claimed AC left unticked
+  is a must-fix finding, and a keyword that disagrees with the tick state is
+  a must-fix finding. A repair round unticks what its verdict reopened and
+  re-ticks only what the fix completes.
+- **Resume lane.** Before the normal pick, the builder resumes an issue on
+  its repo that is assigned to itself, In Progress or In Review, with
+  unchecked ACs and no open PR (every linked PR merged or closed). It never
+  resumes a `blocked` issue and never while a PR is open — including one
+  waiting on a human. Nothing needs unassigning or resetting between slices.
+
+## Conflicting PRs on the human gate (YOY-103)
+
+`needs-human-review` alone means "left the automated queue until a human
+resolves it" — by design. When such a PR turns CONFLICTING because main
+moved, the reviewer posts one `Yoyo-loop: gated PR went stale` note and one
+⚠️ Slack ping, once per state change; it never relabels, and the builder's
+skip rule is unchanged. The human resolves as before: resolve the
+escalation, then rebase or swap the label to `loop-changes-requested` so
+the repair queue takes over. (`loop-approved` PRs that turn conflicting are
+the separate YOY-63 retraction path.)

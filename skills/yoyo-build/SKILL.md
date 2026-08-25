@@ -133,6 +133,15 @@ prior fix-round comments plus one, `SHA` is the new head commit — followed by
 what changed. That first line is the anchor the round counting below depends
 on; never omit or reword it. End this pass.
 
+AC ticks follow the repair. A tick on the Linear issue means "claimed,
+evidence in this PR", and an `[AC-N]` must-fix withdraws that claim: before
+fixing, untick on the issue every AC the verdict's `[AC-N]` findings
+reopened — change its `- [x] AC-N` back to `- [ ] AC-N`. Re-tick each one
+only with the fix push that completes it; an AC the repair cannot complete —
+an escalation below — stays unticked so the resume lane in step 2 still sees
+it as open work. Edit only the checkbox characters, never the AC text, and
+verify the edit by re-fetch per step 3.
+
 Repair pushes are append-only: fix commits go on top of the existing branch
 history — never force-push, never rewrite already-reviewed commits. The
 reviewer records verdicts against exact SHAs, and a history rewrite orphans
@@ -205,6 +214,41 @@ PR URL.
 
 ## 2. Pick
 
+### Resume lane — before the normal pick
+
+A multi-PR issue — a hardening tail worked in `Part of` slices — sits
+assigned to the loop user and In Progress or In Review between slices. The
+normal pick below requires an unassigned issue, so without this lane the
+builder reported an empty queue after every intermediate merge and asked the
+founder to unassign the issue by hand, once per slice (YOY-113). Before the
+normal pick, using the Linear connector, list issues on team `linear_team`
+that meet every condition:
+
+- labeled `repo:SLUG` and `agent-ready`
+- assigned to self — the loop's own Linear user; never another person's issue
+- workflow status In Progress or In Review — a started or review state
+- at least one acceptance-criteria checkbox (`- [ ] AC-N`) still unchecked
+- not labeled `blocked`, and no unresolved blocker relation
+- NO open PR: every PR linked to the issue — its Linear attachments plus
+  `gh pr list --state all --search "TEAMKEY-NNN"` — is merged or closed
+
+Never resume when the issue is `blocked`, and never resume when the open-PR
+condition fails: an open PR means the previous slice is still in review or
+repair — including a PR waiting on a human under `needs-human-review` — and a
+second slice would race it. Only the self-assigned case resumes, so the
+one-builder-per-repo cooperative lock of step 3 holds unchanged. A linked PR
+that closed without merging carried withdrawn claims: untick the ACs its
+scope ledger claimed before continuing, so the next slice does not skip work
+that never landed.
+
+When such an issue exists — oldest first if several — skip the claim in
+step 3, because the issue is already yours and already started, and continue
+at step 4 with the unchecked ACs as the remaining contract. Ticked ACs were
+completed by merged slices and are never redone. Otherwise fall through to
+the normal pick.
+
+### Normal pick
+
 Using the Linear connector, list issues on team `linear_team` that meet every
 condition:
 
@@ -256,7 +300,9 @@ silently keep the old value while reporting success. If a field did not
 change, retry that mutation once and re-fetch again; if it still holds the old
 value, report the discrepancy explicitly in the pass output instead of
 assuming success. This applies to every Linear mutation that assigns,
-unassigns, or changes state — here and in the blocked flow of step 8.
+unassigns, or changes state — here and in the blocked flow of step 8 — and to
+every AC checkbox edit in steps 1, 2, and 7: re-fetch the issue description
+and confirm exactly the intended boxes changed.
 
 The assignee prevents different people from taking the same issue. It is not
 an atomic lock between simultaneous sessions authenticated as the same Linear
@@ -357,14 +403,19 @@ unrelated work or generated secrets.
 Push and open a PR with `gh pr create`. Its description must include:
 
 - What changed and why
-- The issue link, using the issue's real Linear identifier: write
-  `Closes TEAMKEY-NNN` only when this PR completes every remaining acceptance
-  criterion of the issue. When the PR covers only a subset of the issue's
-  acceptance criteria — a multi-PR issue, such as a hardening tail worked per
-  its own sizing note — write `Part of TEAMKEY-NNN` instead: the Linear-GitHub
-  integration auto-closes the issue at merge on `Closes`, and a mid-tail
-  auto-close makes the remaining ACs invisible to the pick query. The PR title
-  keeps naming the ACs it covers.
+- The issue link, using the issue's real Linear identifier — the closure
+  convention: write `Closes TEAMKEY-NNN` only when this PR completes every
+  remaining acceptance criterion of the issue, that is, when it ticks the
+  last open AC and no `- [ ] AC-N` remains. When the PR covers only a subset
+  of the issue's acceptance criteria — a multi-PR issue, such as a hardening
+  tail worked per its own sizing note — write `Part of TEAMKEY-NNN` instead:
+  the Linear-GitHub integration auto-closes the issue at merge on `Closes`,
+  and a mid-tail auto-close makes the remaining ACs invisible to the pick
+  query. The slice that completes the LAST open AC uses `Closes`, not
+  `Part of`, so the issue closes itself at merge: unfiltered PR #108, the
+  thirteenth and last slice of YOY-96, wrote `Part of` and left the close as
+  one more manual founder touch — the judgment call this rule settles. The
+  PR title keeps naming the ACs it covers.
 - A scope ledger: one evidence line per `AC-N`, one preservation line per
   `NG-N`, and `Other behavior changes: None`
 - Numbered manual test steps matching what was actually built
@@ -385,6 +436,16 @@ reviewer's verdict ping is the call to action. Immediate pings are reserved
 for events that stop automated work — a `blocked` issue, `loop-stuck`, a
 repair-pass escalation — which need the human now to keep the loop moving,
 while merge-decision pings wait for the reviewer's completed verdict.
+
+Tick the ACs this PR completes, at ship: on the Linear issue description,
+change `- [ ] AC-N` to `- [x] AC-N` for exactly the ACs the scope ledger
+claims — the mechanics are identical for single- and multi-PR issues and for
+whatever verdict the PR later receives, because a tick at ship means
+"claimed, evidence in this PR", and the reviewer cross-checks every tick
+against the diff at verdict: a tick without evidence is a finding. Never tick
+an AC the diff does not evidence. Edit only the checkbox characters, never
+the AC text, and verify the edit by re-fetch per step 3. This is what lets a
+resumed slice skip merged work without reading PR titles.
 
 Comment the PR URL on the Linear issue. Move it to the team's review state if
 one exists; otherwise leave it in the started state for the Linear-GitHub

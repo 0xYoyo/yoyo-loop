@@ -120,12 +120,16 @@ reliably lock each other.
 ## Slack notifications
 
 Optional and outbound-only: the loop posts a message when something needs a
-human, and nothing in Slack can act back on the loop. Five events notify:
+human, and nothing in Slack can act back on the loop. Seven events notify:
 
 - an issue became `blocked` (builder has a question)
 - a PR became `loop-stuck` (fix rounds exhausted)
 - a PR became `needs-human-review` (escalation, from builder or reviewer)
 - a PR became `loop-approved` (ready for your merge decision)
+- a `loop-approved` PR turned conflicting (approval retracted; the earlier
+  merge-ready ping is superseded)
+- a `needs-human-review` PR turned conflicting (stale-gate note; the label
+  is untouched — resolve the escalation, then rebase or swap the label)
 - a deferred review finding has no hardening issue to hold it (only chains
   specced before the hardening-tail mechanism)
 

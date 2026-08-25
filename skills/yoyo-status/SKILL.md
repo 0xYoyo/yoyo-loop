@@ -84,7 +84,10 @@ age (oldest first).
    reason pulled from the latest verdict comment. A PR carrying both
    `needs-human-review` and `loop-changes-requested` is still the agent's to
    fix — no action from you yet — so it is listed only under **agent
-   working** below. Each PR appears in exactly one category, never two.
+   working** below. Each PR appears in exactly one category, never two. A
+   `needs-human-review` PR whose mergeability is conflicting is annotated
+   `conflicting` — resolving the escalation now also means a rebase; the
+   reviewer posts a stale-gate note on it and never relabels it.
 3. **answer** — Linear issues labeled `blocked` (with `repo:SLUG`), quoting
    the blocking question from the issue's latest comment.
 4. **approve or discard** — issues with `repo:SLUG`, not labeled
@@ -108,7 +111,11 @@ age (oldest first).
    `needs-human-review`), and issues in progress or in review with an
    attached PR or visible recent activity. Listing them keeps "the agent is
    on it" distinguishable from "nothing exists"; the action is
-   "none — agent working".
+   "none — agent working". An issue assigned to the loop user, in progress
+   or in review, whose linked PRs are all merged or closed while unchecked
+   ACs remain is the builder's resume lane between slices of a multi-PR
+   issue, not a stall: list it here with the action "none — builder resumes
+   the next slice". It needs no unassign and no reset from you.
 7. **waiting by design** — container and hardening-tail issues in backlog
    that need nothing yet: a tail accumulates deferred findings until its
    chain completes and the human reads the set. The action is

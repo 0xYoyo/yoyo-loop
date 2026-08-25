@@ -782,6 +782,116 @@ const requiredContracts = [
     designFlat.includes("Then `git checkout main` and confirm a clean `git status`: the ship step ends on main, never on the feature branch"),
     "design skill ship step must end with git checkout main and a clean git status — YOY-85",
   ],
+  // YOY-113: multi-PR issues stalled after every intermediate merge because
+  // the pick requires an unassigned issue. The resume lane re-enters the
+  // builder's own self-assigned issue (no open PR, unchecked ACs, never
+  // blocked); ticks at ship record which ACs each slice claimed, the
+  // reviewer cross-checks the ticks against the diff, a repair round unticks
+  // what it reopened, and the closure convention pins Closes to the LAST
+  // open AC (unfiltered PR #108 wrote Part of on the final slice).
+  [
+    buildFlat.includes("### Resume lane — before the normal pick") &&
+      buildFlat.includes("assigned to self — the loop's own Linear user; never another person's issue") &&
+      buildFlat.includes("workflow status In Progress or In Review") &&
+      buildFlat.includes("at least one acceptance-criteria checkbox (`- [ ] AC-N`) still unchecked") &&
+      buildFlat.includes("NO open PR: every PR linked to the issue"),
+    "builder must run the resume lane before the normal pick: self-assigned, In Progress/In Review, unchecked ACs, no open PR — YOY-113",
+  ],
+  [
+    buildFlat.includes("Never resume when the issue is `blocked`, and never resume when the open-PR condition fails"),
+    "builder must never resume a blocked issue or one with an open PR — YOY-113",
+  ],
+  [
+    buildFlat.includes("Only the self-assigned case resumes, so the one-builder-per-repo cooperative lock of step 3 holds unchanged"),
+    "builder resume lane must keep the cooperative lock: only the self-assigned case resumes — YOY-113",
+  ],
+  [
+    buildFlat.includes("skip the claim in step 3, because the issue is already yours and already started") &&
+      buildFlat.includes("Ticked ACs were completed by merged slices and are never redone"),
+    "builder resume must skip the claim and never redo ticked ACs — YOY-113",
+  ],
+  [
+    buildFlat.includes("Tick the ACs this PR completes, at ship") &&
+      buildFlat.includes("for exactly the ACs the scope ledger claims") &&
+      buildFlat.includes("Never tick an AC the diff does not evidence"),
+    "builder must tick exactly the ACs its PR completes at ship time and never tick without evidence — YOY-113",
+  ],
+  [
+    buildFlat.includes("untick on the issue every AC the verdict's `[AC-N]` findings reopened") &&
+      buildFlat.includes("Re-tick each one only with the fix push that completes it"),
+    "builder repair round must untick what the verdict reopened and re-tick only what the fix completes — YOY-113",
+  ],
+  [
+    buildFlat.includes("and to every AC checkbox edit in steps 1, 2, and 7"),
+    "builder must verify AC checkbox edits by re-fetch like every other Linear mutation — YOY-113",
+  ],
+  [
+    buildFlat.includes("The slice that completes the LAST open AC uses `Closes`, not `Part of`") &&
+      buildFlat.includes("unfiltered PR #108"),
+    "builder closure convention must pin Closes to the slice completing the last open AC, citing unfiltered PR #108 — YOY-113",
+  ],
+  [
+    reviewFlat.includes("Cross-check the AC ticks against the diff") &&
+      reviewFlat.includes("a tick without evidence is a finding, never a courtesy"),
+    "reviewer must cross-check AC ticks against the diff at verdict; a tick without evidence is a finding — YOY-113",
+  ],
+  [
+    reviewFlat.includes("`Part of` on the PR that ticks the last open AC, is a must-fix `[DEFECT]`"),
+    "reviewer must enforce the closure convention against the tick state — YOY-113",
+  ],
+  [
+    statusFlat.includes("none — builder resumes the next slice"),
+    "status must list a between-slices self-assigned issue as the resume lane, not a stall — YOY-113",
+  ],
+  [
+    watchdogFlat.includes("or the resume lane is: an `agent-ready` issue assigned to the loop user"),
+    "watchdog dead-loop must count resumable issues as builder work — YOY-113",
+  ],
+  [
+    processFlat.includes("## Multi-PR issue lifecycle (YOY-65, YOY-113)") &&
+      processFlat.includes("the slice that completes the LAST open AC writes `Closes TEAM-NNN`"),
+    "docs/PROCESS.md must record the multi-PR lifecycle: closure convention, ticks, cross-check, resume lane — YOY-113",
+  ],
+  // YOY-103: a CONFLICTING PR whose only loop label is needs-human-review
+  // was invisible to reviewer, builder, and Slack. Notification-only by
+  // founder decision: one superseding note + one ⚠️ ping per state change;
+  // no relabel, builder skip rule untouched.
+  [
+    reviewFlat.includes("Exception — conflicting on the human gate (YOY-103)") &&
+      reviewFlat.includes("This exception is notification-only. Do NOT relabel"),
+    "reviewer must notify, never relabel, on a conflicting PR whose only loop label is needs-human-review — YOY-103",
+  ],
+  [
+    reviewFlat.includes("gated PR went stale — became conflicting after SHA while waiting on a human; needs-human-review unchanged"),
+    "reviewer stale-gate note must name the staleness and state the label is unchanged — YOY-103",
+  ],
+  [
+    reviewFlat.includes("needs-human-review PR became conflicting — earlier human-decision ping superseded"),
+    "reviewer stale-gate ping must supersede the earlier human-decision ping — YOY-103",
+  ],
+  [
+    reviewFlat.includes("Once per state change, not per pass") &&
+      reviewFlat.includes("if a `Yoyo-loop: gated PR went stale` comment already exists after the latest `Yoyo-loop review of` verdict for this head SHA, stay silent"),
+    "reviewer stale-gate note must fire once per state change, silent while the note is already open — YOY-103",
+  ],
+  [
+    buildFlat.includes("Skip a PR carrying `needs-human-review` only when it does not also carry `loop-changes-requested`"),
+    "builder skip rule for needs-human-review-only PRs must stay untouched by the stale-gate notification — YOY-103",
+  ],
+  [
+    watchdogFlat.includes("stale-gate-silent") &&
+      watchdogFlat.includes("`Yoyo-loop: gated PR went stale` comment with no matching superseding ping"),
+    "watchdog must verify the stale-gate note fired and that its ping was sent — YOY-103",
+  ],
+  [
+    statusFlat.includes("the reviewer posts a stale-gate note on it and never relabels it"),
+    "status must annotate conflicting needs-human-review PRs without moving them between categories — YOY-103",
+  ],
+  [
+    readme.includes("a `needs-human-review` PR turned conflicting (stale-gate note; the label") &&
+      processFlat.includes("## Conflicting PRs on the human gate (YOY-103)"),
+    "README and docs/PROCESS.md must document the stale-gate notification — YOY-103",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
@@ -820,6 +930,28 @@ assert(builderTidy !== -1, "builder must prune merged issue branches in the work
 assert(
   localOnlyCheck < builderTidy,
   "builder must tidy merged branches only AFTER the unpushed-work check passes",
+);
+
+// YOY-113 order: the resume lane must sit inside the pick step, before the
+// normal pick query and before the claim; a resume check placed after the
+// pick would never run on an empty unassigned queue.
+const pickStep = buildFlat.indexOf("## 2. Pick");
+const resumeLane = buildFlat.indexOf("### Resume lane — before the normal pick");
+const normalPick = buildFlat.indexOf("### Normal pick");
+const claimStep = buildFlat.indexOf("## 3. Claim");
+assert(
+  pickStep !== -1 && resumeLane !== -1 && normalPick !== -1 && claimStep !== -1 &&
+    pickStep < resumeLane && resumeLane < normalPick && normalPick < claimStep,
+  "builder resume lane must sit inside step 2, BEFORE the normal pick query and the claim — YOY-113",
+);
+// The tick step is part of shipping: it must follow the PR creation and
+// precede the pass end, so a ticked AC always has a PR carrying its evidence.
+const shipStep = buildFlat.indexOf("## 7. Ship");
+const tickStep = buildFlat.indexOf("Tick the ACs this PR completes, at ship");
+const blockedStep = buildFlat.indexOf("## 8. Blocked");
+assert(
+  shipStep !== -1 && tickStep !== -1 && shipStep < tickStep && tickStep < blockedStep,
+  "builder tick step must live inside step 7 (ship), after the PR is opened — YOY-113",
 );
 
 // Same discipline for spec and review: a sync placed after the missing-config
