@@ -1,10 +1,7 @@
 # Roadmap
 
-Last updated: 25 August 2026 — factory window shipped YOY-113 (multi-PR
-lifecycle: resume lane, AC ticks at ship, reviewer tick cross-check, closure
-convention) and YOY-103 (stale-gate notification for conflicting
-`needs-human-review` PRs); this refresh also catches up the 15–19 August
-one-offs (PRs #41–#45) and the product state through M4.
+Last updated: 26 August 2026 — product-state refresh after the M5 spec session
+and the Frankfurt move.
 
 ## North star
 
@@ -233,16 +230,26 @@ live. YOY-96, the M4 hardening tail, closed at 21 ACs across thirteen
 intermediate merge needed a founder unassign, and no AC was ever ticked by
 an agent.
 
-**unfiltered — M5 pile (specced or direction-noted, not yet chained):**
-- YOY-64 — AI search latency: intent extraction dominates at 4.1–6.5s; the
-  founder bar is <2s end to end, which needs model/prompt-level work, not
-  tuning.
-- YOY-110 — colour-exclusion semantics: exclude by primary colour, not any
-  colourway (founder decision recorded).
-- YOY-111 — close matches respect explicit exclusions and relax constraints
-  one at a time (founder decision recorded).
-- YOY-112 — recurring agent-executed live E2E smoke on the deployment;
-  doubles as Phase 7's first cloud-routine step.
+**unfiltered — M5 specified and chained (2026-08-25), execution started
+2026-08-26.** /yoyo-spec filed 16 issues, YOY-114 → YOY-125, as a strict
+blocked-by chain: per-stage latency instrumentation → classic p95 ≤ 500 ms
+with pooled Neon → daily cloud smoke (YOY-112) → lite-first routing → AI
+p50 < 2 s / p95 < 3.5 s → primary-colour exclusion → honest close matches →
+colourway families → Constructor-bar eval set → vision-model comparison
+(Gemini-only one-off) → image capture → vision pass → contamination eval →
+playground design build (gated on a /yoyo-design re-run) → live verification
+tail → hardening tail. Twelve issues are agent-ready; 119, 123, 124 and 125
+are not. Gate math: 28 August is the "M5 merged" checkpoint with submission
+around 5 September; then M6 (dashboard, attribution, billing, kill switch,
+transactional email), M7 (onboarding, listing, GDPR), and M8/Door-2 during
+the review wait.
+
+Deployment moved to Render Frankfurt (service `unfiltered-eu`,
+https://unfiltered-eu.onrender.com) via agent-driven Render API work
+(unfiltered PRs #109/#110, `apps/shopify-app/scripts/render-migrate.mts`, env
+group `unfiltered-prod`, no blueprint). Render is now API-controlled — the
+founder keeps only deletions and billing.
+
 Parked with `[LATER]`: YOY-97 (agent-agent debugging & UI-QA lane),
 YOY-102 (stop committing the widget bundle; build in CI).
 
