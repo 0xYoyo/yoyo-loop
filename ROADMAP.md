@@ -1,7 +1,8 @@
 # Roadmap
 
-Last updated: 26 August 2026 — product-state refresh after the M5 spec session
-and the Frankfurt move.
+Last updated: 27 September 2026 — product-state refresh after M5 shipped
+(unfiltered, 2026-08-29) and briza's M2 (2026-08-28); the factory queue
+named (YOY-126, YOY-127).
 
 ## North star
 
@@ -103,11 +104,23 @@ low-blast-radius job that proves a routine can run a skill against live
 Linear/GitHub/Slack from the cloud before any builder or reviewer loop moves
 there. Ordering after YOY-112: watchdog → reviewer → builder, each only
 after the previous one has run unattended for a milestone.
+2026-08-26 → 29: YOY-112's code shipped (four read-only probes,
+`live-smoke.mts`, docs/SMOKE.md with the routine prompt and a phone
+checklist). Founder decision 2026-08-26: the routine itself is NOT created
+until submission day, so the schedule starts when the site must stay up
+unattended. Phase 7's first cloud run is therefore still ahead.
 - Includes orchestrated parallel builders — queue partitioning + leases
   (absorbs YOY-37).
 - Candidate compute: the $300 GCP credit — verify its ~90-day activation
   expiry. Superseded as the first option by cloud routines, which need no
   compute of our own.
+- The M5 execution run (2026-08-26 → 29) filed the two factory issues that
+  now head the queue: **YOY-127** — event-driven orchestration (build → CI
+  → review → verdict-driven next step; the blind 15-minute timers waste
+  passes and let the reviewer stall on CI queue lag) and **YOY-126** — a
+  PR body naming a second Linear ID auto-closes that issue (happened twice:
+  YOY-124 via PR #114, YOY-64 via PR #119), and loop sessions bloat to 100 %
+  context (fresh context per pass). Both High, Backlog, `repo:yoyo-loop`.
 
 **Phase 8 — Post-M2 queue (in order)**
 1. UI-verification gate — ✅ DONE (PR #27, YOY-38).
@@ -187,7 +200,7 @@ after the previous one has run unattended for a milestone.
   mixed commands; the settings template stops denying reads of committed
   example env files.
 
-**2026-08-25 factory window — ✅ SHIPPED (this PR)**
+**2026-08-25 factory window — ✅ SHIPPED (PR #46)**
 - YOY-113 — multi-PR lifecycle. Resume lane: before the normal pick the
   builder resumes its own self-assigned In Progress/In Review issue with
   unchecked ACs and no open PR, never when blocked, never while a PR is
@@ -206,6 +219,10 @@ after the previous one has run unattended for a milestone.
   `stale-gate-silent` and counts resumable issues in `dead-loop`.
 - Validator: 174 → 196 contracts; docs/PROCESS.md records the multi-PR
   lifecycle and the stale-gate path.
+- Proven in production 2026-08-26 → 29: the M5 run shipped 39 unfiltered
+  PRs (#111–#149) across 19 issues in four loop-days with the resume lane,
+  ticks-at-ship and `Closes`-on-last-slice all working unattended. The
+  founder's per-slice touches were merges only.
 
 Later layers: documentation merge gates (Finn §5); morning director
 (Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
@@ -214,51 +231,71 @@ milestone planning.
 Note: hosting, deployments, and secrets are NOT a factory phase — they are
 milestone 1 of each product repo, specified in its PRD.
 
-## Product state (live Linear, team YOY — 25 August 2026)
+## Product state (live Linear, team YOY — 27 September 2026)
 
-**unfiltered — M4 complete.** The playground milestone shipped in full
-through the loop: catalog registry and public-catalog sources (YOY-88,
-YOY-89), the search + click API with throttles and daily AI caps (YOY-90),
-the Render deployment (YOY-91), the playground shell with its UI test lane
-(YOY-92), AI states (YOY-93), the store-preload page (YOY-94), iterative
-HNSW scans for full small-tenant recall (YOY-105). YOY-95's live run on the
-deployed playground recorded 27/27 steps. YOY-109 — intent extraction
-failing intermittently on live — was diagnosed through the bug lane, fixed
-(low thinking on the intent call, intent-failure class logged) and verified
-live. YOY-96, the M4 hardening tail, closed at 21 ACs across thirteen
-`Part of` slices (PRs #96–#108) — the run that surfaced YOY-113: every
-intermediate merge needed a founder unassign, and no AC was ever ticked by
-an agent.
+**unfiltered — M1–M5 complete.** M4 (the playground) shipped through the
+loop in August (YOY-88 → YOY-95, YOY-105, YOY-109; hardening tail YOY-96 at
+21 ACs across PRs #96–#108 — the run that surfaced YOY-113).
 
-**unfiltered — M5 specified and chained (2026-08-25), execution started
-2026-08-26.** /yoyo-spec filed 16 issues, YOY-114 → YOY-125, as a strict
-blocked-by chain: per-stage latency instrumentation → classic p95 ≤ 500 ms
-with pooled Neon → daily cloud smoke (YOY-112) → lite-first routing → AI
-p50 < 2 s / p95 < 3.5 s → primary-colour exclusion → honest close matches →
-colourway families → Constructor-bar eval set → vision-model comparison
-(Gemini-only one-off) → image capture → vision pass → contamination eval →
-playground design build (gated on a /yoyo-design re-run) → live verification
-tail → hardening tail. Twelve issues are agent-ready; 119, 123, 124 and 125
-are not. Gate math: 28 August is the "M5 merged" checkpoint with submission
-around 5 September; then M6 (dashboard, attribution, billing, kill switch,
-transactional email), M7 (onboarding, listing, GDPR), and M8/Door-2 during
-the review wait.
+**M5 shipped 2026-08-26 → 29 (PRs #111–#149; every issue Done).** The
+16-issue chain YOY-114 → YOY-125 closed in full, plus four issues filed and
+closed inside the run (YOY-133 negated attributes as hard exclusions and the
+purpose-phrase AI route; YOY-135 classic-route family collapse; YOY-136 the
+curated examples; YOY-137 closed by AC amendment). Every M5 bar is measured
+on the Frankfurt deployment and recorded in docs/LATENCY.md and
+docs/M5-LIVE-RUN.md: classic p50 37 ms / p95 50 ms on the pooled Neon
+connection (bar ≤ 500 ms); AI p50 ≈ 1.0 s, p95 2.2 s EN / 3.4 s HE (bars
+< 2 s / < 3.5 s), degraded 1 of 200; $0.37 per 1,000 searches (bar $0.60);
+vision enrichment at ingest on 465/465 seed products, contamination clean,
+$1.90 per 1,000 products; Constructor-bar eval set 100 % hits and 0 mustNot
+leaks; the colour law holds in EN and HE; parity floor: playground classic
+43–49 ms against 607–765 ms for the stock Shopify storefront search. The
+shopper's worst-case wait dropped from ≈ 8 s to ≤ 4.5 s (intent ladder
+deadline 4500 ms, lite timeout 3000 ms). The playground was re-drawn on the
+founder's Claude Design kit (YOY-123). Total AI spend for all of development
+to date: $3.54.
 
-Deployment moved to Render Frankfurt (service `unfiltered-eu`,
-https://unfiltered-eu.onrender.com) via agent-driven Render API work
-(unfiltered PRs #109/#110, `apps/shopify-app/scripts/render-migrate.mts`, env
-group `unfiltered-prod`, no blueprint). Render is now API-controlled — the
-founder keeps only deletions and billing.
+**Open on unfiltered (Backlog, not agent-ready):** YOY-134 (High) —
+positive vision attributes never constrain retrieval ("long sleeve midi
+dress" returns sleeveless dresses); a real engine feature, first item of
+M6. YOY-138 (Medium) — a price cap stated in ILS is applied as a bare number
+on a USD catalog. Parked with `[LATER]`: YOY-97 (agent-agent debugging &
+UI-QA lane), YOY-102 (stop committing the widget bundle). Founder
+observation after the run (2026-09-27): human queries outside the eval
+suite still break the engine — an inspection of the engine's inner
+workings and a wider eval set are the next chat's first product question,
+before the M6 spec.
 
-Parked with `[LATER]`: YOY-97 (agent-agent debugging & UI-QA lane),
-YOY-102 (stop committing the widget bundle; build in CI).
+**Deferred to submission day by founder decision:** creating the daily
+smoke routine (docs/SMOKE.md; the code shipped in YOY-112). Still to
+record: the first `latency-probe.mts --runs 20 --set all` row on the
+deployed 4.5 s code (the "after" tail for docs/LATENCY.md).
 
-**briza — M1 shipped (PRs #1–#6, 2026-08-08)**, hardening tail YOY-55
-closed; no active milestone.
+**Gate math (as decided 2026-08-25, now behind schedule by the September
+break):** M6 (dashboard, attribution — `routeReason` ready — billing, kill
+switch, transactional email) → M7 (onboarding, listing assets, GDPR
+webhooks) → Shopify submission → M8/Door-2 in the review wait. Dates are to
+be re-cut in the next spec session.
 
-**yoyo-loop — factory queue empty** after this window: YOY-113 and YOY-103
-close with this PR; nothing else carries `repo:yoyo-loop` in Backlog except
-the `[LATER]` YOY-97.
+Deployment: Render Frankfurt (service `unfiltered-eu`,
+https://unfiltered-eu.onrender.com), env group `unfiltered-prod`, API-
+controlled via `apps/shopify-app/scripts/render-migrate.mts`; Neon pooled
+(`-pooler`, `pgbouncer=true`) since 2026-08-28 with `DIRECT_DATABASE_URL`
+for migrations; UptimeRobot on `/healthz` every 5 minutes.
+
+**briza — M1 and M2 shipped.** M1: PRs #1–#6 (2026-08-08). M2 (PRD v2,
+design kit, Cloudflare deploy config, four loop issues YOY-128 → YOY-131
+plus hardening YOY-132) shipped 2026-08-26 → 28 as PRs #7–#14, followed by
+two founder-directed redesign PRs (#15 photographic split-panel layout, #16
+polish). No open issues; no active milestone.
+
+**yoyo-loop — factory queue: two High issues, both filed from the M5 run.**
+YOY-127 (event-driven orchestration: build → CI → review → verdict-driven
+next step, no blind 15-minute timers) and YOY-126 (a PR body naming a
+second Linear ID auto-closes it — interim rule: exactly one Linear ID per
+PR title and body; loop sessions bloat to 100 % context — fresh context per
+pass). Founder's stated order: factory first, before the M6 spec. `[LATER]`
+YOY-97 stays parked.
 
 ## Standing decisions
 
@@ -279,7 +316,10 @@ the `[LATER]` YOY-97.
 - Direction notes are promoted to full AC contracts before any agent is
   pointed at them. Agents correctly stop on AC-less issues and on
   contract-versus-live mismatches (the YOY-62 and YOY-66 lesson), and that
-  stop is rewarded behavior.
+  stop is rewarded behavior. Confirmed again 2026-08-28: two issues filed
+  with placeholder ACs ("to be written when the shape is decided") were
+  correctly refused by the builder twice; an issue is filed with decided
+  ACs or not at all.
 - **Scope discipline:** a skill never absorbs duties outside its stated
   purpose. New capability goes into an existing skill only when genuinely
   in-scope; otherwise a new skill — and a new skill only when the capability
@@ -296,6 +336,11 @@ the `[LATER]` YOY-97.
   through the loop; multi-symptom/failed run → /yoyo-diagnose → consolidated
   contract). Defined in YOY-73; recorded here so the routing survives chat
   migrations.
+- **One Linear ID per PR (interim rule since 2026-08-26, until YOY-126
+  ships a mechanism):** a PR's title and body name exactly one Linear issue.
+  The Linear–GitHub integration closes any issue a PR body mentions with a
+  closing keyword, and did so twice during the M5 run. Cross-references to
+  other issues go in Linear comments, never in PR text.
 
 ## Notes
 
