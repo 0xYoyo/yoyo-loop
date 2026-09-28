@@ -105,6 +105,10 @@ posting in step 3 is the separate exit-side one.
   issue mid-tail or leaves a finished issue open for a human to close. A
   repair round unticks what its verdict reopened and re-ticks only what the
   fix completes; the cross-check runs again on the repaired head.
+- A PR whose title or body names more than one Linear issue identifier is a
+  must-fix `[DEFECT]`: the Linear-GitHub integration closes any issue a PR
+  body names with a closing keyword, so a second identifier can close an
+  issue this PR does not complete.
 - Read the full diff and every changed file in context.
 - Review only against the linked issue: acceptance-criteria gaps, defects,
   broken data flow, unnecessary scope expansion, security problems, missing

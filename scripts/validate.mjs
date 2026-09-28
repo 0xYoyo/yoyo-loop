@@ -120,6 +120,18 @@ const requiredContracts = [
     ),
     "reviewer keeps the waiting fallback after the watch — YOY-127 step 1",
   ],
+  [
+    buildFlat.includes("waiting on PR #N (under review or repair)"),
+    "builder starts no new issue while a PR awaits review or repair — YOY-127 step 2",
+  ],
+  [
+    buildFlat.includes("exactly one Linear issue identifier"),
+    "builder PR text names exactly one Linear issue — YOY-126 part 1",
+  ],
+  [
+    reviewFlat.includes("more than one Linear issue identifier"),
+    "reviewer flags a PR naming a second Linear issue — YOY-126 part 1",
+  ],
   [build.includes("defaultBranchRef"), "builder must detect the default branch"],
   [build.includes("git status --porcelain"), "builder must protect dirty worktrees"],
   [build.includes("repo:SLUG"), "builder must scope its pick query to this repository"],

@@ -247,6 +247,19 @@ at step 4 with the unchecked ACs as the remaining contract. Ticked ACs were
 completed by merged slices and are never redone. Otherwise fall through to
 the normal pick.
 
+### Open-PR gate — before the normal pick
+
+Run `gh pr list --state open --json number,labels` for this repository. If
+any open PR is labeled `loop-changes-requested`, or carries none of
+`loop-approved` / `needs-human-review` — it is still awaiting its first
+verdict — claim no new issue: end the pass and report "waiting on PR #N
+(under review or repair)". If every open PR is `loop-approved` or
+`needs-human-review` — all waiting on a human — the normal pick proceeds.
+Building ahead of an unreviewed PR is what created the conflict traffic;
+building behind a human-gated PR is safe because the blocker rule already
+keeps chained issues out. The repair queue in step 1 and the resume lane
+above run before this gate and are unchanged by it.
+
 ### Normal pick
 
 Using the Linear connector, list issues on team `linear_team` that meet every
@@ -416,6 +429,12 @@ Push and open a PR with `gh pr create`. Its description must include:
   thirteenth and last slice of YOY-96, wrote `Part of` and left the close as
   one more manual founder touch — the judgment call this rule settles. The
   PR title keeps naming the ACs it covers.
+- The PR title and body name exactly one Linear issue identifier — the
+  pattern TEAMKEY-NNN — this issue's. Any cross-reference to another issue
+  goes in a Linear comment on this issue, never in PR text, because the
+  Linear-GitHub integration closes any issue a PR body names with a closing
+  keyword. Before opening the PR, check the title and body for a second
+  identifier and remove it.
 - A scope ledger: one evidence line per `AC-N`, one preservation line per
   `NG-N`, and `Other behavior changes: None`
 - Numbered manual test steps matching what was actually built
