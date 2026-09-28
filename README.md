@@ -1,8 +1,7 @@
 # yoyo-loop
 
 Eight Claude Code skills that turn Linear + GitHub into a small, human-gated
-software factory. Adapted from [Finn-loop](https://github.com/finna/Finn-loop)
-by Alex Finn (MIT), with per-repo scoping and a bootstrap command added.
+software factory.
 
 **idea → `/yoyo-spec` interviews you and files the issue → you label it
 `agent-ready` → `/yoyo-build` claims it and opens a PR → `/yoyo-review` posts
@@ -20,24 +19,6 @@ One approval label, one rule: **humans merge**.
 | `/yoyo-watchdog` | Scheduled read-only health sweep: verifies the loop's claims against primary sources (Linear, GitHub, Slack) and alerts once per condition — stalls, missing notifications, red main. Never fixes anything. Runs under `/loop`. |
 | `/yoyo-diagnose` | Turns a symptom set or failed run into one complete, evidence-backed diagnosis report with a proposed consolidated fix contract, posted as a Linear comment. Diagnosis only — never edits code, never opens PRs. Manually invoked; see the bug routing table in [docs/PROCESS.md](docs/PROCESS.md). |
 | `/yoyo-design` | Authors or re-authors `docs/DESIGN.md` — design invariants plus a direction system proportional to the design surface the project owns — from the PRD, the repo, and a spec-style interview. Run manually once per project and again for direction-level changes. DESIGN.md is its entire write surface. |
-
-## Changes from Finn-loop
-
-Four deliberate changes; everything else is his design.
-
-1. **Renamed** `finn-*` → `yoyo-*`.
-2. **Per-repo scoping.** `/yoyo-spec` applies a `repo:SLUG` label and
-   `/yoyo-build` requires it in the pick query. Finn scoped the queue to a
-   Linear *team*, which means one team per project — and Linear's free plan
-   allows two. Scoping by label instead lets one free team serve every
-   repository with no cross-project mixing.
-3. **`/yoyo-init` added.** Automates the manual install checklist from his
-   README so a new project costs one command instead of nine steps.
-4. **Convergence cap and sensitive paths.** A PR that fails two fix rounds gets
-   `loop-stuck` instead of ping-ponging; any diff touching a configured
-   sensitive path escalates to a human. Both are patterns he describes in his
-   README's "full software factory" section, pulled forward because they are
-   cheap and prevent runaway loops.
 
 ## Install (once, ever)
 
@@ -60,6 +41,11 @@ mkdir ~/repos/myproject && cd ~/repos/myproject
 claude
 > /yoyo-init
 ```
+
+**Per-repo scoping.** `/yoyo-spec` applies a `repo:SLUG` label to every
+issue it files, and `/yoyo-build` requires that label in its pick query. One
+Linear team — Linear's free plan allows two — serves every repository with no
+cross-project mixing.
 
 **Starting from nothing.** A fresh repo has no tests, so GitHub has nothing to
 check and the reviewer has no independent evidence — it hands you every pull
@@ -170,6 +156,10 @@ node scripts/validate.mjs
   comments — and a finding not worth doing is rejected with a reason in the
   verdict. Every finding is fixed, deferred, or rejected; the loop never
   leaves one without a home.
+- Repair converges or stops. A PR that exhausts its fix rounds
+  (`max_fix_rounds`, 2 by default) gets `loop-stuck` instead of
+  ping-ponging; any diff touching a configured sensitive path escalates to a
+  human.
 - Blocked issues, `loop-stuck` PRs, and unfixable escalations leave the
   automated queue until a human acts. `needs-human-review` alone gates the
   merge, not the repair: a PR carrying it alongside `loop-changes-requested`

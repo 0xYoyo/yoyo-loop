@@ -23,10 +23,7 @@ lands via PR with validator contracts, never hand edits. Every phase and every
 fix is measured against one question: does this reduce Yoyo's required
 touches?
 
-Status board for the yoyo-loop build phases. The ordering follows Alex Finn's
-Finn-loop README ("From the starter loop to a full software factory" — not in
-this repo; it describes growing a minimal builder/reviewer loop step by step
-into a fully unattended pipeline).
+Status board for the yoyo-loop build phases.
 
 ## Phases
 
@@ -69,16 +66,16 @@ report the webhook HTTP status; silent unverifiable "sent" claims are
 contract-banned.
 5b (later): interactive approvals from Slack with signature verification,
 approver allowlist, idempotency, and re-reading live Linear/GitHub state at
-action time. (Finn §2.)
+action time.
 2026-08-08: interactive Slack approvals evaluated and REJECTED — the delta
 over GitHub mobile merging is a few seconds against real new infrastructure
 (see YOY-39); outbound-only stands.
 
 **Phase 6 — Fresh-reviewer convergence — ✅ ABSORBED BY ARCHITECTURE**
-The failure mode Finn §1 guards (a builder reviewing its own work without
-clean context) cannot occur here — build and review run as fully separate
+The failure mode of a builder reviewing its own work without
+clean context cannot occur here — build and review run as fully separate
 sessions, and convergence (fix rounds, max_fix_rounds cap, loop-stuck)
-landed in PRs #22–#24. The remaining delta vs Finn §1 is only PR-to-review
+landed in PRs #22–#24. The remaining delta is only PR-to-review
 latency from independent 15m crons; deliberately NOT solved by
 builder-spawned reviewers (a spawned reviewer arrives before checks finish
 and must poll) but by Phase 7's event-driven triggers when the latency
@@ -89,7 +86,7 @@ Cloud Routines on GitHub events first; leased persistent workers only if
 open sessions become the bottleneck. The /loop scheduler is per-session and
 loops run concurrently (confirmed 2026-08-02); the remaining constraint
 Phase 7 removes is that sessions must stay open on an awake machine.
-(Finn §8.) DEFERRED — the first factory window after M3 ships; condition (loop
+DEFERRED — the first factory window after M3 ships; condition (loop
 latency and laptop-tethering actually hurting) was met 2026-08-08 per the
 user.
 DEFERRED 2026-08-11: the user reversed the Aug-8 promotion. Caffeinate plus
@@ -136,7 +133,7 @@ unattended. Phase 7's first cloud run is therefore still ahead.
 3. Factory watchdog — ✅ DONE (YOY-40): scheduled read-only pass verifying
    the system's claims against primary sources (Slack channel, Linear
    issues, GitHub state), alerting once per condition; pulled forward by
-   the 2026-08-05 unverifiable-notification failure (Finn §7).
+   the 2026-08-05 unverifiable-notification failure.
 
 **2026-08-11 factory window — ✅ SHIPPED (PRs #34–#37)**
 - YOY-59 — zsh-safe notification sends: captured variable renamed to
@@ -230,9 +227,8 @@ unattended. Phase 7's first cloud run is therefore still ahead.
   ticks-at-ship and `Closes`-on-last-slice all working unattended. The
   founder's per-slice touches were merges only.
 
-Later layers: documentation merge gates (Finn §5); morning director
-(Finn §6); post-merge learning loop (Finn §9); /yoyo-plan autonomous
-milestone planning.
+Later layers: documentation merge gates; morning director; post-merge
+learning loop; /yoyo-plan autonomous milestone planning.
 
 Note: hosting, deployments, and secrets are NOT a factory phase — they are
 milestone 1 of each product repo, specified in its PRD.
