@@ -79,3 +79,10 @@ skip rule is unchanged. The human resolves as before: resolve the
 escalation, then rebase or swap the label to `loop-changes-requested` so
 the repair queue takes over. (`loop-approved` PRs that turn conflicting are
 the separate YOY-63 retraction path.)
+
+## Review timing (YOY-127 step 1)
+
+When a PR's checks are pending, the reviewer waits for CI with
+`gh pr checks --watch` for up to 9 minutes instead of skipping the pass.
+Loops run at `/loop 5m`; an empty pass is near-free. True event triggers
+stay parked.

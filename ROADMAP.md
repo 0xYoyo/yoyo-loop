@@ -121,6 +121,9 @@ unattended. Phase 7's first cloud run is therefore still ahead.
   PR body naming a second Linear ID auto-closes that issue (happened twice:
   YOY-124 via PR #114, YOY-64 via PR #119), and loop sessions bloat to 100 %
   context (fresh context per pass). Both High, Backlog, `repo:yoyo-loop`.
+  2026-09-28: step 1 shipped — the reviewer waits for CI with `gh pr checks
+  --watch`; loop cadence 5 minutes; event triggers and cloud loops stay
+  parked.
 
 **Phase 8 — Post-M2 queue (in order)**
 1. UI-verification gate — ✅ DONE (PR #27, YOY-38).

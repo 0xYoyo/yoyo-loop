@@ -229,9 +229,18 @@ loop must notice that by itself.
 
 Then:
 
-- If checks are pending or mergeability is still unknown, report that
-  the PR is waiting and end without posting a verdict or changing labels. A
-  later loop pass will retry it.
+- If `gh pr checks NUMBER` reports pending checks (exit code 8), wait for
+  them instead of skipping the pass. Run
+  `gh pr checks NUMBER --watch --interval 15` with a 9-minute command timeout
+  (Bash timeout 540000 ms), then re-run the three one-shot reads above
+  (`gh pr view ... --json headRefOid,mergeable,mergeStateStatus`,
+  `gh pr checks ... --json ...`, `gh pr checks ... --required --json ...`)
+  and continue the review on the head commit read after the wait. Re-read the
+  head because the builder may have pushed during the wait; the verdict names
+  the commit it reviewed, as always.
+- If checks are still pending after the wait, or mergeability is still
+  unknown, report that the PR is waiting and end without posting a verdict or
+  changing labels. A later loop pass will retry it.
 - Failed checks are `[CI]` must-fix findings.
 - A merge conflict is a `[DEFECT]` must-fix finding.
 

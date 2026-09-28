@@ -88,8 +88,8 @@ Projects without a UI leave both unset; nothing changes for them.
 ## Daily rhythm
 
 ```
-window 1 — cd ~/repos/myproject        → /yoyo-spec, then /loop 15m /yoyo-review
-window 2 — cd ~/repos/myproject.build  → /loop 15m /yoyo-build
+window 1 — cd ~/repos/myproject        → /yoyo-spec, then /loop 5m /yoyo-review
+window 2 — cd ~/repos/myproject.build  → /loop 5m /yoyo-build
 ```
 
 1. Run `/yoyo-spec` whenever an idea hits you. Read the filed issue; if you

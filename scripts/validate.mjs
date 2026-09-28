@@ -110,6 +110,16 @@ const requiredContracts = [
     reviewFlat.includes("Reroute (escape hatch)"),
     "review skill must document the reroute escape hatch",
   ],
+  [
+    reviewFlat.includes("gh pr checks NUMBER --watch --interval 15"),
+    "reviewer waits for pending checks instead of skipping the pass — YOY-127 step 1",
+  ],
+  [
+    reviewFlat.includes(
+      "If checks are still pending after the wait, or mergeability is still unknown, report that the PR is waiting and end without posting a verdict or changing labels.",
+    ),
+    "reviewer keeps the waiting fallback after the watch — YOY-127 step 1",
+  ],
   [build.includes("defaultBranchRef"), "builder must detect the default branch"],
   [build.includes("git status --porcelain"), "builder must protect dirty worktrees"],
   [build.includes("repo:SLUG"), "builder must scope its pick query to this repository"],
