@@ -124,6 +124,9 @@ unattended. Phase 7's first cloud run is therefore still ahead.
   2026-09-28: step 1 shipped — the reviewer waits for CI with `gh pr checks
   --watch`; loop cadence 5 minutes; event triggers and cloud loops stay
   parked.
+  2026-09-28: step 2 shipped — the builder starts no new issue while a PR
+  awaits review or repair; PR text names exactly one Linear issue (YOY-126
+  part 1).
 
 **Phase 8 — Post-M2 queue (in order)**
 1. UI-verification gate — ✅ DONE (PR #27, YOY-38).
@@ -339,8 +342,9 @@ YOY-97 stays parked.
   through the loop; multi-symptom/failed run → /yoyo-diagnose → consolidated
   contract). Defined in YOY-73; recorded here so the routing survives chat
   migrations.
-- **One Linear ID per PR (interim rule since 2026-08-26, until YOY-126
-  ships a mechanism):** a PR's title and body name exactly one Linear issue.
+- **One Linear ID per PR (rule since 2026-08-26; the mechanism now lives in
+  the builder and reviewer skills, YOY-126 part 1):** a PR's title and body
+  name exactly one Linear issue.
   The Linear–GitHub integration closes any issue a PR body mentions with a
   closing keyword, and did so twice during the M5 run. Cross-references to
   other issues go in Linear comments, never in PR text.

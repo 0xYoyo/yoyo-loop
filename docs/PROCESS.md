@@ -69,6 +69,16 @@ and the watchdog, changed together per the fragility rule:
   resumes a `blocked` issue and never while a PR is open — including one
   waiting on a human. Nothing needs unassigning or resetting between slices.
 
+### Pick gate and one ID per PR (YOY-127 step 2, YOY-126 part 1)
+
+- **Pick gate.** The builder claims no new issue while any open PR on its
+  repo is `loop-changes-requested` or has no verdict label yet; it reports
+  "waiting on PR #N (under review or repair)". PRs waiting on a human
+  (`loop-approved`, `needs-human-review`) do not hold the pick.
+- **One ID per PR.** A PR's title and body name exactly one Linear issue;
+  cross-references go in Linear comments. The reviewer flags a second ID
+  as a must-fix `[DEFECT]`.
+
 ## Conflicting PRs on the human gate (YOY-103)
 
 `needs-human-review` alone means "left the automated queue until a human
