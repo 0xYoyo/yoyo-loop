@@ -1,8 +1,8 @@
 # Roadmap
 
-Last updated: 27 September 2026 — product-state refresh after M5 shipped
-(unfiltered, 2026-08-29) and briza's M2 (2026-08-28); the factory queue
-named (YOY-126, YOY-127).
+Last updated: 29 September 2026 — product-state refresh to PRD v3 after the
+27–28 Sep reset (unfiltered docs/RESET-2026-09-27.md): M6 is Engine v2; the
+factory's YOY-127 steps 1–2 and YOY-126 part 1 shipped 28 Sep.
 
 ## North star
 
@@ -263,21 +263,28 @@ dress" returns sleeveless dresses); a real engine feature, first item of
 M6. YOY-138 (Medium) — a price cap stated in ILS is applied as a bare number
 on a USD catalog. Parked with `[LATER]`: YOY-97 (agent-agent debugging &
 UI-QA lane), YOY-102 (stop committing the widget bundle). Founder
-observation after the run (2026-09-27): human queries outside the eval
-suite still break the engine — an inspection of the engine's inner
-workings and a wider eval set are the next chat's first product question,
-before the M6 spec.
+observation after the run (2026-09-27): human queries outside the eval suite
+still break the engine. Answered by the 27–28 Sep reset (unfiltered
+docs/RESET-2026-09-27.md, PRD v3): M6 rebuilds the engine brain, and YOY-134
+and YOY-138 close as duplicates of the M6 issues that cover them.
 
 **Deferred to submission day by founder decision:** creating the daily
 smoke routine (docs/SMOKE.md; the code shipped in YOY-112). Still to
 record: the first `latency-probe.mts --runs 20 --set all` row on the
 deployed 4.5 s code (the "after" tail for docs/LATENCY.md).
 
-**Gate math (as decided 2026-08-25, now behind schedule by the September
-break):** M6 (dashboard, attribution — `routeReason` ready — billing, kill
-switch, transactional email) → M7 (onboarding, listing assets, GDPR
-webhooks) → Shopify submission → M8/Door-2 in the review wait. Dates are to
-be re-cut in the next spec session.
+**Milestone map (PRD v3 §13, 2026-09-28):** M6 Engine v2 — one spec session,
+one chain: the hidden human-style score; variants table + per-product
+dossiers + multi-vector index; find-then-judge behind the current API;
+shop-assistant labels; server-side pages; judge comparison (Gemini vs Jev);
+delete the old classic-vs-AI switch and relaxation ladder; site copy pass.
+M7 Run alone — automatic re-analysis on product change, a real health check,
+uninstall data deletion, bounded scans, kill switch, billing, dashboard and
+attribution. M8 Surfaces and onboarding — image search, playground thumbs
+up/down, paste-URL onboarding, listing assets, GDPR webhooks. Shopify
+submission after the 90 % gate (hidden score ≥ 90 % per language, half of
+searches under 1 s, friends-and-family round). No dates; revenue is a Q1
+2027 goal.
 
 Deployment: Render Frankfurt (service `unfiltered-eu`,
 https://unfiltered-eu.onrender.com), env group `unfiltered-prod`, API-
@@ -296,8 +303,9 @@ YOY-127 (event-driven orchestration: build → CI → review → verdict-driven
 next step, no blind 15-minute timers) and YOY-126 (a PR body naming a
 second Linear ID auto-closes it — interim rule: exactly one Linear ID per
 PR title and body; loop sessions bloat to 100 % context — fresh context per
-pass). Founder's stated order: factory first, before the M6 spec. `[LATER]`
-YOY-97 stays parked.
+pass). Shipped 28 Sep: YOY-127 steps 1–2 (PRs #49, #50) and YOY-126 part 1
+(PR #50). YOY-127 step 3 and YOY-126 part 2 (builder codes in a subagent,
+fresh context per pass) follow M6. `[LATER]` YOY-97 stays parked.
 
 ## Standing decisions
 
