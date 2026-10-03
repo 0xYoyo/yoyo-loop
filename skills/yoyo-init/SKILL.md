@@ -61,6 +61,12 @@ Ask the user, offering detected defaults:
   its location only and never edits its content.
 - Create the GitHub repo with `gh repo create` if `origin` is missing, then
   push.
+- Turn on GitHub's delete-branch-on-merge for the repository:
+  `gh repo edit --delete-branch-on-merge`, then verify with
+  `gh repo view --json deleteBranchOnMerge` (expect `true`). The builder tidies
+  only its local branches; without this setting every merged PR's branch stays
+  on GitHub forever (unfiltered reached 180 branches, 2026-10-03). Idempotent;
+  safe on an existing repo.
 - Detect the real default branch via
   `gh repo view --json defaultBranchRef --jq .defaultBranchRef.name`. Never
   assume `main`.
