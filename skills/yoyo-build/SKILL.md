@@ -250,15 +250,16 @@ the normal pick.
 ### Open-PR gate — before the normal pick
 
 Run `gh pr list --state open --json number,labels` for this repository. If
-any open PR is labeled `loop-changes-requested`, or carries none of
-`loop-approved` / `needs-human-review` — it is still awaiting its first
-verdict — claim no new issue: end the pass and report "waiting on PR #N
-(under review or repair)". If every open PR is `loop-approved` or
-`needs-human-review` — all waiting on a human — the normal pick proceeds.
-Building ahead of an unreviewed PR is what created the conflict traffic;
-building behind a human-gated PR is safe because the blocker rule already
-keeps chained issues out. The repair queue in step 1 and the resume lane
-above run before this gate and are unchanged by it.
+any PR is open on the repository — whatever its labels, including a
+`loop-approved` or `needs-human-review` PR that is waiting on the human merge
+— claim no new issue: end the pass and report "waiting on PR #N (open)". The
+builder is serial by default: one open PR at a time, and the founder's merge
+is what releases the next build. Building ahead of any open PR is what created
+the conflict traffic: PRs waiting on a batched human merge touch the same
+files as the next issue, and every merge then costs a rebase round. The repair
+queue in step 1 and the resume lane above run before this gate and are
+unchanged by it — a repair is work on the open PR itself, and the resume lane
+already requires no open PR.
 
 ### Normal pick
 
