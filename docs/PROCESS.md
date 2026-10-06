@@ -71,10 +71,11 @@ and the watchdog, changed together per the fragility rule:
 
 ### Pick gate and one ID per PR (YOY-127 step 2, YOY-126 part 1)
 
-- **Pick gate.** The builder claims no new issue while any open PR on its
-  repo is `loop-changes-requested` or has no verdict label yet; it reports
-  "waiting on PR #N (under review or repair)". PRs waiting on a human
-  (`loop-approved`, `needs-human-review`) do not hold the pick.
+- **Pick gate (serial by default, YOY-170).** The builder claims no new
+  issue while any PR is open on its repo, whatever its labels; it reports
+  "waiting on PR #N (open)". One open PR at a time: the founder's merge is
+  what releases the next build. The repair queue and the resume lane are
+  unchanged (a repair is work on the open PR itself).
 - **One ID per PR.** A PR's title and body name exactly one Linear issue;
   cross-references go in Linear comments. The reviewer flags a second ID
   as a must-fix `[DEFECT]`.

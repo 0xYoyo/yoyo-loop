@@ -121,8 +121,13 @@ const requiredContracts = [
     "reviewer keeps the waiting fallback after the watch — YOY-127 step 1",
   ],
   [
-    buildFlat.includes("waiting on PR #N (under review or repair)"),
-    "builder starts no new issue while a PR awaits review or repair — YOY-127 step 2",
+    buildFlat.includes("If any PR is open on the repository — whatever its labels") &&
+      buildFlat.includes('report "waiting on PR #N (open)"'),
+    "builder claims no new issue while any PR is open, whatever its labels — serial by default, YOY-170",
+  ],
+  [
+    !buildFlat.includes("waiting on PR #N (under review or repair)"),
+    "builder must not keep the old gate that let it build ahead of human-gated PRs — YOY-170",
   ],
   [
     buildFlat.includes("exactly one Linear issue identifier"),
@@ -913,6 +918,11 @@ const requiredContracts = [
     readme.includes("a `needs-human-review` PR turned conflicting (stale-gate note; the label") &&
       processFlat.includes("## Conflicting PRs on the human gate (YOY-103)"),
     "README and docs/PROCESS.md must document the stale-gate notification — YOY-103",
+  ],
+  [
+    processFlat.includes("Pick gate (serial by default, YOY-170)") &&
+      readme.includes("The builder is serial: it starts no new issue while any PR is open"),
+    "docs/PROCESS.md and README must state the builder is serial by default — YOY-170",
   ],
 ];
 

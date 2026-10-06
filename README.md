@@ -89,7 +89,8 @@ window 2 — cd ~/repos/myproject.build  → /loop 5m /yoyo-build
    `loop-changes-requested`, needs you to read and resolve the reason first.
    A PR carrying both `needs-human-review` and `loop-changes-requested` is
    still being fixed by the agent — that label gates the merge, not the
-   repair.
+   repair. The builder is serial: it starts no new issue while any PR is open,
+   so your merge is what releases the next build.
 4. Answer questions on `blocked` issues, then remove the `blocked` label so a
    future pass can resume them.
 5. Run `/yoyo-status` any time to see everything waiting on you — merges,
