@@ -331,6 +331,21 @@ acceptance criteria. Non-goals are binding. Compare every `AC-N` against every
 If an acceptance criterion is ambiguous, conflicts with a non-goal, or depends
 on an unresolved blocker, go to step 8. Never guess.
 
+### Never ask in the terminal
+
+The builder never asks a question in the terminal. Claude Code prompts the
+human on screen whenever a session is attended, so a question asked there
+stalls the pass on the founder's keyboard until someone notices — on
+2026-10-14 (unfiltered YOY-174, YOY-175) three such questions each cost an
+idle loop and a hand-typed answer that lives in no record. Every question,
+whatever its size — a choice between two readings of an AC, a missing
+environment key, a spend above the issue's written figure, a tool that
+refused a command — is written as a `blocked` comment on the Linear issue
+exactly as step 8 describes, with its options and the AC it affects, and the
+pass ends. The answer then lives on the issue, where the next pass reads it.
+A pass that must stop and wait on a human has exactly one way to do so:
+`blocked` on Linear.
+
 ### Bug issues
 
 The `bug` label means exactly one thing: cause currently unknown. On a
@@ -357,6 +372,34 @@ path re-diagnoses; no path skips a needed diagnosis.
 - Add or update tests when the change affects logic, data flow, permissions,
   integrations, or user-visible behavior.
 - Preserve behavior outside the issue contract.
+
+### Scratch worktrees
+
+Some work needs a second checkout — scoring another commit, replaying an
+old branch, extracting a file from a tag. Never do that in the builder
+worktree or the primary clone. Create a throwaway detached worktree under
+`/tmp/yoyo-scratch/` named after the issue:
+
+```bash
+mkdir -p /tmp/yoyo-scratch
+git worktree add --detach /tmp/yoyo-scratch/TEAMKEY-NNN-purpose COMMIT
+```
+
+Before the pass ends — on success, on `blocked`, on any escalation — remove
+every scratch worktree the pass created, with these two commands and no
+others:
+
+```bash
+rm -rf /tmp/yoyo-scratch/TEAMKEY-NNN-purpose
+git worktree prune
+```
+
+`rm -rf` under `/tmp/` is allowed by the guard; `git worktree remove` is
+denied by it, and a scratch tree left behind (unfiltered, 2026-10-14) sits
+under `~/repos/` until the founder deletes it by hand. Never `git reset
+--hard` inside a scratch worktree either — the guard denies it; create a
+fresh one instead. A scratch worktree is never committed from: work that
+must land goes on the issue branch in the builder worktree.
 
 ## 6. Verify
 
@@ -473,8 +516,9 @@ integration to manage. Never merge and never enable auto-merge. End the pass.
 
 ## 8. Blocked
 
-Comment one specific question a human can answer asynchronously, apply the
-`blocked` label, and unassign yourself. Leave `agent-ready` in place: the pick
+This is the only way a pass asks a human anything (step 4, "Never ask in the
+terminal"). Comment one specific question a human can answer asynchronously,
+apply the `blocked` label, and unassign yourself. Leave `agent-ready` in place: the pick
 query explicitly excludes `blocked`, so the issue safely reappears only after
 a human answers and removes that label.
 

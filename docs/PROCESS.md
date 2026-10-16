@@ -91,6 +91,18 @@ escalation, then rebase or swap the label to `loop-changes-requested` so
 the repair queue takes over. (`loop-approved` PRs that turn conflicting are
 the separate YOY-63 retraction path.)
 
+## Builder questions belong on Linear (2026-10-16)
+
+The builder never asks a question in the terminal: Claude Code prompts the
+human on screen whenever a session is attended, so a terminal question
+stalls the pass until someone sits at the keyboard, and the answer leaves
+no record. Every question is a `blocked` comment on the issue (yoyo-build
+step 4, "Never ask in the terminal", and step 8), answered on Linear by the
+founder or the co-manager chat with every branch written out, so the next
+pass runs through. Scratch worktrees a pass creates live under
+`/tmp/yoyo-scratch/` and are removed before the pass ends (yoyo-build step
+5, "Scratch worktrees"; the same rule in one-off-prompts.md).
+
 ## Review timing (YOY-127 step 1)
 
 When a PR's checks are pending, the reviewer waits for CI with

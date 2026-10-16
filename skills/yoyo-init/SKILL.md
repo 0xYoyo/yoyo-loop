@@ -358,8 +358,8 @@ update on its own.
 Then print the daily rhythm with real paths substituted:
 
 ```
-window 1 — cd ~/repos/SLUG        → /yoyo-spec, then /loop 15m /yoyo-review
-window 2 — cd ~/repos/SLUG.build  → /loop 15m /yoyo-build
+window 1 — cd ~/repos/SLUG        → /yoyo-spec, then /loop 5m /yoyo-review
+window 2 — cd ~/repos/SLUG.build  → /loop 5m /yoyo-build
 ```
 
 Remind the user that only they apply `agent-ready`, and only they merge.
