@@ -924,6 +924,39 @@ const requiredContracts = [
       readme.includes("The builder is serial: it starts no new issue while any PR is open"),
     "docs/PROCESS.md and README must state the builder is serial by default — YOY-170",
   ],
+  // 2026-10-16: the builder never asks in the terminal — every question is a
+  // `blocked` comment on Linear — scratch worktrees are removed before the
+  // pass ends, and init's daily rhythm agrees with README (/loop 5m).
+  [
+    buildFlat.includes("### Never ask in the terminal") &&
+    buildFlat.includes("The builder never asks a question in the terminal.") &&
+    buildFlat.includes("A pass that must stop and wait on a human has exactly one way to do so: `blocked` on Linear."),
+    "builder must never ask in the terminal; every question is a blocked comment on Linear",
+  ],
+  [
+    buildFlat.includes("### Scratch worktrees") &&
+    buildFlat.includes("/tmp/yoyo-scratch/") &&
+    buildFlat.includes("git worktree prune"),
+    "builder must create scratch worktrees under /tmp/yoyo-scratch and remove them before the pass ends",
+  ],
+  [
+    buildFlat.includes("remove every scratch worktree the pass created"),
+    "builder must remove every scratch worktree it created before the pass ends",
+  ],
+  [
+    init.includes("/loop 5m /yoyo-review") && init.includes("/loop 5m /yoyo-build") && !init.includes("/loop 15m"),
+    "init's daily rhythm must print /loop 5m, matching README and PROCESS",
+  ],
+  [
+    oneOffFlat.includes("**A one-off checks out its own branch.**") &&
+    oneOffFlat.includes("**\"Known in the repository\" reads `origin/main`.**") &&
+    oneOffFlat.includes("**Scratch worktrees live under `/tmp/yoyo-scratch/` and are removed.**"),
+    "one-off template must carry the YOY-175 lessons: own branch checkout, origin/main-known check, scratch worktrees removed",
+  ],
+  [
+    processFlat.includes("## Builder questions belong on Linear"),
+    "PROCESS.md must record that builder questions belong on Linear",
+  ],
 ];
 
 for (const [condition, message] of requiredContracts) {
@@ -959,6 +992,7 @@ assert(
 // unpushed-work check could delete the only ref pointing at unpushed commits.
 const builderTidy = buildFlat.indexOf("git remote prune origin");
 assert(builderTidy !== -1, "builder must prune merged issue branches in the worktree");
+
 assert(
   localOnlyCheck < builderTidy,
   "builder must tidy merged branches only AFTER the unpushed-work check passes",

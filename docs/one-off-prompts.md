@@ -30,6 +30,25 @@ unless the prompt supplies them. Every one-off prompt follows these rules:
   reports it back instead of extending the task to cover it.
 - **End on main.** The last steps are `git checkout main` and a clean
   `git status`, so the working tree is never left on a feature branch.
+- **A one-off checks out its own branch.** When the task continues an
+  existing branch, the prompt names the branch and the first steps fetch
+  and check it out (`git fetch origin && git switch BRANCH`, or
+  `git switch --detach origin/BRANCH` in a throwaway worktree). Never
+  assume the checkout is already on it: the builder worktree's preflight
+  detaches it to `origin/main` at the start of every pass, so a one-off
+  that assumed the branch (unfiltered YOY-175, 2026-10-14) worked on main.
+- **"Known in the repository" reads `origin/main`.** A check that asks
+  whether some text already exists in the repository reads `origin/main`'s
+  tracked files (`git ls-tree -r origin/main --name-only`, then
+  `git cat-file -p origin/main:PATH`), never the branch's own working tree
+  or its committed files: the branch's earlier output is in that tree and
+  poisons the check (unfiltered YOY-175 round 1, 2026-10-14).
+- **Scratch worktrees live under `/tmp/yoyo-scratch/` and are removed.**
+  A second checkout the task needs is a detached worktree at
+  `/tmp/yoyo-scratch/<task>`; the task ends by removing it with
+  `rm -rf /tmp/yoyo-scratch/<task>` and `git worktree prune` — never
+  `git worktree remove` and never `git reset --hard`, which the guard
+  denies.
 
 ## Skeleton
 
